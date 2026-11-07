@@ -456,6 +456,17 @@ body.roll-locked .dicepanel{opacity:.75}
 .iprow .ipact select{font-size:12px;padding:2px 6px}
 .ipgrid{display:flex;gap:12px;flex-wrap:wrap}
 @media (max-width:760px){.iprow{grid-template-columns:1fr}.gridmap{max-width:100%}}
+
+/* ---- free layout of sheet boxes ---- */
+.cs.free{display:block;position:relative}
+.cs.free>div{display:contents}
+.cs.free .box[data-k]{position:absolute;margin:0;overflow:auto;resize:both;min-width:160px;min-height:60px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.cs.free .box[data-k].dragging{z-index:5;box-shadow:0 14px 30px rgba(0,0,0,.6);opacity:.95}
+.cs.free .grid.three{display:contents}
+.box-grip{display:flex;align-items:center;gap:6px;margin:-14px -14px 8px;padding:3px 10px;border-bottom:1px dashed var(--line);background:rgba(212,168,74,.06);cursor:grab;user-select:none;font-size:11px;touch-action:none}
+.box-grip:active{cursor:grabbing}
+.box-grip .dots{color:var(--gold);letter-spacing:-2px}
+.hud-win{resize:both;overflow:hidden;min-width:320px;min-height:200px}
 </style>
 </head>
 <body>
@@ -1568,6 +1579,18 @@ function itemSlot(name, effect){
 /* ของสวมใส่ = {name, effect, weight} ต่อช่อง น้ำหนักนับรวมกับกระเป๋า · สวมแล้วย้ายออกจากกระเป๋า (ไม่นับซ้ำ) */
 function equipWeight(c){ return Object.values(c.equip||{}).reduce((a,e)=>a + (e && e.weight ? +e.weight : 0), 0); }
 function bagWeight(c){ return (c.inventory||[]).reduce((a,r)=>a + (r.qty||0)*(r.weight||0), 0); }
+/* ค่า Armor ต่ออวัยวะจากของสวมใส่: รูปแบบในไฟล์ "Armor A/B (ชนิด)" = A กันกายภาพทั่วไป, B กันชนิดในวงเล็บ (ส่วนใหญ่ Blunt) · "Main Armor n ที่ลำตัว" (เข็มขัดโซ่) ไม่ทบกับเกราะลำตัว ใช้ค่าที่สูงกว่า (ข้อเคาะ 8 ของ Starter Set) · ชั้นใน + ชั้นนอกบวกกัน */
+const ARMOR_SLOT_PARTS = {head:['head'], shirt:['torso'], chestIn:['torso'], chestOut:['torso'], cape:[], back:[], neck:[], hands:['armL','armR'], legs:['legL','legR'], feet:['legL','legR'], waist:['torso'], weapon1:[], weapon2:[], shield:[]};
+function parseArmor(effect){ const m = /Armor\s+(\d+)\s*\/\s*(\d+)(?:\s*\(([^)]+)\))?/.exec(effect||''); if (m) return {a:+m[1], b:+m[2], type:(m[3]||'Blunt').trim()}; const m2 = /Armor\s+(\d+)(?!\s*\/)/.exec(effect||''); if (m2) return {a:+m2[1], b:+m2[1], type:''}; return null; }
+function armorFromEquip(c){
+  const parts = {}; for (const [k] of DATA.meta.bodyParts) parts[k] = {a:0, b:0, types:new Set(), belt:0};
+  for (const [slot, e] of Object.entries(c.equip||{})){ if (!e || !e.effect) continue; const ar = parseArmor(e.effect); if (!ar) continue; const targets = ARMOR_SLOT_PARTS[slot] || [];
+    for (const pk of targets){ if (slot==='waist') parts[pk].belt = Math.max(parts[pk].belt, ar.a); else { parts[pk].a += ar.a; parts[pk].b += ar.b; if (ar.type) parts[pk].types.add(ar.type); } } }
+  const out = {};
+  for (const [k,v] of Object.entries(parts)){ const a = Math.max(v.a, v.belt), b = Math.max(v.b, v.belt); if (!a && !b){ out[k]=''; continue; } const t = [...v.types].filter(x=>x && x!=='Blunt'); out[k] = `${a}/${b}` + (t.length? ` (${t.join('/')})` : ''); }
+  return out;
+}
+function recalcArmor(c){ c.armor = armorFromEquip(c); c.armorAuto = true; }
 function recalcParry(c){ c.current = c.current||{}; c.current.parryBonus = Object.values(c.equip||{}).reduce((a,e)=>{ const m=/\+(\d+)\s*Parry Dice/.exec((e&&e.effect)||''); return a + (m? +m[1] : 0); }, 0); }
 function migrateEquip(c){ // ชีทเก่า (v0.4) เก็บช่องเป็นข้อความ "ชื่อ · คุณสมบัติ" และยังมีของชิ้นเดียวกันค้างในกระเป๋า
   let migrated = false;
@@ -1583,13 +1606,13 @@ function wearItem(c, idx, slot){
   unequip(c, slot);
   c.equip[slot] = {name: row.name, effect: row.effect||'', weight: +row.weight||0};
   if ((row.qty||1) > 1) row.qty--; else c.inventory.splice(idx,1);
-  recalcParry(c);
+  recalcParry(c); recalcArmor(c);
 }
 function unequip(c, slot){
   const e = c.equip[slot]; if (!e || !(e.name||'').trim()) { delete c.equip[slot]; return; }
   const same = c.inventory.find(r=>r.name===e.name && (r.effect||'')===(e.effect||'') && +r.weight===+e.weight);
   if (same) same.qty = (same.qty||0)+1; else c.inventory.push({name:e.name, effect:e.effect||'', qty:1, weight:+e.weight||0});
-  delete c.equip[slot]; recalcParry(c);
+  delete c.equip[slot]; recalcParry(c); recalcArmor(c);
 }
 function autoEquip(c){
   // ถอดทุกอย่างกลับกระเป๋าก่อน แล้วสวมใหม่ตามชื่อ/คุณสมบัติ
@@ -1608,7 +1631,7 @@ function autoEquip(c){
   // เครื่องแต่งกายของชุด (outfit) ไม่ใช่ไอเทมในกระเป๋า: สวมเป็นชิ้นน้ำหนัก 0 เฉพาะช่องที่ยังว่าง
   const set = c.starterSet ? DATA.sets.sets.find(x=>x.nameEn===c.starterSet) : null;
   if (set && set.outfit){ for (const piece of set.outfit.split(/,\s*|\s+กับ\s+/)){ const nm = piece.trim(); if (!nm) continue; let slot = itemSlot(nm, '') || 'shirt'; if (slot==='weapon') slot='shirt'; if (!c.equip[slot]) c.equip[slot] = {name:nm, effect:'เครื่องแต่งกาย', weight:0}; } }
-  recalcParry(c);
+  recalcParry(c); recalcArmor(c);
   c.equipAuto = true;
 }
 function ensureSheetState(c, d){
@@ -1623,6 +1646,7 @@ function ensureSheetState(c, d){
     for (const it of items){ const m = it.name.match(/×\s*(\d+)/); c.inventory.push({name: it.name.replace(/\(เสนอ\)\s*/,'').replace(/\s*×\s*\d+/,'').trim(), effect: it.effect||'', qty: m? +m[1] : 1, weight: parseFloat(it.weight)||0}); }
   }
   migrateEquip(c);
+  if (!c.armorAuto && !Object.values(c.armor||{}).some(v=>v && String(v).trim())) recalcArmor(c);
   // สวมของจากชุดเริ่มต้นให้ทันทีครั้งแรก (ตัวละครเก่าที่ยังไม่เคยสวมและช่องว่างทั้งหมดก็สวมให้)
   if (!c.equipAuto && !Object.values(c.equip).some(v=>v && (v.name||'').trim())) autoEquip(c);
 }
@@ -1644,21 +1668,21 @@ function renderSheet(id){
   if (c.portrait) portrait.append(h('img',{src:c.portrait, alt:c.name})); else portrait.append(h('div',null, '[แทรกภาพตัวละคร]', h('div',{class:'muted',style:'font-size:11px',text:'คลิกเพื่อเลือกไฟล์'})));
   const fileInp = h('input',{type:'file',accept:'image/*',class:'sr',onchange:(e)=>{ const f=e.target.files[0]; if(!f) return; const img=new Image(); img.onload=()=>{ const cv=document.createElement('canvas'); const sc=Math.min(1, 360/Math.max(img.width,img.height)); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); c.portrait=cv.toDataURL('image/jpeg',0.82); save(); rerender(); if (Table.room){ const tk = Table.room.tokens.find(t=>t.charId===c.id); if (tk) makeThumb(c.portrait).then(th=>{ tk.thumb = th; Table.save(); }); } }; img.src=URL.createObjectURL(f); }});
   portrait.onclick = ()=>fileInp.click();
-  left.append(h('div',{class:'box'}, portrait, fileInp, h('div',{class:'idgrid',style:'margin-top:8px'}, h('span',{class:'k',text:'ชื่อผู้เล่น'}), txt(det,'player','Player name'))));
-  const resBox = h('div',{class:'box'}, h('h4',{text:'ทรัพยากร'}));
+  left.append(h('div',{class:'box',dataset:{k:'portrait'}}, portrait, fileInp, h('div',{class:'idgrid',style:'margin-top:8px'}, h('span',{class:'k',text:'ชื่อผู้เล่น'}), txt(det,'player','Player name'))));
+  const resBox = h('div',{class:'box',dataset:{k:'res'}}, h('h4',{text:'ทรัพยากร'}));
   const resbar = (label, key, max, color, term) => { const v = cur[key]||0; return h('div',{class:'resbar'}, h('div',{class:'l'}, h('b',{text:label}), h('span',{class:'num'}, `${v} / ${max}`)), h('div',{class:'bar'}, h('i',{style:`width:${Math.max(0,Math.min(100, max? v/max*100 : 0))}%;background:${color}`})), h('div',{class:'ctl'}, h('button',{class:'small',onclick:()=>{cur[key]=v-1; save(); rerender();},text:'−'}), h('button',{class:'small',onclick:()=>{cur[key]=Math.min(max,v+1); save(); rerender();},text:'+'}), h('input',{type:'number',value:v,onchange:(e)=>{cur[key]=+e.target.value||0; save(); rerender();}}), h('button',{class:'small ghost',onclick:()=>{cur[key]=max; save(); rerender();},text:'เต็ม'}))); };
   resBox.append(resbar('Sanity','sanity',d.sanity,'#a371f7','Sanity'), resbar('Health Points','hp',d.hp,'#e5484d','HP'), resbar('Mana Points','mp',d.mp,'#58b7ff','MP'));
   resBox.append(h('div',{class:'resbar'}, h('div',{class:'l'}, h('b',{text:'Temporary Health'}), h('span',{class:'num',text:String(cur.temp||0)})), h('div',{class:'bar'}, h('i',{style:`width:${Math.min(100,(cur.temp||0)*10)}%;background:#e8c547`})), h('div',{class:'ctl'}, h('button',{class:'small',onclick:()=>{cur.temp=Math.max(0,(cur.temp||0)-1); save(); rerender();},text:'−'}), h('button',{class:'small',onclick:()=>{cur.temp=(cur.temp||0)+1; save(); rerender();},text:'+'}), h('button',{class:'small ghost',onclick:()=>{cur.temp=0; save(); rerender();},text:'ล้าง'}))));
   resBox.append(h('div',{class:'idgrid',style:'margin-top:8px'}, h('span',{class:'k',text:'Insight Point'}), h('div',{class:'row',style:'gap:4px'}, h('button',{class:'small',onclick:()=>{cur.ip=Math.max(0,(cur.ip||0)-1); save(); rerender();},text:'−'}), h('b',{class:'num',text:String(cur.ip||0)}), h('button',{class:'small',onclick:()=>{cur.ip=(cur.ip||0)+1; save(); rerender();},text:'+'}), h('button',{class:'small primary',onclick:()=>openIpShop(c, ()=>{ save(); rerender(); }),text:'ใช้ IP ▸'})), h('span',{class:'k',text:'เกรฟ (เงิน)'}), h('input',{type:'number',value:cur.money||0,onchange:(e)=>{cur.money=+e.target.value||0; save();}})));
   left.append(resBox);
-  const tb = h('div',{class:'box'}, h('h4',null, T('Toughness'), ' / ', T('Armor')));
+  const tb = h('div',{class:'box',dataset:{k:'tough'}}, h('h4',null, T('Toughness'), ' / ', T('Armor')));
   const bg2 = h('div',{class:'body2'}, h('span',{class:'dim',text:'ส่วน'}), h('span',{class:'dim',text:'Tough'}), h('span',{class:'dim',text:'เกราะ'}));
-  for (const [k,label] of DATA.meta.bodyParts){ const v = cur.tough[k]; bg2.append(h('span',{text:label}), h('div',{class:'row',style:'gap:2px'}, h('button',{class:'small',onclick:()=>{cur.tough[k]=v-1; save(); rerender();},text:'−'}), h('b',{class:'num',style:'min-width:38px;text-align:center;'+(v<=0?'color:var(--bad)':''),text:`${v}/${d.toughness}`}), h('button',{class:'small',onclick:()=>{cur.tough[k]=Math.min(d.toughness,v+1); save(); rerender();},text:'+'})), h('input',{value:c.armor[k]||'',placeholder:'0',onchange:(e)=>{c.armor[k]=e.target.value; save();}})); }
-  tb.append(bg2, h('p',{class:'dim',style:'font-size:11px;margin:8px 0 0',text:'Hit Location: '+DATA.meta.hitLocation}));
+  for (const [k,label] of DATA.meta.bodyParts){ const v = cur.tough[k]; bg2.append(h('span',{text:label}), h('div',{class:'row',style:'gap:2px'}, h('button',{class:'small',onclick:()=>{cur.tough[k]=v-1; save(); rerender();},text:'−'}), h('b',{class:'num',style:'min-width:38px;text-align:center;'+(v<=0?'color:var(--bad)':''),text:`${v}/${d.toughness}`}), h('button',{class:'small',onclick:()=>{cur.tough[k]=Math.min(d.toughness,v+1); save(); rerender();},text:'+'})), h('input',{value:c.armor[k]||'',placeholder:'0',title:'A/B = กันกายภาพทั่วไป / กัน Blunt (หรือชนิดในวงเล็บ)',onchange:(e)=>{c.armor[k]=e.target.value; save();}})); }
+  tb.append(bg2, h('div',{class:'row',style:'margin-top:6px;justify-content:space-between;align-items:center'}, h('span',{class:'dim',style:'font-size:11px',text:'เกราะ A/B = กันทั่วไป / กัน Blunt'}), h('button',{class:'small ghost',title:'คำนวณค่าเกราะจากของสวมใส่ใหม่',onclick:()=>{ recalcArmor(c); save(); rerender(); },text:'จากของสวมใส่'})), h('p',{class:'dim',style:'font-size:11px;margin:8px 0 0',text:'Hit Location: '+DATA.meta.hitLocation}));
   left.append(tb);
   // ===== middle =====
   const mid = h('div');
-  const idb = h('div',{class:'box'}, h('div',{class:'row',style:'justify-content:space-between'}, h('h2',{text:c.name}), h('div',{class:'row'}, readOnly? null : h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#create'; },text:'แก้ไขในวิซาร์ด'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}))));
+  const idb = h('div',{class:'box',dataset:{k:'id'}}, h('div',{class:'row',style:'justify-content:space-between'}, h('h2',{text:c.name}), h('div',{class:'row'}, readOnly? null : h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#create'; },text:'แก้ไขในวิซาร์ด'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}))));
   const ig = h('div',{class:'idgrid',style:'margin-top:8px'});
   const kv = (k, v) => ig.append(h('span',{class:'k',text:k}), typeof v === 'string' ? h('span',{text:v}) : v);
   kv('Age อายุ', txt(det,'age')); kv('Gender เพศ', txt(det,'gender')); kv('Job อาชีพ', txt(det,'job', c.starterSet||'')); kv('Size ขนาด', d.size); kv('Height/Weight', txt(det,'height')); kv('Speed ความเร็ว', kin.speed); kv('Kin วงศา', kin.name);
@@ -1666,7 +1690,7 @@ function renderSheet(id){
   kv('Childhood', ch ? `${ch.name} (${ch.nameEn})` : '-'); kv('Adulthood', ad ? `${ad.name} (${ad.nameEn})` : '-'); kv('Languages ภาษา', txt(c.extraText,'languages'));
   idb.append(ig);
   mid.append(idb);
-  const pt = h('div',{class:'box'}, h('h4',{text:'Personal Traits นิสัยส่วนตัว'}));
+  const pt = h('div',{class:'box',dataset:{k:'traits'}}, h('h4',{text:'Personal Traits นิสัยส่วนตัว'}));
   const pg = h('div',{class:'idgrid'});
   for (const [k,label,multi] of [['likes','Likes ชอบ'],['dislikes','Dislikes ไม่ชอบ'],['fears','Fears หวาดกลัว'],['motivation','Motivation แรงจูงใจ',true],['want','Want',false],['need','Need',false],['manifest','Manifest',false],['appearance','Appearance',true],['backstory','Backstory',true],['signature','Signature Look',true]]) pg.append(h('span',{class:'k',text:label}), txt(det,k,'',multi));
   pt.append(pg); mid.append(pt);
@@ -1678,38 +1702,70 @@ function renderSheet(id){
   const profs = [];
   for (const k of DATA.knowledge){ for (const sl of Object.values(c.kslots||{})){ if (sl && sl.id===k.id && sl.prof && !sl.prof.startsWith('(')){ let text=''; for (const L of Object.values(k.levels)){ const f=L.proficiencies.find(x=>x.name===sl.prof); if (f) text=f.text; } profs.push({name:`${sl.prof} (${k.nameEn})`, text}); } } }
   if (c.adaptation) profs.push({name:'Adaptation: '+c.adaptation, text:'ได้ Advantage ในการทอยป้องกันผลจากสภาพแวดล้อมแบบนี้'});
-  const col = (title, items, cls) => h('div',{class:'box'}, h('h4',null, T(title)), items.length ? items.map(it=>h('div',{style:'margin:6px 0;font-size:13px'}, h('div',null, tag(it.name, cls), it.src? h('span',{class:'muted',style:'font-size:11px',text:' '+it.src}):null), h('div',{class:'desc',style:'font-size:12px'}, T(it.text)))) : h('div',{class:'muted',text:'-'}));
-  mid.append(h('div',{class:'grid three'}, col('Trait', traits, 'ok'), col('Hindrance', hinds, 'neg'), col('Proficiency Trait', profs, 'prop')));
+  const col = (title, items, cls, key) => h('div',{class:'box',dataset:{k:key}}, h('h4',null, T(title)), items.length ? items.map(it=>h('div',{style:'margin:6px 0;font-size:13px'}, h('div',null, tag(it.name, cls), it.src? h('span',{class:'muted',style:'font-size:11px',text:' '+it.src}):null), h('div',{class:'desc',style:'font-size:12px'}, T(it.text)))) : h('div',{class:'muted',text:'-'}));
+  mid.append(h('div',{class:'grid three'}, col('Trait', traits, 'ok', 'trait'), col('Hindrance', hinds, 'neg', 'hind'), col('Proficiency Trait', profs, 'prop', 'prof')));
   // ===== สกิล / ของสวมใส่ / กระเป๋า อยู่ใน HUD ลอยข้างจอ (hud.js) =====
   const grow = (ta)=>{ ta.rows = 1; const fit=()=>{ ta.style.height='auto'; ta.style.height = (ta.scrollHeight+2)+'px'; }; ta.addEventListener('input', fit); requestAnimationFrame(fit); return ta; };
-  const totalW = equipWeight(c) + bagWeight(c);
-  mid.append(h('div',{class:'box hudhint'}, h('span',{class:'dim',text:'กระเป๋า คัมภีร์ทักษะ และถุงย่ามอยู่ที่ปุ่มลอยข้างจอ (ลากย้ายได้)'}), h('span',{class:'num '+(totalW>d.capacity?'res-fail':''),text:`แบก ${totalW.toFixed(1)} / ${d.capacity} กก.`})));
-  const nt = h('div',{class:'box notes'}, h('div',{class:'grid two'}, h('div',null, h('h4',{text:'Quest'}), txt(c.extraText,'quest','',true)), h('div',null, h('h4',{text:'Note'}), txt(c.extraText,'note','',true)), h('div',null, h('h4',{text:'Reputation (Faction)'}), txt(c.extraText,'reputation','',true)), h('div',null, h('h4',{text:'Relationship (Character)'}), txt(c.extraText,'relationship','',true))));
+  const nt = h('div',{class:'box notes',dataset:{k:'notes'}}, h('div',{class:'grid two'}, h('div',null, h('h4',{text:'Quest'}), txt(c.extraText,'quest','',true)), h('div',null, h('h4',{text:'Note'}), txt(c.extraText,'note','',true)), h('div',null, h('h4',{text:'Reputation (Faction)'}), txt(c.extraText,'reputation','',true)), h('div',null, h('h4',{text:'Relationship (Character)'}), txt(c.extraText,'relationship','',true))));
   mid.append(nt);
   // ===== right =====
   const right = h('div',{class:'cs-right'});
-  const st = h('div',{class:'box'}, h('h4',{text:'STATUS'}));
+  const st = h('div',{class:'box',dataset:{k:'status'}}, h('h4',{text:'STATUS'}));
   const stt = h('table',{class:'stt'}, h('thead',null, h('tr',null, h('th'), h('th',{text:'BASE'}), h('th',{text:'CHILD'}), h('th',{text:'ADULT'}), h('th',{text:'EXTRA'}), h('th',{text:'RAW'}), h('th',{text:'MOD'}))));
   for (const s of STATS){ const chv = ch && ch.stats[s] || 0, adv = ad && ad.stats[s] || 0, exv = (c.extra||{})[s]||0, chc = (c.choiceStats||[]).filter(x=>x===s).length; stt.append(h('tr',{class:'sc-'+s}, h('td',{class:'n'}, T(s)), h('td',{text:kin.raw[s]}), h('td',{text:String(chv+chc)}), h('td',{text:String(adv)}), h('td',{text:String(exv)}), h('td',{text:String(d.raw[s])}), h('td',{class:'ov',text:signed(d.mod[s])}))); }
   st.append(h('div',{class:'tablewrap'}, stt)); right.append(st);
-  const pb = h('div',{class:'box'}, h('h4',{text:'Personality Stats'}));
+  const pb = h('div',{class:'box',dataset:{k:'pers'}}, h('h4',{text:'Personality Stats'}));
   const pg2 = h('div',{class:'ptable'});
   for (const ax of DATA.meta.personality){ const p=c.personality[ax.id]; const l = (!p||p.value==null)?0:(p.side==='left'?p.value:-p.value); pg2.append(h('span',{class:'lw'}, ax.left, h('span',{class:'dim',text:` (${ax.leftTh})`})), h('span',{class:'v',style:'color:#f08c2e',text:signed(l)}), h('span',{class:'dim',text:'/'}), h('span',{class:'v',style:'color:#58b7ff',text:signed(-l)}), h('span',{class:'rc'}, ax.right, h('span',{class:'dim',text:` (${ax.rightTh})`}))); }
   pb.append(pg2); right.append(pb);
-  const cm = h('div',{class:'box'}, h('h4',null, 'Combat Mod. ', tag('เสนอ','prop')));
+  const cm = h('div',{class:'box',dataset:{k:'combat'}}, h('h4',null, 'Combat Mod. ', tag('เสนอ','prop')));
   cm.append(h('div',{class:'gives'}, h('span',{class:'tag sc sc-AGI stat'}, T('Reflex'), ` ${signed(d.reflex)}`), h('span',{class:'tag sc sc-STR stat'}, T('Might'), ` ${signed(d.might)}`), h('span',{class:'tag sc sc-PER stat'}, T('Sight'), ` ${signed(d.sight)}`), h('span',{class:'tag sc sc-PER stat'}, T('Initiative'), ` ${signed(d.initiative)}`), h('span',{class:'tag sc sc-VIT stat'}, 'VIT ST', ` ${signed(d.fortitude)}`), h('span',{class:'tag sc sc-PER stat'}, 'PER ST', ` ${signed(d.will)}`), h('span',{class:'tag',title:'เต๋าเพิ่มตอน Parry (โล่ +1) แก้ตัวเลขได้'}, T('Parry Dice'), ' ', h('input',{type:'number',min:0,max:4,value:d.parryDice,style:'width:44px;padding:0 4px;font-size:12px',onchange:(e)=>{ cur.parryBonus=Math.max(0,+e.target.value||0); save(); rerender(); }})), h('span',{class:'tag'}, T('Passive PER'), ` ${d.passivePer}`), h('span',{class:'tag'}, T('Capacity'), ` ${d.capacity} กก.`)));
   right.append(cm);
   const kl = knowledgeLevels(c);
-  const kb = h('div',{class:'box'}, h('h4',null, T('Knowledge'), ' (2d6 + Proficiency)'));
+  const kb = h('div',{class:'box',dataset:{k:'know'}}, h('h4',null, T('Knowledge'), ' (2d6 + Proficiency)'));
   const kt = h('table',{class:'t'});
   for (const k of DATA.knowledge){ const n = Object.values(c.kslots||{}).filter(s=>s&&s.id===k.id&&s.prof&&!s.prof.startsWith('(')).length; kt.append(h('tr',null, h('td',null, h('b',{text:k.nameEn}), h('span',{class:'dim',style:'font-size:11px',text:` (${k.stats.join('/')})`})), h('td',{class:'num',text:'Lv'+kl[k.id]}), h('td',{class:'num',text:'+'+n}))); }
   kb.append(h('div',{class:'tablewrap'}, kt)); right.append(kb);
-  right.append(dicePanel(c, (e)=>{ if (Table.roomId) Table.postRoll(e, c); }, {guard: Table.roomId ? (run,label)=>Table.guardedRoll(c.name, run, label) : null}));
-  root.append(h('div',{class:'cs'}, left, mid, right));
+  const dp = dicePanel(c, (e)=>{ if (Table.roomId) Table.postRoll(e, c); }, {guard: Table.roomId ? (run,label)=>Table.guardedRoll(c.name, run, label) : null}); dp.dataset.k = 'dice'; right.append(dp);
+  const cs = h('div',{class:'cs'}, left, mid, right);
+  // ปุ่มจัดวางกรอบเอง (ย้าย/ย่อขยายทุกกรอบ บันทึกต่อเบราว์เซอร์)
+  const lay = loadLayout();
+  idb.querySelector('.row .row').append(h('button',{class:'small ghost',title:'ลากย้ายและปรับขนาดทุกกรอบได้ตามถนัด',onclick:()=>{ if (lay.free){ lay.free=false; saveLayout(lay); } else { lay.free=true; saveLayout(lay); } rerender(); },text: lay.free ? 'กลับเป็นแบบตาราง' : 'จัดวางกรอบเอง'}), lay.free ? h('button',{class:'small ghost',onclick:()=>{ if (!confirm('ล้างการจัดวางที่บันทึกไว้?')) return; saveLayout({free:true, boxes:{}}); rerender(); },text:'รีเซ็ตตำแหน่ง'}) : null);
+  root.append(cs);
+  if (lay.free && window.innerWidth > 760) applyFreeLayout(cs, lay);
   renderHUD(c, d, {save, rerender, txt, grow});
   if (readOnly) lockForm(root);
 }
 function lockForm(root){ for (const el of root.querySelectorAll('input,textarea,select')) el.disabled = true; for (const b of root.querySelectorAll('button')) { if (!b.classList.contains('rollbtn') && !/กลับ|JSON|ปิด|ซ่อน|คัมภีร์|กระเป๋า|ถุงย่าม|Advantage|Disadvantage|ปกติ/.test(b.textContent) && !b.closest('.hud-head,.hud-dock,.modeBtns')) b.disabled = true; } }
+
+/* ===== จัดวางกรอบเอง: ทุกกรอบลากย้ายและย่อขยายได้ (บันทึกใน localStorage ของเบราว์เซอร์) ===== */
+function loadLayout(){ try{ return Object.assign({free:false, boxes:{}}, JSON.parse(localStorage.getItem('kirana.sheetLayout')||'{}')); }catch(e){ return {free:false, boxes:{}}; } }
+function saveLayout(l){ try{ localStorage.setItem('kirana.sheetLayout', JSON.stringify(l)); }catch(e){} }
+function applyFreeLayout(cs, lay){
+  const boxes = [...cs.querySelectorAll('.box[data-k]')];
+  // ตำแหน่งตั้งต้น = ตำแหน่งในตารางปัจจุบัน (วัดก่อนปลดออกจากกริด)
+  const base = cs.getBoundingClientRect();
+  const rects = boxes.map(b=>{ const r = b.getBoundingClientRect(); return {x:r.left-base.left, y:r.top-base.top, w:r.width, h:r.height}; });
+  cs.classList.add('free');
+  let maxBottom = 0;
+  boxes.forEach((b,i)=>{
+    const k = b.dataset.k; const saved = lay.boxes[k] || rects[i];
+    const x = Math.max(0, saved.x), y = Math.max(0, saved.y), w = Math.max(160, saved.w), hgt = Math.max(60, saved.h);
+    b.style.left = x+'px'; b.style.top = y+'px'; b.style.width = w+'px'; b.style.height = hgt+'px'; if (saved.z) b.style.zIndex = saved.z;
+    maxBottom = Math.max(maxBottom, y+hgt);
+    const grip = h('div',{class:'box-grip',title:'ลากเพื่อย้าย · ดึงมุมขวาล่างเพื่อปรับขนาด'}, h('span',{class:'dots',text:'⋮⋮'}), h('span',{class:'dim',text:'ย้าย'}));
+    b.prepend(grip);
+    let sx=0, sy=0, ox=0, oy=0, id=null;
+    grip.addEventListener('pointerdown', (e)=>{ if (e.button!==0) return; lay.zTop = (lay.zTop||1)+1; b.style.zIndex = lay.zTop; id=e.pointerId; grip.setPointerCapture(id); sx=e.clientX; sy=e.clientY; ox=parseFloat(b.style.left); oy=parseFloat(b.style.top); b.classList.add('dragging'); e.preventDefault(); });
+    grip.addEventListener('pointermove', (e)=>{ if (id==null || e.pointerId!==id) return; const nx = Math.max(0, Math.min(cs.clientWidth - b.offsetWidth, ox + e.clientX - sx)), ny = Math.max(0, oy + e.clientY - sy); b.style.left = nx+'px'; b.style.top = ny+'px'; });
+    const up = ()=>{ if (id==null) return; try{ grip.releasePointerCapture(id); }catch(x){} id=null; b.classList.remove('dragging'); store(); fitHeight(); };
+    grip.addEventListener('pointerup', up); grip.addEventListener('pointercancel', up);
+    const store = ()=>{ lay.boxes[k] = {x:parseFloat(b.style.left), y:parseFloat(b.style.top), w:b.offsetWidth, h:b.offsetHeight, z: +b.style.zIndex||0}; saveLayout(lay); };
+    let first = true; const ro = new ResizeObserver(()=>{ if (first){ first=false; return; } store(); fitHeight(); }); ro.observe(b);
+  });
+  const fitHeight = ()=>{ let mb = 0; for (const b of boxes) mb = Math.max(mb, parseFloat(b.style.top) + b.offsetHeight); cs.style.height = (mb + 24) + 'px'; };
+  cs.style.height = (maxBottom + 24) + 'px';
+}
 
 /* ===== HUD แบบเกม: ปุ่มลอยข้างจอ (กระเป๋า / คัมภีร์สกิล / ถุงย่ามของสวมใส่) ลากย้ายได้ เปิดเป็นหน้าต่างลอย ===== */
 const HUD = {
@@ -1763,9 +1819,10 @@ function renderHUD(c, d, ctx){
   const head = h('div',{class:'hud-head'}, svgEl({bag:'bag',book:'book',pouch:'pouch'}[HUD.open]), h('b',{text:title}), h('span',{class:'dim hud-sub'}), h('button',{class:'hud-x',title:'ปิด',onclick:()=>{ HUD.open=null; HUD.persist(); renderHUD(c, d, ctx); }}, svgEl('close')));
   const body = h('div',{class:'hud-body'});
   win.append(head, body);
-  const wp = HUD.winPos[HUD.open]; if (wp){ win.style.left = wp.x+'px'; win.style.top = wp.y+'px'; win.style.right='auto'; }
+  const wp = HUD.winPos[HUD.open]; if (wp){ win.style.left = wp.x+'px'; win.style.top = wp.y+'px'; win.style.right='auto'; if (wp.w) win.style.width = wp.w+'px'; if (wp.h) win.style.height = wp.h+'px'; }
+  { let first = true; new ResizeObserver(()=>{ if (first){ first=false; return; } const cur = HUD.winPos[HUD.open] || {x: win.getBoundingClientRect().left, y: win.getBoundingClientRect().top}; HUD.winPos[HUD.open] = {...cur, w: win.offsetWidth, h: win.offsetHeight}; HUD.persist(); }).observe(win); }
   root.append(win);
-  makeDraggable(win, head, (p)=>{ HUD.winPos[HUD.open] = p; HUD.persist(); });
+  makeDraggable(win, head, (p)=>{ HUD.winPos[HUD.open] = {...(HUD.winPos[HUD.open]||{}), ...p}; HUD.persist(); });
   hudCtx = ctx;
   const {save, rerender, txt, grow} = ctx;
   const refresh = ()=>{ save(); rerender(); };
