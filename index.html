@@ -237,12 +237,19 @@ table.t th{color:var(--bone-mute);font-weight:500}
 .profile{border-left:3px solid var(--gold)}
 .profile .arch{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
 /* sheet (template) */
-.cs{display:grid;grid-template-columns:260px minmax(0,1fr) 420px;gap:14px;align-items:start}
-@media (max-width:1100px){.cs{grid-template-columns:260px minmax(0,1fr)}.cs .cs-right{grid-column:1/-1}}
+.cs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.cs .cscol{display:flex;flex-direction:column;gap:14px;min-width:0}
+.cs .box{margin:0}
+@media (max-width:1100px){.cs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:760px){.cs{grid-template-columns:1fr}}
+.idgrid.two{grid-template-columns:auto 1fr auto 1fr}
+.cs .box.notes .grid.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cs .box.notes textarea{min-height:64px}
+.idgrid.two textarea{grid-column:2/-1}
+.idgrid.two textarea+.k,.idgrid.two .k:has(+textarea){grid-column:1}
 .cs .box{background:var(--ink-2);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
 .cs .box h4{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--bone-mute);margin-bottom:8px}
-.portrait{aspect-ratio:3/4;background:var(--ink);border:1px dashed var(--line-2);border-radius:8px;display:grid;place-items:center;overflow:hidden;cursor:pointer;color:var(--bone-mute);font-size:13px;text-align:center}
+.portrait{aspect-ratio:3/4;max-width:240px;margin:0 auto;background:var(--ink);border:1px dashed var(--line-2);border-radius:8px;display:grid;place-items:center;overflow:hidden;cursor:pointer;color:var(--bone-mute);font-size:13px;text-align:center}
 .portrait img{width:100%;height:100%;object-fit:cover}
 .resbar{margin:8px 0}
 .resbar .l{display:flex;justify-content:space-between;font-size:13px}
@@ -1691,8 +1698,8 @@ function renderSheet(id){
   idb.append(ig);
   mid.append(idb);
   const pt = h('div',{class:'box',dataset:{k:'traits'}}, h('h4',{text:'Personal Traits นิสัยส่วนตัว'}));
-  const pg = h('div',{class:'idgrid'});
-  for (const [k,label,multi] of [['likes','Likes ชอบ'],['dislikes','Dislikes ไม่ชอบ'],['fears','Fears หวาดกลัว'],['motivation','Motivation แรงจูงใจ',true],['want','Want',false],['need','Need',false],['manifest','Manifest',false],['appearance','Appearance',true],['backstory','Backstory',true],['signature','Signature Look',true]]) pg.append(h('span',{class:'k',text:label}), txt(det,k,'',multi));
+  const pg = h('div',{class:'idgrid two'});
+  for (const [k,label,multi] of [['likes','Likes ชอบ'],['dislikes','Dislikes ไม่ชอบ'],['fears','Fears หวาดกลัว'],['want','Want'],['need','Need'],['manifest','Manifest'],['motivation','Motivation แรงจูงใจ',true],['appearance','Appearance',true],['backstory','Backstory',true],['signature','Signature Look',true]]) pg.append(h('span',{class:'k',text:label}), txt(det,k,'',multi));
   pt.append(pg); mid.append(pt);
   // Trait / Hindrance / Proficiency
   const traits = [...kin.traits.map(t=>({name:`${t.name} (${t.nameEn})`, text:t.text, src:'วงศา'})), ...[ch,ad].filter(Boolean).filter(b=>b.text).map(b=>({name:b.name, text:b.text, src: b===ch?'วัยเด็ก':'วัยผู้ใหญ่'})), ...kin.benefits.map(b=>({name:`${b.name} (${b.nameEn})`, text:b.text, src:'Benefit'}))];
@@ -1727,11 +1734,16 @@ function renderSheet(id){
   for (const k of DATA.knowledge){ const n = Object.values(c.kslots||{}).filter(s=>s&&s.id===k.id&&s.prof&&!s.prof.startsWith('(')).length; kt.append(h('tr',null, h('td',null, h('b',{text:k.nameEn}), h('span',{class:'dim',style:'font-size:11px',text:` (${k.stats.join('/')})`})), h('td',{class:'num',text:'Lv'+kl[k.id]}), h('td',{class:'num',text:'+'+n}))); }
   kb.append(h('div',{class:'tablewrap'}, kt)); right.append(kb);
   const dp = dicePanel(c, (e)=>{ if (Table.roomId) Table.postRoll(e, c); }, {guard: Table.roomId ? (run,label)=>Table.guardedRoll(c.name, run, label) : null}); dp.dataset.k = 'dice'; right.append(dp);
-  const cs = h('div',{class:'cs'}, left, mid, right);
+  const cs = h('div',{class:'cs'});
+  // จัดกรอบลงคอลัมน์เท่ากัน 3 ช่อง (2 บนจอกลาง, 1 บนมือถือ) แบบเรียงให้คอลัมน์สูงใกล้เคียงกัน ไม่ทิ้งช่องว่าง
+  const all = [...left.children, ...mid.children, ...right.children].flatMap(el => el.classList.contains('grid') ? [...el.children] : [el]);
+  const ORDER = ['id','portrait','status','res','traits','pers','tough','combat','trait','hind','prof','know','dice','notes'];
+  const order = all.slice().sort((a,b)=>ORDER.indexOf(a.dataset.k) - ORDER.indexOf(b.dataset.k));
   // ปุ่มจัดวางกรอบเอง (ย้าย/ย่อขยายทุกกรอบ บันทึกต่อเบราว์เซอร์)
   const lay = loadLayout();
   idb.querySelector('.row .row').append(...[h('button',{class:'small ghost',title:'ลากย้ายและปรับขนาดทุกกรอบได้ตามถนัด',onclick:()=>{ if (lay.free){ lay.free=false; saveLayout(lay); } else { lay.free=true; saveLayout(lay); } rerender(); },text: lay.free ? 'กลับเป็นแบบตาราง' : 'จัดวางกรอบเอง'}), lay.free ? h('button',{class:'small ghost',onclick:()=>{ if (!confirm('ล้างการจัดวางที่บันทึกไว้?')) return; saveLayout({free:true, boxes:{}}); rerender(); },text:'รีเซ็ตตำแหน่ง'}) : null].filter(Boolean));
   root.append(cs);
+  packColumns(cs, order);
   if (lay.free && window.innerWidth > 760) applyFreeLayout(cs, lay);
   renderHUD(c, d, {save, rerender, txt, grow});
   if (readOnly) lockForm(root);
@@ -1765,6 +1777,26 @@ function applyFreeLayout(cs, lay){
   });
   const fitHeight = ()=>{ let mb = 0; for (const b of boxes) mb = Math.max(mb, parseFloat(b.style.top) + b.offsetHeight); cs.style.height = (mb + 24) + 'px'; };
   cs.style.height = (maxBottom + 24) + 'px';
+}
+
+/* จัดกรอบลงคอลัมน์: วัดความสูงจริงแล้ววางทีละกรอบลงคอลัมน์ที่เตี้ยที่สุด (ลำดับคงเดิม) */
+function packColumns(cs, boxes){
+  const n = window.innerWidth <= 760 ? 1 : (window.innerWidth <= 1100 ? 2 : 3);
+  const cols = Array.from({length:n}, ()=>h('div',{class:'cscol'}));
+  cs.append(...cols);
+  // วัดในคอลัมน์แรกก่อน (ทุกคอลัมน์กว้างเท่ากัน)
+  for (const b of boxes) cols[0].append(b);
+  const heights = boxes.map(b => b.offsetHeight + 14);
+  const tot = Array(n).fill(0);
+  const hOf = new Map(boxes.map((b,i)=>[b, heights[i]]));
+  boxes.forEach((b,i)=>{ let j = 0; for (let k=1;k<n;k++) if (tot[k] < tot[j]) j = k; cols[j].append(b); tot[j] += heights[i]; });
+  // ปรับสมดุล: ย้ายกรอบจากคอลัมน์ที่สูงสุดไปต่อท้ายคอลัมน์ที่เตี้ยสุด เลือกกรอบที่ทำให้ส่วนต่างเหลือน้อยที่สุด (ไม่ย้ายกรอบแรกของคอลัมน์)
+  for (let it=0; it<8; it++){
+    let T=0, S=0; for (let k=1;k<n;k++){ if (tot[k] > tot[T]) T=k; if (tot[k] < tot[S]) S=k; }
+    if (T===S) break; const diff = tot[T]-tot[S]; let best=null, bestGap=diff;
+    for (const b of [...cols[T].children].slice(1)){ const hb = hOf.get(b)||0; const gap = Math.abs(diff - 2*hb); if (hb < diff && gap < bestGap){ bestGap = gap; best = b; } }
+    if (!best) break; const hb = hOf.get(best); cols[S].append(best); tot[T] -= hb; tot[S] += hb;
+  }
 }
 
 /* ===== HUD แบบเกม: ปุ่มลอยข้างจอ (กระเป๋า / คัมภีร์สกิล / ถุงย่ามของสวมใส่) ลากย้ายได้ เปิดเป็นหน้าต่างลอย ===== */
