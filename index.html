@@ -388,14 +388,15 @@ function roll2d6(mode='normal'){
   const dbl = kept[0]===kept[1];
   return {dice, kept, keptIdx, sum, crit, double: dbl, mode};
 }
-/* Degrees of success (ไม่มี DC): 10+ Full, 7-9 Partial, 6- Failure. มี DC: ถึง DC = สำเร็จ. Critical ตัดสินทันทีทั้งสองแบบ */
+/* ตัดสินผลเฉพาะเมื่อระบุ DC: ถึง DC = สำเร็จ, [6,6]/[1,1] ตัดสินทันที · ไม่ระบุ DC = ไม่บอกสำเร็จ/ล้มเหลว (อาจเป็นทอย Parry หรือทอยที่ GM ตัดสินเอง) บอกแค่ว่าออกคู่ */
 function judge(total, r, dc){
-  if (r.crit === 'success') return {cls:'res-crit', text:'Critical Success [6,6] ผ่านทันที'};
-  if (r.crit === 'failure') return {cls:'res-crit', text:'Critical Failure [1,1] ล้มเหลวทันที'};
-  if (dc != null) return total >= dc ? {cls:'res-full', text:`สำเร็จ (ถึง DC ${dc})`} : {cls:'res-fail', text:`ล้มเหลว (DC ${dc})`};
-  if (total >= 10) return {cls:'res-full', text:'Full Success'};
-  if (total >= 7) return {cls:'res-part', text:'Partial Success (สำเร็จแต่มีราคา)'};
-  return {cls:'res-fail', text:'Failure'};
+  if (dc != null){
+    if (r.crit === 'success') return {cls:'res-crit', text:'Critical Success [6,6] ผ่านทันที'};
+    if (r.crit === 'failure') return {cls:'res-crit', text:'Critical Failure [1,1] ล้มเหลวทันที'};
+    return total >= dc ? {cls:'res-full', text:`สำเร็จ (ถึง DC ${dc})`} : {cls:'res-fail', text:`ล้มเหลว (DC ${dc})`};
+  }
+  if (r.double) return {cls:'res-crit', text:`ออกคู่ [${r.kept[0]},${r.kept[1]}]`};
+  return {cls:'', text:''};
 }
 function renderDice(r){
   return h('span', {class:'inline-roll'}, r.dice.map((d,i)=>h('span',{class:'die' + (r.keptIdx.includes(i)?'':' drop'), text:d})));
@@ -1287,7 +1288,7 @@ function dicePanel(c, onRoll, opts={}){ // opts.guard(run) = ด่านล็�
   const box = h('div',{class:'card dicepanel'});
   const modeBtns = h('div',{class:'row'}, ['normal','adv','dis'].map(m=>h('button',{class:'small'+(st.mode===m?' primary':''), onclick:(e)=>{ st.mode=m; for (const b of modeBtns.children) b.classList.toggle('primary', b.dataset.m===m); }, dataset:{m}, text: m==='normal'?'ปกติ 2d6':m==='adv'?'Advantage 3d6↑':'Disadvantage 3d6↓'})));
   const persSel = h('select',{onchange:(e)=>{st.pers=e.target.value;}}, h('option',{value:'',text:'ไม่บวกบุคลิกภาพ'}), DATA.meta.personality.flatMap(ax=>[ax.left, ax.right]).map(s=>h('option',{value:s, text: c? `${s} (${signed(persMod(c,s))})` : s})));
-  const dcInp = h('input',{type:'number',placeholder:'DC (ว่าง = Degrees)',style:'width:150px',oninput:(e)=>{st.dc=e.target.value;}});
+  const dcInp = h('input',{type:'number',placeholder:'DC (ว่าง = ไม่ตัดสินผล)',style:'width:150px',oninput:(e)=>{st.dc=e.target.value;}});
   box.append(h('h3',{text:'ทอยเต๋า'}), h('div',{class:'row',style:'margin:8px 0'}, modeBtns), h('div',{class:'row',style:'margin-bottom:8px'}, persSel, dcInp));
   const log = h('div',{class:'log'});
   const refresh = ()=>{ clear(log); if(!RollLog.entries.length) log.append(h('div',{class:'dim',text:'ยังไม่มีการทอย'})); for (const e of RollLog.entries.slice(0,30)) log.append(rollEntryEl(e)); };
