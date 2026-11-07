@@ -1414,8 +1414,13 @@ function itemSlot(name, effect){
 function equipWeight(c){ return Object.values(c.equip||{}).reduce((a,e)=>a + (e && e.weight ? +e.weight : 0), 0); }
 function bagWeight(c){ return (c.inventory||[]).reduce((a,r)=>a + (r.qty||0)*(r.weight||0), 0); }
 function recalcParry(c){ c.current = c.current||{}; c.current.parryBonus = Object.values(c.equip||{}).reduce((a,e)=>{ const m=/\+(\d+)\s*Parry Dice/.exec((e&&e.effect)||''); return a + (m? +m[1] : 0); }, 0); }
-function migrateEquip(c){ // ชีทเก่าเก็บช่องเป็นข้อความ "ชื่อ · คุณสมบัติ"
-  for (const [k,v] of Object.entries(c.equip||{})){ if (v && typeof v === 'string'){ const parts = v.split(' / ')[0].split(' · '); c.equip[k] = {name: parts[0].trim(), effect: parts.slice(1).join(' · ').trim(), weight: 0}; } else if (v && v.weight==null) v.weight = 0; }
+function migrateEquip(c){ // ชีทเก่า (v0.4) เก็บช่องเป็นข้อความ "ชื่อ · คุณสมบัติ" และยังมีของชิ้นเดียวกันค้างในกระเป๋า
+  let migrated = false;
+  for (const [k,v] of Object.entries(c.equip||{})){ if (v && typeof v === 'string'){ const parts = v.split(' / ')[0].split(' · '); c.equip[k] = {name: parts[0].trim(), effect: parts.slice(1).join(' · ').trim(), weight: 0}; migrated = true; } else if (v && v.weight==null) v.weight = 0; }
+  if (migrated && c.inventory){
+    for (const e of Object.values(c.equip)){ if (!e || !e.name) continue; const i = c.inventory.findIndex(r=>r.name===e.name); if (i<0) continue; const row = c.inventory[i]; e.weight = +row.weight||0; if (!e.effect) e.effect = row.effect||''; if ((row.qty||1) > 1) row.qty--; else c.inventory.splice(i,1); }
+    recalcParry(c);
+  }
   if (c.inventory) for (const r of c.inventory) if (r.worn){ delete r.worn; } }
 /* ใส่ไอเทมจากกระเป๋าลงช่อง: ของเดิมในช่องกลับเข้ากระเป๋า, ไอเทมที่มีหลายชิ้นลดจำนวนลง 1 */
 function wearItem(c, idx, slot){
