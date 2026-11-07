@@ -1730,7 +1730,7 @@ function renderSheet(id){
   const cs = h('div',{class:'cs'}, left, mid, right);
   // ปุ่มจัดวางกรอบเอง (ย้าย/ย่อขยายทุกกรอบ บันทึกต่อเบราว์เซอร์)
   const lay = loadLayout();
-  idb.querySelector('.row .row').append(h('button',{class:'small ghost',title:'ลากย้ายและปรับขนาดทุกกรอบได้ตามถนัด',onclick:()=>{ if (lay.free){ lay.free=false; saveLayout(lay); } else { lay.free=true; saveLayout(lay); } rerender(); },text: lay.free ? 'กลับเป็นแบบตาราง' : 'จัดวางกรอบเอง'}), lay.free ? h('button',{class:'small ghost',onclick:()=>{ if (!confirm('ล้างการจัดวางที่บันทึกไว้?')) return; saveLayout({free:true, boxes:{}}); rerender(); },text:'รีเซ็ตตำแหน่ง'}) : null);
+  idb.querySelector('.row .row').append(...[h('button',{class:'small ghost',title:'ลากย้ายและปรับขนาดทุกกรอบได้ตามถนัด',onclick:()=>{ if (lay.free){ lay.free=false; saveLayout(lay); } else { lay.free=true; saveLayout(lay); } rerender(); },text: lay.free ? 'กลับเป็นแบบตาราง' : 'จัดวางกรอบเอง'}), lay.free ? h('button',{class:'small ghost',onclick:()=>{ if (!confirm('ล้างการจัดวางที่บันทึกไว้?')) return; saveLayout({free:true, boxes:{}}); rerender(); },text:'รีเซ็ตตำแหน่ง'}) : null].filter(Boolean));
   root.append(cs);
   if (lay.free && window.innerWidth > 760) applyFreeLayout(cs, lay);
   renderHUD(c, d, {save, rerender, txt, grow});
