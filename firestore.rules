@@ -1,9 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // โต๊ะเพื่อน: ใครก็ตามที่เปิดเว็บ (ล็อกอินนิรนามอัตโนมัติ) อ่านและเขียนได้ทั้งหมด
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    // ตั้งค่าเว็บ: ใครก็อ่านได้ แก้ได้เฉพาะผู้พัฒนาที่ล็อกอิน Google (ครั้งแรกที่ยังไม่มีผู้พัฒนา ให้คนที่ล็อกอิน Google มาอ้างสิทธิ์ได้)
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
+        && (resource == null || !('devUids' in resource.data) || resource.data.devUids.size() == 0 || request.auth.uid in resource.data.devUids);
     }
+    // ตัวละคร ห้อง แชต presence: ทุกคนที่ล็อกอิน (Google หรือนิรนามจากเครื่องผู้พัฒนา) อ่านและเขียนได้
+    match /chars/{id} { allow read, write: if request.auth != null; }
+    match /rooms/{id} { allow read, write: if request.auth != null; }
+    match /rooms/{id}/{sub=**} { allow read, write: if request.auth != null; }
   }
 }
