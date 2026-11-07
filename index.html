@@ -1066,7 +1066,7 @@ function renderTable(){
   if (!Table.roomId || location.hash!=='#room-'+Table.roomId) return;
   const root = clear($('#v-table'));
   const r = Table.room;
-  if (!r){ root.append(h('div',{class:'card',text:'กำลังเปิดห้อง… (ถ้าค้างนาน แปลว่าไม่พบห้องนี้)'}), h('button',{style:'margin-top:10px',onclick:()=>{location.hash='#table';},text:'← กลับรายการห้อง'})); return; }
+  if (!r){ root.append(h('div',{class:'card',text: Table.localMode ? 'ไม่พบห้องนี้ในเครื่อง (ถ้าเป็นห้องออนไลน์ รอการเชื่อมต่อสักครู่)' : 'กำลังเปิดห้อง… (ถ้าค้างนาน แปลว่าไม่พบห้องนี้)'}), h('button',{style:'margin-top:10px',onclick:()=>{location.hash='#table';},text:'← กลับรายการห้อง'})); return; }
   const gm = Table.isGM();
   const myChars = Store.chars.filter(c=>c.done && (!Store.me || !c.ownerId || c.ownerId===Store.me));
   // header
@@ -1074,7 +1074,7 @@ function renderTable(){
   const becomeGm = !gm && r.gmKey ? h('button',{class:'small ghost',onclick:()=>{ const k=(prompt('กรอกรหัส GM ของห้องนี้')||'').trim().toUpperCase(); if(!k) return; if (k===r.gmKey){ rememberGmKey(r.id,k); toast('คุณเป็น GM ของห้องนี้แล้ว'); renderTable(); } else toast('รหัสไม่ถูกต้อง'); },text:'เข้าเป็น GM'}) : null;
   const shareBtn = h('button',{class:'small ghost',onclick:()=>{ const url = location.href.split('#')[0] + '#room-' + r.id; navigator.clipboard.writeText(url).then(()=>toast('คัดลอกลิงก์ห้องแล้ว')).catch(()=>modal(h('div',null, h('h3',{text:'ลิงก์ห้อง'}), h('input',{style:'width:100%',value:url,readonly:true})))); },text:'ลิงก์ห้อง'});
   const head = h('div',{class:'stephead'}, h('div',null, h('h2',{text:r.name}), h('p',null, gm? tag('คุณเป็น GM','prop') : tag('ผู้เล่น'), ' ', h('span',{id:'peers',class:'dim',style:'font-size:13px'}), Table.localMode? [' ', tag('ห้องในเครื่องนี้','warn')] : null)),
-    h('div',{class:'row'}, shareBtn, gmKeyBtn, becomeGm, h('button',{class:'small ghost',onclick:()=>{ Table.close(); location.hash='#table'; },text:'← ออกจากห้อง'})));
+    h('div',{class:'row'}, shareBtn, gmKeyBtn, becomeGm, gm? h('button',{class:'small ghost',onclick:async()=>{ if(!confirm(`ลบห้อง "${r.name}" ถาวร? แชตและบอร์ดจะหายทั้งหมด`)) return; const id=r.id; Table.close(); if (!Store.db){ saveLocalRooms(loadLocalRooms().filter(x=>x.id!==id)); } else { try{ await Store.db.doc('rooms/'+id).delete(); }catch(e){ toast('ลบห้องไม่ได้'); } } location.hash='#table'; },text:'ลบห้อง'}) : null, h('button',{class:'small ghost',onclick:()=>{ Table.close(); location.hash='#table'; },text:'← ออกจากห้อง'})));
   root.append(head);
   const left = h('div'); const right = h('div');
   // scene text
@@ -1269,7 +1269,7 @@ function route(){
 window.addEventListener('hashchange', route);
 Store.listeners.add(()=>{ const hsh=location.hash; if (hsh==='#chars') renderChars(); else if (hsh==='' || hsh==='#home') renderHome(); });
 route();
-initCapabilities().then(()=>{ if (location.hash==='#table') renderTableHome(); if (location.hash==='#chars') renderChars(); });
+initCapabilities().then(()=>{ if (location.hash==='#table') renderTableHome(); if (location.hash==='#chars') renderChars(); const m = location.hash.match(/^#room-([a-z0-9]+)$/); if (m){ Table.close(); Table.open(m[1]); } });
 // test hook (read-only)
 window.__kirana = { compute, roll2d6, judge, DATA, Store, knowledgeLevels, allSkills };
 
