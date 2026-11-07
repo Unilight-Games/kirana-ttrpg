@@ -1,16 +1,30 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    // ตั้งค่าเว็บ: ใครก็อ่านได้ แก้ได้เฉพาะผู้พัฒนาที่ล็อกอิน Google (ครั้งแรกที่ยังไม่มีผู้พัฒนา ให้คนที่ล็อกอิน Google มาอ้างสิทธิ์ได้)
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null; }
+    function isDev() {
+      return signedIn() && exists(/databases/$(db)/documents/config/site)
+        && request.auth.uid in get(/databases/$(db)/documents/config/site).data.devUids;
+    }
+    // ตั้งค่าเว็บ: อ่านได้ทุกคน เขียนได้เฉพาะผู้พัฒนาที่ล็อกอิน Google (อ้างสิทธิ์ครั้งแรกได้เมื่อยังไม่มีผู้พัฒนา)
     match /config/{doc} {
       allow read: if true;
-      allow write: if request.auth != null
-        && request.auth.token.firebase.sign_in_provider != 'anonymous'
+      allow write: if signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous'
         && (resource == null || !('devUids' in resource.data) || resource.data.devUids.size() == 0 || request.auth.uid in resource.data.devUids);
     }
-    // ตัวละคร ห้อง แชต presence: ทุกคนที่ล็อกอิน (Google หรือนิรนามจากเครื่องผู้พัฒนา) อ่านและเขียนได้
-    match /chars/{id} { allow read, write: if request.auth != null; }
-    match /rooms/{id} { allow read, write: if request.auth != null; }
-    match /rooms/{id}/{sub=**} { allow read, write: if request.auth != null; }
+    // ชีทตัวละคร: เจ้าของเท่านั้น (ผู้พัฒนาเห็นทั้งหมด) — คนอื่นเห็นผ่านสำเนาในห้องที่ตัวละครถูกหยิบมาเล่น
+    match /chars/{id} {
+      allow read: if signedIn() && (isDev() || resource.data.ownerId == request.auth.uid);
+      allow create: if signedIn() && (isDev() || request.resource.data.ownerId == request.auth.uid);
+      allow update, delete: if signedIn() && (isDev() || resource.data.ownerId == request.auth.uid);
+    }
+    // ผู้เล่นที่ออนไลน์: อ่านได้ทุกคนที่ล็อกอิน เขียนได้เฉพาะของตัวเอง
+    match /presence/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+    // ห้องเล่น แชต หมาก สำเนาชีทในห้อง ล็อกทอย presence ในห้อง
+    match /rooms/{id} { allow read, write: if signedIn(); }
+    match /rooms/{id}/{sub=**} { allow read, write: if signedIn(); }
   }
 }

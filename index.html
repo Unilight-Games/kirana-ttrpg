@@ -413,6 +413,49 @@ body.roll-locked .dicepanel{opacity:.75}
 .dslot .wt{position:absolute;bottom:3px;right:6px;font-size:10px;color:var(--bone-mute)}
 .hudhint{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
 @media (max-width:760px){.hud-win{right:6px;left:6px!important;width:auto;top:8vh;max-height:84vh}.hud-win.book{width:auto}.book{grid-template-columns:1fr}.book .toc{border-right:0;border-bottom:1px solid #3d341d;max-height:30vh}.hud-btn{width:54px;height:54px}.hud-btn .ico{width:24px;height:24px}.hud-dock{flex-direction:row;top:auto;bottom:12px;right:10px;padding:6px 8px}.hud-grip{width:14px;height:auto}}
+
+/* ---- online / account widget ---- */
+.online{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.online .acct{font-size:12px;color:var(--bone-dim)}
+.online .onl{display:inline-flex;align-items:center;gap:4px;font-size:12px}
+.onl-pop .onl-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--line);font-size:13px}
+.onl-pop .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok)}
+/* ---- grid combat map ---- */
+.mapwrap{margin-bottom:10px}
+.mapctl{margin-bottom:8px;align-items:center}
+.gridmap{display:grid;grid-template-columns:repeat(20,1fr);gap:1px;background:#05080c;border:2px solid #2a3645;border-radius:8px;padding:2px;aspect-ratio:1/1;max-width:720px;user-select:none}
+.gridmap.painting{cursor:crosshair}
+.cell{position:relative;background:#2b3a2e;cursor:pointer;min-width:0;min-height:0}
+.cell:hover{outline:1px solid var(--gold);z-index:2}
+.t-ground{background:#2e3b2a}.t-grass{background:#36522f;background-image:repeating-linear-gradient(135deg,transparent 0 3px,rgba(0,0,0,.12) 3px 4px)}
+.t-T{background:#1d3a22;background-image:radial-gradient(circle at 50% 45%,#2f6b3a 0 36%,transparent 38%)}
+.t-W{background:#1b3f6b;background-image:repeating-linear-gradient(0deg,transparent 0 4px,rgba(255,255,255,.07) 4px 5px)}.t-w{background:#2b5e8a}
+.t-R{background:#4a4f57;background-image:radial-gradient(circle at 40% 40%,#6a7079 0 30%,transparent 32%)}.t-r{background:#3f4348;background-image:radial-gradient(circle at 30% 60%,#5a5f66 0 15%,transparent 17%),radial-gradient(circle at 70% 30%,#5a5f66 0 12%,transparent 14%)}
+.t-road{background:#6b5a3e}.t-F{background:#5b4a35}.t-wall{background:#23262c;box-shadow:inset 0 0 0 1px #3a3f48}.t-D{background:#8a5a2b;background-image:linear-gradient(90deg,transparent 45%,#3a2410 45% 55%,transparent 55%)}
+.t-S{background:#c2a35f}.t-s{background:#dfe8f0}.t-B{background:#8b6a3e;background-image:repeating-linear-gradient(90deg,transparent 0 3px,rgba(0,0,0,.2) 3px 4px)}
+.t-H{background:#5a3f2b;box-shadow:inset 0 0 0 2px #2d1f14}.t-M{background:#4a3f2a}.t-C{background:#7a6a55;background-image:linear-gradient(90deg,transparent 60%,#2a2219 60%)}
+.t-P{background:#5b4a35;background-image:radial-gradient(circle,#8d8273 0 28%,transparent 30%)}.t-L{background:#8a2a12;background-image:radial-gradient(circle at 40% 50%,#ff7a2a 0 25%,transparent 27%)}
+.t-chasm{background:#07090c}.t-G{background:#3a4238;background-image:linear-gradient(90deg,transparent 35%,#9aa 35% 65%,transparent 65%)}.t-A{background:#6a5a3a;background-image:radial-gradient(circle,var(--gold) 0 20%,transparent 22%)}.t-X{background:#4a2a14;background-image:radial-gradient(circle,#ffb24a 0 25%,transparent 28%)}
+.cell.rng-eng::after,.cell.rng-near::after{content:'';position:absolute;inset:0;pointer-events:none}
+.cell.rng-eng::after{background:rgba(224,90,74,.28)}.cell.rng-near::after{background:rgba(212,168,74,.12)}
+.cell.canmove{box-shadow:inset 0 0 0 1px rgba(79,209,197,.5)}
+.gtok{position:absolute;inset:6%;border-radius:50%;background:var(--ink-2);border:2px solid var(--mana);display:grid;place-items:center;overflow:hidden;font-size:10px;font-weight:700;color:var(--bone);box-shadow:0 2px 6px rgba(0,0,0,.6);z-index:3}
+.gtok img{width:100%;height:100%;object-fit:cover}
+.gtok.npc{border-color:var(--blood-2)}.gtok.hid{opacity:.55;border-style:dashed}.gtok.turn{box-shadow:0 0 0 3px var(--gold),0 2px 6px rgba(0,0,0,.6)}.gtok.sel{box-shadow:0 0 0 3px #fff,0 0 12px rgba(255,255,255,.6)}.gtok.down{filter:grayscale(1);opacity:.6}
+.gtok .hpbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(0,0,0,.6)}.gtok .hpbar::after{content:'';display:block;height:100%;width:var(--p);background:var(--ok)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11px;color:var(--bone-dim)}
+.legend .lg{display:inline-flex;align-items:center;gap:4px}.legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px}
+.toklist{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.toklist .tok{cursor:pointer}.toklist .tok.sel{border-color:var(--gold)}
+.toklist .tok img.av{width:34px;height:34px;border-radius:50%;object-fit:cover}
+/* ---- IP progression ---- */
+.iptabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ipbody{max-height:62vh;overflow:auto}
+.iprow{display:grid;grid-template-columns:1fr 260px;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);align-items:start}
+.iprow .ipact{display:flex;flex-direction:column;gap:4px;align-items:flex-start;font-size:12px}
+.iprow .ipact select{font-size:12px;padding:2px 6px}
+.ipgrid{display:flex;gap:12px;flex-wrap:wrap}
+@media (max-width:760px){.iprow{grid-template-columns:1fr}.gridmap{max-width:100%}}
 </style>
 </head>
 <body>
@@ -598,12 +641,18 @@ function loadLocal(){ try { return JSON.parse(localStorage.getItem(LS_KEY)||'[]'
 function saveLocal(list){ try { localStorage.setItem(LS_KEY, JSON.stringify(list)); } catch(e){} }
 const Store = {
   chars: loadLocal(), db:null, user:null, room:null, me:null, isOwner:false, canWrite:null, online:false, backend:null,
+  displayName:'', isDevUid:false, onlineUsers:[],
   listeners: new Set(),
   notify(){ for (const f of this.listeners) try{ f(); }catch(e){ console.error(e);} },
   upsert(c){ c.updatedAt = Date.now(); const i=this.chars.findIndex(x=>x.id===c.id); if(i>=0) this.chars[i]=c; else this.chars.push(c); saveLocal(this.chars); this.notify();
-    if (this.db && this.me && this.canWrite!==false){ const copy = JSON.parse(JSON.stringify(c)); copy.ownerId = copy.ownerId || this.me; this.db.doc('chars/'+c.id).set(copy).catch(e=>console.warn('db set', e)); } },
-  remove(id){ this.chars = this.chars.filter(x=>x.id!==id); saveLocal(this.chars); this.notify(); if (this.db) this.db.doc('chars/'+id).delete().catch(()=>{}); },
-  get(id){ return this.chars.find(x=>x.id===id) || null; },
+    if (this.db && this.me && this.canWrite!==false){ const copy = JSON.parse(JSON.stringify(c)); copy.ownerId = copy.ownerId || this.me; if (!c.ownerId) c.ownerId = copy.ownerId; copy.ownerName = this.displayName||copy.ownerName||''; this.db.doc('chars/'+c.id).set(copy).catch(e=>console.warn('db set', e));
+      for (const rid of c.roomIds||[]) this.db.doc(`rooms/${rid}/chars/${c.id}`).set(copy).catch(()=>{}); } },
+  /* แชร์สำเนาชีทเข้าห้อง: GM และผู้เล่นในห้องเห็นได้เฉพาะตัวละครที่ถูกหยิบมาเล่นในแคมเปญนี้ */
+  shareToRoom(c, rid){ c.roomIds = [...new Set([...(c.roomIds||[]), rid])]; this.upsert(c); },
+  remove(id){ const c = this.get(id); this.chars = this.chars.filter(x=>x.id!==id); saveLocal(this.chars); this.notify(); if (this.db){ this.db.doc('chars/'+id).delete().catch(()=>{}); for (const rid of (c&&c.roomIds)||[]) this.db.doc(`rooms/${rid}/chars/${id}`).delete().catch(()=>{}); } },
+  get(id){ return this.chars.find(x=>x.id===id) || (typeof Table!=='undefined' && Table.roomChars.find(x=>x.id===id)) || null; },
+  isMine(c){ return !c.ownerId || !this.me || c.ownerId===this.me; },
+  canEdit(c){ return this.isMine(c) || this.isDevUid; },
 };
 async function initCapabilities(){
   if (window.claude && window.claude.use){
@@ -619,7 +668,9 @@ async function initCapabilities(){
     Store.online = true;
     // ตัวละครที่แชร์ในโต๊ะเดียวกัน: ทุกคนอ่านได้ (GM ต้องเห็นชีทผู้เล่น)
     try {
-      Store.db.collection('chars').onSnapshot(snap => {
+      // ตัวละครของฉันเท่านั้น (ผู้พัฒนาเห็นทั้งหมด) — ชีทของคนอื่นเห็นได้ผ่านสำเนาในห้องที่เขาหยิบตัวละครมาเล่น
+      const q = (Store.backend==='firebase' && !Store.isDevUid) ? Store.db.collection('chars').where('ownerId','==',Store.me) : Store.db.collection('chars');
+      q.onSnapshot(snap => {
         const docs = snapDocs(snap);
         let changed=false;
         for (const d of docs){ if(!d || !d.id) continue; const i=Store.chars.findIndex(x=>x.id===d.id); if(i<0){ Store.chars.push(d); changed=true; } else if ((d.updatedAt||0) > (Store.chars[i].updatedAt||0)){ Store.chars[i]=d; changed=true; } }
@@ -674,7 +725,14 @@ async function initFirebase(cfg){
   Store.db = db;
   Store.user = { id: async () => user.uid, isOwner: () => false, canEdit: () => false, can: () => true };
   Store.me = user.uid; Store.canWrite = true; Store.backend = 'firebase';
-  Store.isDev = !!(site && (site.devUids||[]).includes(user.uid)) || Store.isDevIp;
+  Store.isDevUid = !!(site && (site.devUids||[]).includes(user.uid));
+  Store.isDev = Store.isDevUid || Store.isDevIp;
+  Store.displayName = user.isAnonymous ? (localStorage.getItem('kirana.nick') || 'ผู้เล่น-' + user.uid.slice(0,4)) : (user.displayName || (user.email||'').split('@')[0] || 'ผู้เล่น');
+  // แคชในเครื่องอาจมีตัวละครของคนอื่นจากรุ่นก่อน (ตอนนั้นทุกคนเห็นทุกตัว) เก็บเฉพาะของฉัน
+  if (!Store.isDevUid) { Store.chars = Store.chars.filter(c => !c.ownerId || c.ownerId === user.uid); saveLocal(Store.chars); }
+  startSitePresence(F, fdb, user);
+  Store.login = async () => { try { const prov = new A.GoogleAuthProvider(); prov.setCustomParameters({prompt:'select_account'}); if (auth.currentUser && auth.currentUser.isAnonymous){ try { await A.linkWithPopup(auth.currentUser, prov); } catch(e){ if (e && /credential-already-in-use|email-already-in-use/.test(e.code||'')) await A.signInWithPopup(auth, prov); else throw e; } } else await A.signInWithPopup(auth, prov); location.reload(); } catch(e){ toast('ล็อกอินไม่สำเร็จ: ' + (e && e.code || e)); } };
+  Store.logout = async () => { try { await F.deleteDoc(F.doc(fdb, 'presence/' + user.uid)); } catch(e){} try { await A.signOut(auth); } catch(e){} try { localStorage.removeItem(LS_KEY); } catch(e){} location.reload(); };
   // presence ผ่าน Firestore: rooms/<id>/presence/<uid> อัปเดตทุก 40 วิ ถือว่าออนไลน์ถ้าไม่เกิน 100 วิ
   Store.room = { join: async (name) => {
     const path = 'rooms/' + name.replace(/^kirana-/, '') + '/presence';
@@ -688,6 +746,15 @@ async function initFirebase(cfg){
   } };
 }
 let FB = null;
+/* ---- ผู้เล่นที่ออนไลน์ทั้งเว็บ: presence/<uid> อัปเดตทุก 40 วิ (ถือว่าออนไลน์ถ้าไม่เกิน 100 วิ) ---- */
+function startSitePresence(F, fdb, user){
+  const plain = o => JSON.parse(JSON.stringify(o));
+  const push = () => F.setDoc(F.doc(fdb, 'presence/' + user.uid), plain({ uid: user.uid, name: Store.displayName, anon: !!user.isAnonymous, dev: !!Store.isDevUid, room: (typeof Table!=='undefined' && Table.roomId) || null, roomName: (typeof Table!=='undefined' && Table.room && Table.room.name) || '', at: Date.now() })).catch(()=>{});
+  push(); setInterval(push, 40000); window.addEventListener('hashchange', ()=>setTimeout(push, 800));
+  window.addEventListener('beforeunload', ()=>{ try { F.deleteDoc(F.doc(fdb, 'presence/' + user.uid)); } catch(e){} });
+  try { F.onSnapshot(F.collection(fdb, 'presence'), s => { const now = Date.now(); Store.onlineUsers = s.docs.map(d=>d.data()).filter(p => p && (now - (p.at||0)) < 100000).sort((a,b)=>(a.name||'').localeCompare(b.name||'')); updateOnline(); }, ()=>{}); } catch(e){}
+  setInterval(updateOnline, 30000);
+}
 async function fetchPublicIp(){
   try { const r = await fetch('https://api.ipify.org?format=json', {cache:'no-store'}); const j = await r.json(); return j.ip || null; } catch(e){ return null; }
 }
@@ -700,11 +767,27 @@ function snapDocs(snap){
 }
 function docData(d){ if(!d) return null; if (typeof d.data==='function') return d.exists===false ? null : d.data(); return d.data||d; }
 function updateOnline(){
-  const o = $('#online'); clear(o);
+  const o = $('#online'); if (!o) return; clear(o);
   const dot = h('span', {class:'dot' + (Store.online ? ' on' : '')});
-  let txt = Store.online ? (Store.backend==='firebase' ? ('ออนไลน์' + (Store.authUser && !Store.authUser.isAnonymous ? ': ' + (Store.authUser.displayName || Store.authUser.email || '') : (Store.isDevIp ? ': เครื่องผู้พัฒนา' : ': ผู้เล่นนิรนาม'))) : 'ออนไลน์: ตัวละครและโต๊ะเล่นซิงก์ผ่านเว็บ') : 'โหมดออฟไลน์ (บันทึกในเครื่องนี้)';
-  if (Store.online && Store.canWrite === false) txt = 'ออนไลน์แบบอ่านอย่างเดียว (ขอสิทธิ์ Contributor จากเจ้าของเพจเพื่อบันทึก)';
-  o.append(dot, txt);
+  if (!Store.online){ o.append(dot, 'โหมดออฟไลน์ (บันทึกในเครื่องนี้)'); return; }
+  if (Store.backend !== 'firebase'){ o.append(dot, Store.canWrite===false ? 'ออนไลน์แบบอ่านอย่างเดียว' : 'ออนไลน์: ซิงก์ผ่านเว็บ'); return; }
+  const u = Store.authUser; const anon = !u || u.isAnonymous;
+  const n = Store.onlineUsers.length;
+  const who = h('button',{class:'small ghost onl',title:'ผู้เล่นที่ออนไลน์อยู่ตอนนี้',onclick:(e)=>{ e.stopPropagation(); showOnlineList(who); }}, dot, ` ออนไลน์ ${n} คน`);
+  o.append(who);
+  o.append(h('span',{class:'acct',text: anon ? (Store.isDevIp ? 'เครื่องผู้พัฒนา (นิรนาม)' : 'ผู้เล่นนิรนาม') : (Store.displayName + (Store.isDevUid ? ' · ผู้พัฒนา' : ''))}));
+  if (anon) o.append(h('button',{class:'small primary',onclick:()=>Store.login(),text:'เข้าสู่ระบบ Google'}));
+  else o.append(h('button',{class:'small ghost',onclick:()=>{ if (confirm('ออกจากระบบ? ตัวละครในแคชเครื่องนี้จะถูกล้าง (ยังอยู่บนเว็บ ล็อกอินใหม่ก็กลับมา)')) Store.logout(); },text:'ออกจากระบบ'}));
+}
+let onlPop = null;
+function showOnlineList(anchor){
+  if (onlPop){ onlPop.remove(); onlPop=null; return; }
+  const list = Store.onlineUsers;
+  onlPop = h('div',{class:'pop onl-pop',role:'dialog'}, h('div',{class:'pop-h'}, h('b',{text:`ออนไลน์ ${list.length} คน`}), h('button',{class:'small ghost',style:'margin-left:auto',onclick:()=>{ onlPop.remove(); onlPop=null; },text:'✕'})),
+    h('div',{class:'pop-b'}, list.length ? list.map(p=>h('div',{class:'onl-row'}, h('span',{class:'dot on'}), h('b',{text:p.name||'?'}), p.dev? tag('ผู้พัฒนา','prop'):null, p.anon? tag('นิรนาม'):null, p.room? h('a',{href:'#room-'+p.room,class:'dim',style:'font-size:12px',text:' อยู่ในห้อง '+(p.roomName||p.room)}):null)) : h('div',{class:'dim',text:'ไม่มีใครออนไลน์'})));
+  document.body.append(onlPop);
+  const r = anchor.getBoundingClientRect(); onlPop.style.width='300px'; onlPop.style.right='12px'; onlPop.style.top=(r.bottom+8+window.scrollY)+'px';
+  setTimeout(()=>document.addEventListener('click', function once(e){ if (onlPop && !onlPop.contains(e.target)){ onlPop.remove(); onlPop=null; } document.removeEventListener('click', once); }), 0);
 }
 
 /* ===== UI helpers: stat colours, glossary popovers, archetype engine ===== */
@@ -1363,19 +1446,20 @@ function finishWizard(){
 /* ===== Character list + sheet + dice ===== */
 function renderChars(){
   const root = clear($('#v-chars'));
-  root.append(h('div',{class:'stephead'}, h('div',null, h('h2',{text:'ตัวละครของฉัน'}), h('p',{text: Store.online ? 'ตัวละครที่บันทึกบนเว็บจะเห็นร่วมกันทั้งโต๊ะ (GM เปิดชีทผู้เล่นได้)' : 'บันทึกไว้ในเบราว์เซอร์นี้ ส่งออกเป็น JSON เพื่อย้ายเครื่องได้'})),
+  root.append(h('div',{class:'stephead'}, h('div',null, h('h2',{text:'ตัวละครของฉัน'}), h('p',{text: Store.online ? 'ชีทเป็นของบัญชีคุณเท่านั้น GM และเพื่อนร่วมโต๊ะจะเห็นก็ต่อเมื่อคุณหยิบตัวละครลงบอร์ดในห้องนั้น' : 'บันทึกไว้ในเบราว์เซอร์นี้ ส่งออกเป็น JSON เพื่อย้ายเครื่องได้'})),
     h('div',{class:'row'}, h('button',{class:'primary',onclick:()=>{ startWizard(null); location.hash='#create'; },text:'+ สร้างตัวละครใหม่'}), h('button',{onclick:importChar,text:'นำเข้า JSON'}))));
-  const mine = Store.chars.filter(c=>!Store.me || !c.ownerId || c.ownerId===Store.me);
-  const others = Store.chars.filter(c=>Store.me && c.ownerId && c.ownerId!==Store.me);
+  const mine = Store.chars.filter(c=>Store.isMine(c));
+  const others = Store.chars.filter(c=>!Store.isMine(c));
   const list=(arr)=>h('div',{class:'grid two'}, arr.map(c=>{ const d=compute(c); const kin=c.kin?KIN[c.kin]:null;
     return h('div',{class:'card'}, h('h3',null, c.name||'(ยังไม่ตั้งชื่อ)', h('span',{class:'en',text: kin? kin.name : 'ร่าง'})),
       h('div',{class:'gives'}, c.done? tag('พร้อมเล่น','ok') : tag(`ร่าง ขั้น ${(c.step||0)+1}/8`,'warn'), c.starterSet? tag(c.starterSet,'prop'):null, c.talent? tag('Talent '+c.talent):null),
       kin? h('div',{class:'statgrid'}, STATS.map(s=>h('div',{class:'statbox'}, h('div',{class:'k',text:s}), h('div',{class:'v num',text:d.raw[s]}), h('div',{class:'m num',text:signed(d.mod[s])})))) : null,
-      h('div',{class:'row',style:'margin-top:8px'}, c.done? h('button',{class:'primary small',onclick:()=>{location.hash='#sheet-'+c.id;},text:'เปิดชีท'}):null, h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#create'; },text:c.done?'แก้ไขในวิซาร์ด':'ทำต่อ'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}), h('button',{class:'small ghost',onclick:()=>{ if(confirm(`ลบ ${c.name||'ตัวละครนี้'}?`)) Store.remove(c.id); renderChars(); },text:'ลบ'})));
+      h('div',{class:'row',style:'margin-top:8px'}, c.done? h('button',{class:'primary small',onclick:()=>{location.hash='#sheet-'+c.id;},text:'เปิดชีท'}):null, h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#create'; },text:c.done?'แก้ไขในวิซาร์ด':'ทำต่อ'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}), h('button',{class:'small ghost',onclick:()=>{ if(confirm(`ลบ ${c.name||'ตัวละครนี้'}?`)) Store.remove(c.id); renderChars(); },text:'ลบ'}), !Store.isMine(c) && Store.isDevUid ? h('button',{class:'small ghost',title:'ย้ายตัวละครนี้มาเป็นของบัญชีผู้พัฒนา',onclick:()=>{ if(!confirm(`อ้างสิทธิ์ ${c.name} มาเป็นของคุณ?`)) return; c.ownerId = Store.me; Store.upsert(c); renderChars(); },text:'อ้างสิทธิ์'}) : null),
+      !Store.isMine(c) ? h('div',{class:'dim',style:'font-size:12px;margin-top:4px',text:'เจ้าของ: '+(c.ownerName||c.ownerId||'?')}) : null);
   }));
   if (!mine.length && !others.length) root.append(h('div',{class:'card',text:'ยังไม่มีตัวละคร เริ่มจากปุ่มสร้างตัวละครใหม่'}));
   if (mine.length) root.append(list(mine));
-  if (others.length){ root.append(h('h3',{style:'margin:18px 0 8px',text:'ตัวละครของผู้เล่นคนอื่นในโต๊ะ'})); root.append(list(others)); }
+  if (others.length){ root.append(h('h3',{style:'margin:18px 0 8px',text:'ตัวละครของผู้เล่นคนอื่น (มุมมองผู้พัฒนา)'})); root.append(list(others)); }
 }
 function exportChar(c){
   const txt = JSON.stringify(c, null, 1);
@@ -1545,18 +1629,20 @@ function ensureSheetState(c, d){
 function renderSheet(id){
   const root = clear($('#v-sheet'));
   const c = Store.get(id);
-  if (!c){ root.append(h('div',{class:'card',text:'ไม่พบตัวละครนี้'})); return; }
+  if (!c){ root.append(h('div',{class:'card'}, h('p',{text:'ไม่พบตัวละครนี้ในบัญชีของคุณ'}), h('p',{class:'dim',style:'font-size:13px',text:'ชีทของผู้เล่นคนอื่นเปิดได้เฉพาะจากห้องที่เขาหยิบตัวละครลงบอร์ด (กดปุ่ม "ชีท" ที่หมาก)'}), h('button',{style:'margin-top:8px',onclick:()=>{ location.hash = Table.roomId ? '#room-'+Table.roomId : '#chars'; },text:'← กลับ'}))); HUD.hide(); return; }
+  const readOnly = !Store.canEdit(c); SheetUI.readOnly = readOnly;
   let d = compute(c); const kin = KIN[c.kin];
   ensureSheetState(c, d); d = compute(c); // สวมของอัตโนมัติอาจเปลี่ยน Parry Dice
   const cur = c.current; const det = c.details;
-  const save = ()=>{ Store.upsert(c); };
+  const save = ()=>{ if (!readOnly) Store.upsert(c); };
+  if (readOnly) root.append(h('div',{class:'warnbox',style:'margin-bottom:10px'}, `ชีทของ ${c.ownerName||'ผู้เล่นคนอื่น'} (อ่านอย่างเดียว) `, Table.roomId ? h('a',{href:'#room-'+Table.roomId,text:'← กลับห้อง'}) : null));
   const rerender = ()=>renderSheet(id);
   const txt = (obj, key, ph, multi) => { const el = multi ? h('textarea',{placeholder:ph||''}) : h('input',{placeholder:ph||''}); el.value = obj[key]||''; el.oninput = ()=>{ obj[key] = el.value; }; el.onblur = save; return el; };
   // ===== left =====
   const left = h('div');
   const portrait = h('div',{class:'portrait', title:'คลิกเพื่อใส่ภาพตัวละคร'});
   if (c.portrait) portrait.append(h('img',{src:c.portrait, alt:c.name})); else portrait.append(h('div',null, '[แทรกภาพตัวละคร]', h('div',{class:'muted',style:'font-size:11px',text:'คลิกเพื่อเลือกไฟล์'})));
-  const fileInp = h('input',{type:'file',accept:'image/*',class:'sr',onchange:(e)=>{ const f=e.target.files[0]; if(!f) return; const img=new Image(); img.onload=()=>{ const cv=document.createElement('canvas'); const sc=Math.min(1, 360/Math.max(img.width,img.height)); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); c.portrait=cv.toDataURL('image/jpeg',0.82); save(); rerender(); }; img.src=URL.createObjectURL(f); }});
+  const fileInp = h('input',{type:'file',accept:'image/*',class:'sr',onchange:(e)=>{ const f=e.target.files[0]; if(!f) return; const img=new Image(); img.onload=()=>{ const cv=document.createElement('canvas'); const sc=Math.min(1, 360/Math.max(img.width,img.height)); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); c.portrait=cv.toDataURL('image/jpeg',0.82); save(); rerender(); if (Table.room){ const tk = Table.room.tokens.find(t=>t.charId===c.id); if (tk) makeThumb(c.portrait).then(th=>{ tk.thumb = th; Table.save(); }); } }; img.src=URL.createObjectURL(f); }});
   portrait.onclick = ()=>fileInp.click();
   left.append(h('div',{class:'box'}, portrait, fileInp, h('div',{class:'idgrid',style:'margin-top:8px'}, h('span',{class:'k',text:'ชื่อผู้เล่น'}), txt(det,'player','Player name'))));
   const resBox = h('div',{class:'box'}, h('h4',{text:'ทรัพยากร'}));
@@ -1572,7 +1658,7 @@ function renderSheet(id){
   left.append(tb);
   // ===== middle =====
   const mid = h('div');
-  const idb = h('div',{class:'box'}, h('div',{class:'row',style:'justify-content:space-between'}, h('h2',{text:c.name}), h('div',{class:'row'}, h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#create'; },text:'แก้ไขในวิซาร์ด'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}))));
+  const idb = h('div',{class:'box'}, h('div',{class:'row',style:'justify-content:space-between'}, h('h2',{text:c.name}), h('div',{class:'row'}, readOnly? null : h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#create'; },text:'แก้ไขในวิซาร์ด'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}))));
   const ig = h('div',{class:'idgrid',style:'margin-top:8px'});
   const kv = (k, v) => ig.append(h('span',{class:'k',text:k}), typeof v === 'string' ? h('span',{text:v}) : v);
   kv('Age อายุ', txt(det,'age')); kv('Gender เพศ', txt(det,'gender')); kv('Job อาชีพ', txt(det,'job', c.starterSet||'')); kv('Size ขนาด', d.size); kv('Height/Weight', txt(det,'height')); kv('Speed ความเร็ว', kin.speed); kv('Kin วงศา', kin.name);
@@ -1618,10 +1704,12 @@ function renderSheet(id){
   const kt = h('table',{class:'t'});
   for (const k of DATA.knowledge){ const n = Object.values(c.kslots||{}).filter(s=>s&&s.id===k.id&&s.prof&&!s.prof.startsWith('(')).length; kt.append(h('tr',null, h('td',null, h('b',{text:k.nameEn}), h('span',{class:'dim',style:'font-size:11px',text:` (${k.stats.join('/')})`})), h('td',{class:'num',text:'Lv'+kl[k.id]}), h('td',{class:'num',text:'+'+n}))); }
   kb.append(h('div',{class:'tablewrap'}, kt)); right.append(kb);
-  right.append(dicePanel(c, (e)=>{ if (Table.roomId) Table.postRoll(e, c); }));
+  right.append(dicePanel(c, (e)=>{ if (Table.roomId) Table.postRoll(e, c); }, {guard: Table.roomId ? (run,label)=>Table.guardedRoll(c.name, run, label) : null}));
   root.append(h('div',{class:'cs'}, left, mid, right));
   renderHUD(c, d, {save, rerender, txt, grow});
+  if (readOnly) lockForm(root);
 }
+function lockForm(root){ for (const el of root.querySelectorAll('input,textarea,select')) el.disabled = true; for (const b of root.querySelectorAll('button')) { if (!b.classList.contains('rollbtn') && !/กลับ|JSON|ปิด|ซ่อน|คัมภีร์|กระเป๋า|ถุงย่าม|Advantage|Disadvantage|ปกติ/.test(b.textContent) && !b.closest('.hud-head,.hud-dock,.modeBtns')) b.disabled = true; } }
 
 /* ===== HUD แบบเกม: ปุ่มลอยข้างจอ (กระเป๋า / คัมภีร์สกิล / ถุงย่ามของสวมใส่) ลากย้ายได้ เปิดเป็นหน้าต่างลอย ===== */
 const HUD = {
@@ -1684,6 +1772,7 @@ function renderHUD(c, d, ctx){
   if (HUD.open==='bag') renderBagWin(c, d, body, head, {save, rerender, txt, grow, refresh, bagW, eqW, totalW, over});
   else if (HUD.open==='book') renderBookWin(c, d, body, head, sks);
   else renderPouchWin(c, d, body, head, {save, rerender, txt, grow, refresh, eqW});
+  if (SheetUI.readOnly){ for (const el of win.querySelectorAll('input,textarea,select')) el.disabled = true; for (const b of win.querySelectorAll('.hud-body button')) b.disabled = true; }
   requestAnimationFrame(()=>{ const r = win.getBoundingClientRect(); if (r.right > window.innerWidth+2 || r.bottom > window.innerHeight+2 || r.left < 0){ delete HUD.winPos[HUD.open]; win.style.left=''; win.style.top=''; win.style.right=''; } });
 }
 /* ---- กระเป๋า: ตารางช่องของ + แถบน้ำหนัก + รายละเอียดของชิ้นที่เลือก ---- */
@@ -1774,100 +1863,208 @@ function renderPouchWin(c, d, body, head, o){
 }
 let hudCtx = null;
 
-/* ===== Insight Point shop: การ์ดตัวเลือกแบบ Roguelike (สุ่มมือ 5 ใบ สับใหม่ได้ หรือดูทั้งหมด) ===== */
-function ipOptions(c){
-  const d = compute(c); const kl = knowledgeLevels(c); const owned = new Set(allSkills(c));
-  const out = [];
-  for (const s of STATS){ const cost = ipCostStat(d.mod[s]); if (cost==null) continue;
-    out.push({kind:'stat', id:'stat:'+s, stat:s, title:`${s} Mod ${signed(d.mod[s])} → ${signed(d.mod[s]+1)}`, sub:STAT_TH[s], cost, desc:`เพิ่มค่าดิบ ${s} +2 (${d.raw[s]} → ${d.raw[s]+2}) ทำให้ Mod ขึ้นหนึ่งขั้น กระทบทุกอย่างที่ใช้ ${s}`,
-      apply:(c)=>{ c.ipStats = c.ipStats||{}; c.ipStats[s] = (c.ipStats[s]||0)+2; }}); }
-  for (const k of DATA.knowledge){ const lv = kl[k.id]; const cost = ipCostKnowledge(lv); if (cost==null) continue; const L = k.levels[String(lv+1)] || {};
-    out.push({kind:'knowledge', id:'kn:'+k.id, know:k, level:lv+1, title:`${k.nameEn} Lv${lv} → Lv${lv+1}`, sub:`${k.nameTh} · ${k.stats.join('/')}`, cost, desc:(L.text||'') + ((L.proficiencies||[]).length? ' · เลือก Proficiency 1 อย่าง' : ''),
-      apply:(c)=>{ c.kslots = c.kslots||{}; c.kslots['ip'+uid()] = {id:k.id, prof:null}; }, needProf: (L.proficiencies||[]).filter(p=>!Object.values(c.kslots||{}).some(sl=>sl&&sl.prof===p.name)) }); }
-  const mySubs = new Set([...owned].map(n=>SKILL_BY_NAME[n]).filter(Boolean).map(sk=>sk.subcategory));
-  for (const sk of DATA.skills){ if (sk.ipCost==null || owned.has(sk.nameEn)) continue;
-    const w = (mySubs.has(sk.subcategory)?4:1) * (sk.tier==='Novice'?3 : sk.tier==='Adept'?1.5 : 1);
-    out.push({kind:'skill', id:'sk:'+sk.nameEn, skill:sk, title:sk.nameEn, sub:`${sk.nameTh||''} · ${sk.subcategory}${sk.tier?' · '+sk.tier:''}`, cost:sk.ipCost, desc:sk.effect||'', weight:w,
-      apply:(c)=>{ c.grants = c.grants||[]; c.grants.push(sk.nameEn); }}); }
-  return out;
-}
-function pickWeighted(arr, n){ const pool = arr.slice(); const out = []; while (pool.length && out.length < n){ const tot = pool.reduce((a,x)=>a+(x.weight||1),0); let r = Math.random()*tot; let i=0; for (; i<pool.length; i++){ r -= (pool[i].weight||1); if (r<=0) break; } out.push(pool.splice(Math.min(i,pool.length-1),1)[0]); } return out; }
-function drawHand(opts, c){
-  const kl = knowledgeLevels(c);
-  const stats = opts.filter(o=>o.kind==='stat'); const kn = opts.filter(o=>o.kind==='knowledge').map(o=>({...o, weight: kl[o.know.id]>0 ? 3 : 1})); const sk = opts.filter(o=>o.kind==='skill');
-  return [...pickWeighted(stats,1), ...pickWeighted(kn,1), ...pickWeighted(sk,3)];
-}
+/* ===== ความก้าวหน้าด้วย Insight Point ตามบทที่ 13 (คำตัดสิน 29 ส.ค. 2026): IP เป็นสกุลเงินเดียว
+ * ค่าพลัง: Mod ติดลบ→0 ขั้นละ 3 · 0→1 3 · 1→2 4 · 2→3 5 · 3→4 6 · 4→5 7 (บุคคลในตำนานลด 2 IP ต่อขั้น ไม่เกิน 3 ขั้น)
+ * ความรู้: Lv1/2/3 = 4/6/9 IP ผ่านประตูระดับ (ใช้งานจริง ตำรา ครู) ระดับจากพรสวรรค์/เนื้อเรื่องไม่เสีย IP
+ * ทักษะ: ราคาตามรายการ · Novice เรียนเองได้ · Expert ต้องมีครู ตำรา หรือเคยเห็นถูกใช้ · Master ต้องมีปรมาจารย์หรือเนื้อเรื่อง
+ * ส่วนลด: ตำราทั่วไป/ผู้ชำนาญการ −1 · ตำราหายาก/ปรมาจารย์ −2 · สาขาละก้อนเดียว ไม่ทบ ใช้ได้ครั้งเดียวต่อช่วงระหว่าง Milestone
+ * ใช้ IP ได้เฉพาะตอนจบเซสชั่นหรือช่วง Downtime ===== */
+const IP_DISC = [['', 'ไม่มีส่วนลด', 0], ['common', 'ตำราทั่วไป / ผู้ชำนาญการ (−1)', 1], ['rare', 'ตำราหายาก / ปรมาจารย์ (−2)', 2]];
+const IpUI = { tab: 'stat', q: '', cat: '', tier: '' };
 function openIpShop(c, onChange){
-  c.current = c.current || {}; // หมายเหตุ: renderSheet สร้าง c.current ใหม่ทุกครั้ง จึงอ้าง c.current สด ๆ เสมอ
-  let showAll = false; let hand = null;
+  c.current = c.current || {}; c.ipLog = c.ipLog || []; c.ipDiscUsed = c.ipDiscUsed || {}; c.ipLegendSteps = c.ipLegendSteps || 0;
   const wrap = h('div',{class:'ipshop'});
+  const ip = ()=> c.current.ip||0;
+  const spend = (title, cost, kind, extra)=>{ c.current.ip = ip() - cost; c.ipLog.push({ts:Date.now(), title, cost, kind, ...(extra||{})}); if (onChange) onChange(); toast(`${title} · ใช้ ${cost} IP`); render(); };
+  const discRow = (branch, onPick)=>{ // ส่วนลดครู/ตำรา สาขาละครั้งต่อช่วง Milestone
+    const used = !!c.ipDiscUsed[branch];
+    const sel = h('select',{class:'small',disabled:used}, IP_DISC.map(([v,l])=>h('option',{value:v,text:l})));
+    sel.onchange = ()=>onPick(sel.value);
+    return h('span',{class:'disc'}, sel, used ? h('span',{class:'dim',text:' ใช้ส่วนลดสาขานี้ไปแล้วในช่วงนี้'}) : null);
+  };
+  const costWith = (base, discId)=>{ const d = IP_DISC.find(x=>x[0]===discId); return Math.max(1, base - (d? d[2] : 0)); };
   const render = ()=>{
     clear(wrap);
-    const opts = ipOptions(c); if (!hand) hand = drawHand(opts, c);
-    const ip = c.current.ip||0;
-    wrap.append(h('div',{class:'row',style:'justify-content:space-between;align-items:baseline'}, h('h3',null, 'ใช้ Insight Point ', h('span',{class:'ipbal',text:`${ip} IP`})), h('div',{class:'row'}, h('button',{class:'small',onclick:()=>{ hand = drawHand(opts, c); showAll=false; render(); },text:'สับการ์ดใหม่'}), h('button',{class:'small ghost',onclick:()=>{ showAll=!showAll; render(); },text: showAll? 'กลับไปดูการ์ด' : 'ดูตัวเลือกทั้งหมด'}))));
-    wrap.append(h('p',{class:'desc',style:'margin:4px 0 10px',text:'เลือกการ์ด 1 ใบต่อครั้ง (สับใหม่ได้ ไม่เสีย IP) · ใช้ IP ได้ตอนจบเซสชั่นหรือช่วง Downtime · ประตู: Novice เรียนเองได้ · Expert ต้องมีครู ตำรา หรือเคยเห็นถูกใช้ · Master ต้องมีปรมาจารย์หรือเนื้อเรื่อง (GM ตัดสิน) · ความรู้ Lv1/2/3 = 4/6/9 IP'}));
-    const cardEl = (o)=>{
-      const can = ip >= o.cost;
-      const el = h('div',{class:`ipcard ${o.kind}${can?'':' locked'}`},
-        h('div',{class:'ribbon',text: o.kind==='stat'?'ค่าพลัง' : o.kind==='knowledge'?'ความรู้' : (o.skill.category==='Sorcery'?'เวทมนตร์':'ทักษะ')}),
-        h('div',{class:'cost',text:`${o.cost} IP`}),
-        h('h4',{text:o.title}), h('div',{class:'sub',text:o.sub||''}),
-        h('div',{class:'body cardtext'}, T(o.desc||'')),
-        o.kind==='skill' && (o.skill.cost||o.skill.condition) ? h('div',{class:'sub'}, o.skill.cost? `Cost ${o.skill.cost}` : '', o.skill.condition? ` · ${o.skill.condition}` : '') : null,
-        o.kind==='skill' && o.skill.tier && o.skill.tier!=='Novice' ? h('div',{class:'sub gate',text: o.skill.tier==='Master' ? 'ประตู: ต้องมีปรมาจารย์หรือเนื้อเรื่อง' : 'ประตู: ต้องมีครู ตำรา หรือเคยเห็นถูกใช้'}) : null,
-        h('button',{class:'primary small',disabled:!can,onclick:()=>choose(o),text: can? 'เลือกการ์ดนี้' : `ขาดอีก ${o.cost-ip} IP`}));
-      return el; };
-    if (!showAll){ wrap.append(h('div',{class:'hand'}, hand.map(cardEl))); }
-    else {
-      for (const [kind,label] of [['stat','ค่าพลัง (Mod +1)'],['knowledge','ความรู้ (Level Up)'],['skill','ทักษะและเวทมนตร์']]){
-        const list = opts.filter(o=>o.kind===kind); wrap.append(h('h4',{style:'margin:12px 0 6px',text:`${label} · ${list.length}`}));
-        wrap.append(h('div',{class:'hand all'}, list.sort((a,b)=>a.cost-b.cost).map(cardEl)));
-      }
+    const d = compute(c); const kl = knowledgeLevels(c); const owned = new Set(allSkills(c));
+    wrap.append(h('div',{class:'row',style:'justify-content:space-between;align-items:baseline'}, h('h3',null, 'ความก้าวหน้า ', h('span',{class:'ipbal',text:`${ip()} IP`})),
+      h('button',{class:'small ghost',title:'ผ่าน Milestone แล้ว: รีเซ็ตสิทธิ์ส่วนลดครู/ตำราทุกสาขา',onclick:()=>{ if (!confirm('เริ่มช่วงใหม่หลัง Milestone? สิทธิ์ส่วนลดครู/ตำราทุกสาขาจะใช้ได้อีกครั้ง')) return; c.ipDiscUsed = {}; if (onChange) onChange(); render(); },text:'ผ่าน Milestone แล้ว'})));
+    wrap.append(h('p',{class:'desc',style:'margin:4px 0 10px',text:'ใช้ IP ได้ตอนจบเซสชั่นหรือช่วง Downtime · ครูและตำราเปลี่ยนได้แค่สิทธิ์ (ประตู) และราคา (ส่วนลด) · GM เป็นผู้ยืนยันประตู'}));
+    const tabs = h('div',{class:'iptabs'}, [['stat','ค่าพลัง'],['know','ความรู้'],['skill','ทักษะและเวทมนตร์'],['log','ประวัติ']].map(([k,l])=>h('button',{class:'small'+(IpUI.tab===k?' primary':''),onclick:()=>{ IpUI.tab=k; render(); },text:l})));
+    wrap.append(tabs);
+    const body = h('div',{class:'ipbody'}); wrap.append(body);
+    if (IpUI.tab==='stat'){
+      body.append(h('p',{class:'dim',style:'font-size:12px',text:`ซื้อ Mod ขึ้นหนึ่งขั้น = ค่าดิบ +2 · บุคคลในตำนานลด 2 IP ต่อขั้น (ใช้แล้ว ${c.ipLegendSteps}/3 ขั้น)`}));
+      const tbl = h('table',{class:'t'}, h('thead',null, h('tr',null, h('th',{text:'ค่าพลัง'}), h('th',{text:'ดิบ'}), h('th',{text:'Mod'}), h('th',{text:'ถัดไป'}), h('th',{text:'ราคา'}), h('th'))));
+      for (const s of STATS){ const cost = ipCostStat(d.mod[s]); const legend = h('input',{type:'checkbox',disabled: c.ipLegendSteps>=3}); const row = h('tr',{class:'sc-'+s});
+        row.append(h('td',null, h('b',{class:'n',text:s}), ' ', h('span',{class:'dim',text:STAT_TH[s]})), h('td',{class:'num',text:d.raw[s]}), h('td',{class:'num ov',text:signed(d.mod[s])}), h('td',{class:'num',text: cost==null? 'สูงสุดแล้ว' : signed(d.mod[s]+1)}), h('td',{class:'num',text: cost==null? '-' : cost+' IP'}),
+          h('td',null, cost==null? null : h('div',{class:'row',style:'gap:6px;align-items:center'}, h('label',{class:'dim',style:'font-size:11px'}, legend, ' บุคคลในตำนาน −2'), h('button',{class:'small primary',onclick:()=>{ const useL = legend.checked && c.ipLegendSteps<3; const fin = Math.max(1, cost - (useL?2:0)); if (ip() < fin){ toast(`IP ไม่พอ (ต้องการ ${fin})`); return; } c.ipStats = c.ipStats||{}; c.ipStats[s] = (c.ipStats[s]||0)+2; if (useL) c.ipLegendSteps++; spend(`${s} Mod ${signed(d.mod[s])} → ${signed(d.mod[s]+1)}`, fin, 'stat', useL? {disc:'legend'} : null); },text:'ซื้อ'}))));
+        tbl.append(row); }
+      body.append(h('div',{class:'tablewrap'}, tbl));
+    } else if (IpUI.tab==='know'){
+      body.append(h('p',{class:'dim',style:'font-size:12px',text:'ราคาระดับ 1 / 2 / 3 = 4 / 6 / 9 IP · ต้องผ่านประตูระดับ (เคยใช้งานจริง มีตำรา หรือมีครู) ให้ GM ยืนยัน · ซื้อแล้วเลือก Proficiency ของระดับใหม่'}));
+      for (const k of DATA.knowledge){ const lv = kl[k.id]; const cost = ipCostKnowledge(lv); const L = k.levels[String(lv+1)]||{};
+        const gate = h('input',{type:'checkbox'}); let disc = '';
+        const row = h('div',{class:'iprow'}, h('div',{class:'ipmain'}, h('b',{text:k.nameEn}), h('span',{class:'dim',text:` ${k.nameTh} · ${k.stats.join('/')} · Lv${lv}`}), cost==null? h('div',{class:'dim',style:'font-size:12px',text:'ระดับสูงสุดแล้ว'}) : h('div',{class:'desc',style:'font-size:12px'}, `Lv${lv+1}: `, T(L.text||''))),
+          cost==null? null : h('div',{class:'ipact'}, h('label',{class:'dim',style:'font-size:11px'}, gate, ' GM ยืนยันผ่านประตูระดับ'), discRow(k.id, v=>{ disc=v; }), h('button',{class:'small primary',onclick:()=>{ if (!gate.checked){ toast('ต้องให้ GM ยืนยันว่าผ่านประตูระดับก่อน'); return; } const fin = costWith(cost, disc); if (ip() < fin){ toast(`IP ไม่พอ (ต้องการ ${fin})`); return; }
+            const profs = (L.proficiencies||[]).filter(p=>!Object.values(c.kslots||{}).some(sl=>sl&&sl.prof===p.name));
+            const finish = (prof)=>{ c.kslots = c.kslots||{}; c.kslots['ip'+uid()] = {id:k.id, prof: prof? prof.name : null}; if (disc) c.ipDiscUsed[k.id] = true; spend(`${k.nameEn} Lv${lv} → Lv${lv+1}${prof? ' ('+prof.name+')':''}`, fin, 'knowledge', disc? {disc} : null); };
+            if (!profs.length){ finish(null); return; }
+            clear(body); body.append(h('h4',{text:`${k.nameEn} Lv${lv+1}: เลือก Proficiency 1 อย่าง`}), h('div',{class:'ipgrid'}, profs.map(p=>h('div',{class:'ipcard knowledge'}, h('div',{class:'ribbon',text:'Proficiency'}), h('h4',{text:p.name}), h('div',{class:'body cardtext'}, T(p.text||'')), h('button',{class:'primary small',onclick:()=>finish(p),text:'เลือก'})))), h('button',{class:'small ghost',style:'margin-top:8px',onclick:render,text:'← ยกเลิก'}));
+          },text:`ซื้อ ${cost} IP`})));
+        body.append(row); }
+    } else if (IpUI.tab==='skill'){
+      const cats = [...new Set(DATA.skills.filter(s=>s.ipCost!=null).map(s=>s.category))];
+      const subs = [...new Set(DATA.skills.filter(s=>s.ipCost!=null && (!IpUI.cat || s.category===IpUI.cat)).map(s=>s.subcategory))].sort();
+      const f = h('div',{class:'row',style:'margin-bottom:8px'}, h('input',{placeholder:'ค้นชื่อ/ข้อความ',value:IpUI.q,style:'width:180px',oninput:(e)=>{ IpUI.q=e.target.value; renderList(); }}),
+        h('select',{onchange:(e)=>{ IpUI.cat=e.target.value; IpUI.sub=''; render(); }}, h('option',{value:'',text:'ทุกหมวด'}), cats.map(x=>h('option',{value:x,selected:IpUI.cat===x,text:x}))),
+        h('select',{onchange:(e)=>{ IpUI.sub=e.target.value; renderList(); }}, h('option',{value:'',text:'ทุกสำนัก/สาย'}), subs.map(x=>h('option',{value:x,selected:IpUI.sub===x,text:x}))),
+        h('select',{onchange:(e)=>{ IpUI.tier=e.target.value; renderList(); }}, h('option',{value:'',text:'ทุกระดับ'}), ['Novice','Expert','Master'].map(x=>h('option',{value:x,selected:IpUI.tier===x,text:x}))),
+        h('label',{class:'dim',style:'font-size:12px'}, h('input',{type:'checkbox',checked:!!IpUI.afford,onchange:(e)=>{ IpUI.afford=e.target.checked; renderList(); }}), ' เฉพาะที่ IP พอ'));
+      body.append(f, h('p',{class:'dim',style:'font-size:12px',text:'ประตู: Novice เรียนเองได้ · Expert ต้องมีครู ตำรา หรือเคยเห็นถูกใช้ · Master ต้องมีปรมาจารย์หรือเนื้อเรื่อง (ให้ GM ยืนยัน) · ส่วนลดครู/ตำราใช้ได้สายละครั้งต่อช่วง Milestone'}));
+      const listEl = h('div',{class:'iplist'}); body.append(listEl);
+      const renderList = ()=>{ clear(listEl); const q = (IpUI.q||'').toLowerCase();
+        const items = DATA.skills.filter(sk => sk.ipCost!=null && !owned.has(sk.nameEn) && (!IpUI.cat || sk.category===IpUI.cat) && (!IpUI.sub || sk.subcategory===IpUI.sub) && (!IpUI.tier || sk.tier===IpUI.tier) && (!q || (sk.nameEn+' '+(sk.nameTh||'')+' '+(sk.effect||'')).toLowerCase().includes(q)) && (!IpUI.afford || sk.ipCost <= ip()));
+        if (!items.length) listEl.append(h('div',{class:'dim',text:'ไม่มีรายการตรงตัวกรอง'}));
+        for (const sk of items.slice(0,80)){
+          const gateNeeded = sk.tier && sk.tier!=='Novice'; const gate = h('input',{type:'checkbox'}); let disc = '';
+          listEl.append(h('div',{class:'iprow'}, h('div',{class:'ipmain'}, h('div',{class:'row',style:'gap:6px;align-items:center'}, h('b',{text:sk.nameEn}), h('span',{class:'dim',text:sk.nameTh||''}), tag(sk.subcategory, sk.category==='Sorcery'?'prop':''), sk.tier? tag(sk.tier, sk.tier==='Master'?'neg':sk.tier==='Expert'?'warn':'ok'):null, sk.cost? tag('Cost '+sk.cost,'stat'):null, tag(sk.ipCost+' IP')),
+              h('div',{class:'desc',style:'font-size:12px'}, T(sk.effect||'')), sk.condition? h('div',{class:'lim',style:'font-size:12px'}, 'Limitation: ', T(sk.condition)) : null),
+            h('div',{class:'ipact'}, gateNeeded? h('label',{class:'dim',style:'font-size:11px'}, gate, sk.tier==='Master'? ' GM ยืนยัน: มีปรมาจารย์/เนื้อเรื่อง' : ' GM ยืนยัน: มีครู/ตำรา/เคยเห็น') : h('span',{class:'dim',style:'font-size:11px',text:'เรียนเองได้'}), discRow(sk.subcategory, v=>{ disc=v; }),
+              h('button',{class:'small primary',onclick:()=>{ if (gateNeeded && !gate.checked){ toast('ต้องให้ GM ยืนยันประตูของทักษะระดับนี้ก่อน'); return; } const fin = costWith(sk.ipCost, disc); if (ip() < fin){ toast(`IP ไม่พอ (ต้องการ ${fin})`); return; } c.grants = c.grants||[]; c.grants.push(sk.nameEn); if (disc) c.ipDiscUsed[sk.subcategory] = true; spend(`ทักษะ ${sk.nameEn}`, fin, 'skill', disc? {disc} : null); },text:'ซื้อ'}))));
+        }
+        if (items.length > 80) listEl.append(h('div',{class:'dim',text:`แสดง 80 จาก ${items.length} รายการ กรองให้แคบลง`}));
+      };
+      renderList();
+    } else {
+      const log = c.ipLog.slice().reverse();
+      body.append(log.length ? h('table',{class:'t'}, log.map(l=>h('tr',null, h('td',{class:'dim',text:new Date(l.ts).toLocaleDateString('th-TH')}), h('td',{text:l.title}), h('td',{class:'num',text:l.cost+' IP'}), h('td',{class:'dim',text:l.disc? (l.disc==='legend'?'บุคคลในตำนาน':IP_DISC.find(x=>x[0]===l.disc)[1]) : ''})))) : h('div',{class:'dim',text:'ยังไม่เคยใช้ IP'}));
     }
-    const log = c.ipLog||[]; if (log.length) wrap.append(h('details',{style:'margin-top:10px'}, h('summary',{text:`ประวัติการใช้ IP (${log.length})`}), log.slice().reverse().map(l=>h('div',{class:'dim',style:'font-size:12px',text:`${new Date(l.ts).toLocaleDateString('th-TH')} · ${l.title} · ${l.cost} IP`}))));
-  };
-  const choose = (o)=>{
-    const finish = (extraNote)=>{ o.apply(c); c.current.ip = (c.current.ip||0) - o.cost; c.ipLog = c.ipLog||[]; c.ipLog.push({ts:Date.now(), title:o.title + (extraNote? ' ('+extraNote+')':''), cost:o.cost, kind:o.kind}); if (onChange) onChange(); toast(`ได้ ${o.title}${extraNote? ' · '+extraNote:''}`); hand=null; render(); };
-    if (o.kind==='knowledge' && o.needProf && o.needProf.length){
-      // เลือก Proficiency ของระดับใหม่ก่อน
-      clear(wrap); wrap.append(h('h3',{text:`${o.know.nameEn} Lv${o.level}: เลือก Proficiency 1 อย่าง`}));
-      wrap.append(h('div',{class:'hand'}, o.needProf.map(p=>h('div',{class:'ipcard knowledge'}, h('div',{class:'ribbon',text:'Proficiency'}), h('h4',{text:p.name}), h('div',{class:'body cardtext'}, T(p.text||'')), h('button',{class:'primary small',onclick:()=>{ const key='ip'+uid(); c.kslots=c.kslots||{}; c.kslots[key]={id:o.know.id, prof:p.name}; o.apply=()=>{}; finish(p.name); },text:'เลือก'})))));
-      wrap.append(h('button',{class:'small ghost',style:'margin-top:8px',onclick:render,text:'← กลับ'}));
-      return;
-    }
-    finish();
   };
   render();
   modal(wrap);
 }
 
-/* ===== Online table: rooms, zone board (Theater of the Mind), encounter order, shared chat & dice, fate clocks ===== */
-const ZONE_KINDS = {eng:{label:'เขตปะทะ (Engagement)', range:'1-3 ม.'}, near:{label:'เขตใกล้เคียง (Nearby)', range:'4-25 ม.'}, far:{label:'เขตไกล (Far)', range:'26-100+ ม.'}, out:{label:'นอกการต่อสู้', range:'หนี/ซ่อนแล้ว'}};
-function defaultZones(){ return [{id:'engA',name:'เขตปะทะ A',kind:'eng'},{id:'near',name:'เขตใกล้เคียง',kind:'near'},{id:'far',name:'เขตไกล',kind:'far'},{id:'out',name:'นอกการต่อสู้',kind:'out'}]; }
-function newRoom(name){ return {id:uid(), name, gmId: Store.me||'local', gmKey: uid().slice(0,6).toUpperCase(), createdAt:Date.now(), updatedAt:Date.now(), zones:defaultZones(), tokens:[], enc:{active:false, round:0, turnIdx:0, order:[]}, clocks:[], scene:''}; }
+/* ===== แผนที่ต่อสู้แบบตาราง 20×20 + ตัวสุ่มแผนที่ตามสถานที่ =====
+ * ช่องหนึ่งตัวอักษร: . พื้น  , หญ้าสูง(กำบัง)  T ต้นไม้(ขวาง)  W น้ำลึก(ผ่านไม่ได้)  w น้ำตื้น(ช้า)  R หิน/ผนัง(ขวาง)  r เศษหิน(ช้า)
+ *   = ถนน  F พื้นอาคาร  # กำแพง  D ประตู  S ทราย  s หิมะ(ช้า)  B สะพาน/ไม้กระดาน  H บ้าน(ขวาง)  M โคลน(ช้า)  C ขอบหน้าผา(ขวาง)  P เสา(ขวาง)  L ลาวา(อันตราย)  ~ เหว(ผ่านไม่ได้)  G หลุมศพ(กำบัง)  A แท่นบูชา  X กองไฟ/ค่าย
+ */
+const MAP_W = 20, MAP_H = 20, CELL_M = 2; // 1 ช่อง = 2 เมตร
+const TILE = {
+  '.': {th:'พื้น', pass:1},        ',': {th:'หญ้าสูง (กำบัง)', pass:1, cover:1},
+  'T': {th:'ต้นไม้', pass:0},      'W': {th:'น้ำลึก', pass:0},        'w': {th:'น้ำตื้น (ช้า)', pass:2},
+  'R': {th:'หิน/ผนัง', pass:0},    'r': {th:'เศษหิน (ช้า)', pass:2},   '=': {th:'ถนน', pass:1},
+  'F': {th:'พื้นอาคาร', pass:1},   '#': {th:'กำแพง', pass:0},         'D': {th:'ประตู', pass:1},
+  'S': {th:'ทราย', pass:1},        's': {th:'หิมะ (ช้า)', pass:2},     'B': {th:'สะพาน', pass:1},
+  'H': {th:'บ้าน', pass:0},        'M': {th:'โคลน (ช้า)', pass:2},     'C': {th:'ขอบหน้าผา', pass:0},
+  'P': {th:'เสา', pass:0},         'L': {th:'ลาวา (อันตราย)', pass:2, danger:1}, '~': {th:'เหว', pass:0},
+  'G': {th:'หลุมศพ (กำบัง)', pass:1, cover:1}, 'A': {th:'แท่นบูชา', pass:1}, 'X': {th:'กองไฟ', pass:0},
+};
+const MAP_KINDS = [
+  ['forest','ป่า'],['river','ริมแม่น้ำ'],['city','เมือง'],['village','หมู่บ้าน'],['cave','ถ้ำ'],['dungeon','ดันเจี้ยน'],['mountain','ภูเขา'],
+  ['sea','ทะเล/ชายฝั่ง'],['ship','บนเรือ'],['valley','หุบเขา'],['cliff','หน้าผา'],['swamp','บึง'],['desert','ทะเลทราย'],['ruins','ซากปรักหักพัง'],
+  ['snow','ทุ่งหิมะ'],['camp','ค่ายพัก'],['temple','วิหาร'],['mine','เหมือง'],['farm','ไร่นา'],['bridge','สะพานข้ามเหว'],['graveyard','สุสาน'],['volcano','ภูเขาไฟ'],['island','เกาะ'],['field','ทุ่งโล่ง'],
+];
+function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function seedFrom(s){ let h = 2166136261; for (const ch of String(s)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+/* value noise ขนาดกริด: คืนค่า 0..1 */
+function noiseGrid(rnd, scale){
+  const gw = Math.ceil(MAP_W/scale)+2, gh = Math.ceil(MAP_H/scale)+2;
+  const g = Array.from({length:gh}, ()=>Array.from({length:gw}, ()=>rnd()));
+  const out = [];
+  for (let y=0;y<MAP_H;y++){ const row=[]; for (let x=0;x<MAP_W;x++){ const fx=x/scale, fy=y/scale; const x0=Math.floor(fx), y0=Math.floor(fy); const tx=fx-x0, ty=fy-y0; const sx=tx*tx*(3-2*tx), sy=ty*ty*(3-2*ty); const v = (g[y0][x0]*(1-sx)+g[y0][x0+1]*sx)*(1-sy) + (g[y0+1][x0]*(1-sx)+g[y0+1][x0+1]*sx)*sy; row.push(v); } out.push(row); }
+  return out;
+}
+function blank(ch='.'){ return Array.from({length:MAP_H}, ()=>Array(MAP_W).fill(ch)); }
+function inb(x,y){ return x>=0 && y>=0 && x<MAP_W && y<MAP_H; }
+function walk(g, rnd, x, y, len, ch, width=1, drift=0.35, dir=null){ // เดินสุ่มวางเส้น (แม่น้ำ/ถนน/ทางเดิน)
+  let dx = dir ? dir[0] : (rnd()<0.5?1:-1), dy = dir ? dir[1] : 0;
+  for (let i=0;i<len;i++){
+    for (let a=-Math.floor(width/2); a<=Math.floor(width/2); a++){ for (let b=-Math.floor(width/2); b<=Math.floor(width/2); b++){ if (inb(x+a,y+b)) g[y+b][x+a]=ch; } }
+    if (rnd()<drift){ if (rnd()<0.5) dy = Math.max(-1, Math.min(1, dy + (rnd()<0.5?-1:1))); else dx = Math.max(-1, Math.min(1, dx + (rnd()<0.5?-1:1))); if (!dx && !dy) dx = 1; }
+    x += dx; y += dy; if (!inb(x,y)) break;
+  }
+}
+function rect(g, x0,y0,x1,y1, ch){ for (let y=y0;y<=y1;y++) for (let x=x0;x<=x1;x++) if (inb(x,y)) g[y][x]=ch; }
+function sprinkle(g, rnd, ch, n, onlyOn='.'){ let k=0, guard=0; while (k<n && guard++<2000){ const x=Math.floor(rnd()*MAP_W), y=Math.floor(rnd()*MAP_H); if (onlyOn.includes(g[y][x])){ g[y][x]=ch; k++; } } }
+function house(g, rnd, x, y, w, hh){ rect(g, x, y, x+w-1, y+hh-1, 'H'); }
+function room(g, x0,y0,x1,y1){ rect(g,x0,y0,x1,y1,'#'); rect(g,x0+1,y0+1,x1-1,y1-1,'F'); }
+const GEN = {
+  field(g, rnd){ const n=noiseGrid(rnd,6); for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = n[y][x]>0.72? ',' : '.'; sprinkle(g,rnd,'T',6); sprinkle(g,rnd,'R',3); },
+  forest(g, rnd){ const n=noiseGrid(rnd,4); for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = n[y][x]>0.62? 'T' : (n[y][x]>0.5? ',' : '.'); walk(g,rnd,0,Math.floor(rnd()*MAP_H),30,'.',1,0.3,[1,0]); sprinkle(g,rnd,'R',4); },
+  river(g, rnd){ GEN.field(g,rnd); const y = 6+Math.floor(rnd()*8); walk(g,rnd,0,y,40,'W',3,0.25,[1,0]); for (let yy=0;yy<MAP_H;yy++) for (let x=0;x<MAP_W;x++) if (g[yy][x]==='.' && [[0,1],[0,-1],[1,0],[-1,0]].some(([a,b])=>inb(x+a,yy+b)&&g[yy+b][x+a]==='W') && rnd()<0.6) g[yy][x]='w'; const bx = 4+Math.floor(rnd()*12); for (let yy=0;yy<MAP_H;yy++) if ('Ww'.includes(g[yy][bx])) g[yy][bx]='B'; sprinkle(g,rnd,'T',8); },
+  city(g, rnd){ for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x]='='; for (let i=0;i<3;i++){ const y=3+i*6; rect(g,0,y,MAP_W-1,y+1,'.'); } for (let x=0;x<MAP_W;x+=7){ for (let y=0;y<MAP_H;y++) g[y][x]='.'; } for (let by=0; by<MAP_H; by+=6) for (let bx=1; bx<MAP_W; bx+=7){ const w=2+Math.floor(rnd()*4), hh=2+Math.floor(rnd()*2); if (rnd()<0.85) house(g,rnd,bx+1,by+1,Math.min(w,5),hh); } sprinkle(g,rnd,'r',6,'='); sprinkle(g,rnd,'P',4,'='); },
+  village(g, rnd){ GEN.field(g,rnd); walk(g,rnd,0,10,40,'=',1,0.2,[1,0]); for (let i=0;i<6;i++){ const x=1+Math.floor(rnd()*15), y=1+Math.floor(rnd()*15); if ('.,'.includes(g[y][x])) house(g,rnd,x,y,2+Math.floor(rnd()*2),2); } sprinkle(g,rnd,'T',5); sprinkle(g,rnd,'X',1); },
+  cave(g, rnd){ const n=noiseGrid(rnd,3); for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = n[y][x]>0.55? 'R' : (n[y][x]>0.47? 'r':'.'); walk(g,rnd,0,Math.floor(rnd()*MAP_H),40,'.',2,0.3,[1,0]); walk(g,rnd,Math.floor(rnd()*MAP_W),0,40,'.',2,0.3,[0,1]); sprinkle(g,rnd,'w',8,'.'); sprinkle(g,rnd,'P',3,'.'); },
+  dungeon(g, rnd){ for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x]='#'; const rooms=[]; for (let i=0;i<6;i++){ const w=3+Math.floor(rnd()*5), hh=3+Math.floor(rnd()*4); const x=Math.floor(rnd()*(MAP_W-w-1)), y=Math.floor(rnd()*(MAP_H-hh-1)); rooms.push([x,y,x+w,y+hh]); room(g,x,y,x+w,y+hh); } for (let i=1;i<rooms.length;i++){ const [ax,ay]=[Math.floor((rooms[i-1][0]+rooms[i-1][2])/2), Math.floor((rooms[i-1][1]+rooms[i-1][3])/2)]; const [bx,by]=[Math.floor((rooms[i][0]+rooms[i][2])/2), Math.floor((rooms[i][1]+rooms[i][3])/2)]; for (let x=Math.min(ax,bx); x<=Math.max(ax,bx); x++) if (g[ay][x]!=='F') g[ay][x]= g[ay][x]==='#' && (inb(x,ay-1)&&g[ay-1][x]==='F'||inb(x,ay+1)&&g[ay+1][x]==='F') ? 'D' : 'F'; for (let y=Math.min(ay,by); y<=Math.max(ay,by); y++) if (g[y][bx]!=='F') g[y][bx]='F'; } sprinkle(g,rnd,'P',3,'F'); sprinkle(g,rnd,'r',4,'F'); sprinkle(g,rnd,'A',1,'F'); },
+  mountain(g, rnd){ const n=noiseGrid(rnd,5); for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = n[y][x]>0.7? 'R' : (n[y][x]>0.58? 'r' : (n[y][x]<0.25? 'C' : '.')); walk(g,rnd,0,Math.floor(rnd()*MAP_H),40,'.',1,0.35,[1,0]); sprinkle(g,rnd,'s',6,'.'); sprinkle(g,rnd,'T',3,'.'); },
+  sea(g, rnd){ for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = x < 8+Math.floor(Math.sin(y/3)*2) ? 'W' : (x < 10+Math.floor(Math.sin(y/3)*2) ? 'w' : (x < 13 ? 'S' : '.')); sprinkle(g,rnd,'R',4,'S.'); sprinkle(g,rnd,'T',3,'.'); rect(g, 6, 8, 9, 9, 'B'); },
+  ship(g, rnd){ for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x]='W'; for (let y=1;y<MAP_H-1;y++){ const half = Math.round(5 + 4*Math.sin(Math.PI*y/(MAP_H-1))); rect(g, 10-half, y, 9+half, y, 'B'); } for (let y=2;y<MAP_H-2;y++){ if (g[y][9]==='B') g[y][9]='F'; if (g[y][10]==='B') g[y][10]='F'; } g[5][9]='P'; g[13][10]='P'; rect(g,7,8,12,10,'#'); rect(g,8,9,11,9,'F'); g[9][7]='D'; sprinkle(g,rnd,'r',5,'B'); },
+  valley(g, rnd){ for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = (x<3||x>16) ? 'R' : ((x<5||x>14) ? 'r' : '.'); walk(g,rnd,8,0,40,'w',1,0.3,[0,1]); sprinkle(g,rnd,'T',6,'.'); sprinkle(g,rnd,',',10,'.'); },
+  cliff(g, rnd){ const edge = 8+Math.floor(rnd()*4); for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++){ const e = edge + Math.round(Math.sin(y/2.5)*1.5); g[y][x] = x>e+1 ? '~' : (x===e||x===e+1 ? 'C' : '.'); } sprinkle(g,rnd,'R',5,'.'); sprinkle(g,rnd,',',8,'.'); const by=4+Math.floor(rnd()*10); for (let x=0;x<MAP_W;x++) if ('C~'.includes(g[by][x])) g[by][x]='B'; },
+  swamp(g, rnd){ const n=noiseGrid(rnd,4); for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = n[y][x]>0.66? 'W' : (n[y][x]>0.52? 'M' : (n[y][x]>0.42? ',' : '.')); sprinkle(g,rnd,'T',8,'.,M'); sprinkle(g,rnd,'B',4,'WM'); },
+  desert(g, rnd){ const n=noiseGrid(rnd,6); for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = n[y][x]>0.7? 'R' : 'S'; sprinkle(g,rnd,'r',6,'S'); sprinkle(g,rnd,'w',3,'S'); sprinkle(g,rnd,'P',2,'S'); },
+  ruins(g, rnd){ GEN.field(g,rnd); for (let i=0;i<5;i++){ const w=3+Math.floor(rnd()*4), hh=3+Math.floor(rnd()*3); const x=Math.floor(rnd()*(MAP_W-w-1)), y=Math.floor(rnd()*(MAP_H-hh-1)); room(g,x,y,x+w,y+hh); for (let yy=y;yy<=y+hh;yy++) for (let xx=x;xx<=x+w;xx++) if (g[yy][xx]==='#' && rnd()<0.45) g[yy][xx]= rnd()<0.5?'r':'F'; } sprinkle(g,rnd,'P',5,'.F'); sprinkle(g,rnd,'A',1,'F'); },
+  snow(g, rnd){ const n=noiseGrid(rnd,5); for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = n[y][x]>0.6? 's' : '.'; sprinkle(g,rnd,'T',7,'.s'); sprinkle(g,rnd,'R',4,'.s'); sprinkle(g,rnd,'W',3,'s'); },
+  camp(g, rnd){ GEN.field(g,rnd); g[10][10]='X'; for (let i=0;i<4;i++){ const a=i*Math.PI/2+rnd(); const x=10+Math.round(Math.cos(a)*4), y=10+Math.round(Math.sin(a)*4); rect(g,x,y,x+1,y,'H'); } sprinkle(g,rnd,'T',8,'.,'); walk(g,rnd,0,16,40,'=',1,0.15,[1,0]); },
+  temple(g, rnd){ for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x]='.'; room(g,4,2,15,17); for (let y=4;y<16;y+=3){ g[y][6]='P'; g[y][13]='P'; } g[17][9]='D'; g[17][10]='D'; rect(g,8,4,11,5,'A'); sprinkle(g,rnd,'T',6,'.'); walk(g,rnd,9,18,2,'=',2,0,[0,1]); },
+  mine(g, rnd){ for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x]='R'; walk(g,rnd,0,10,40,'.',2,0.25,[1,0]); walk(g,rnd,10,0,40,'.',1,0.3,[0,1]); for (let i=0;i<4;i++){ const x=2+Math.floor(rnd()*15), y=2+Math.floor(rnd()*15); rect(g,x,y,x+2,y+2,'.'); } sprinkle(g,rnd,'r',10,'.'); sprinkle(g,rnd,'P',4,'.'); sprinkle(g,rnd,'B',3,'.'); },
+  farm(g, rnd){ for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = (y%4===0) ? '.' : ','; walk(g,rnd,0,9,40,'=',1,0.1,[1,0]); house(g,rnd,2,2,3,2); house(g,rnd,15,14,3,3); sprinkle(g,rnd,'T',4,'.'); sprinkle(g,rnd,'w',3,','); },
+  bridge(g, rnd){ for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = (x>=7 && x<=12) ? '~' : '.'; rect(g,7,8,12,10,'B'); g[6][8]='C'; g[6][11]='C'; g[13][8]='C'; g[13][11]='C'; sprinkle(g,rnd,'R',5,'.'); sprinkle(g,rnd,'T',4,'.'); },
+  graveyard(g, rnd){ GEN.field(g,rnd); for (let y=3;y<17;y+=3) for (let x=3;x<17;x+=3) if (rnd()<0.8) g[y][x]='G'; room(g,8,1,11,4); g[4][9]='D'; sprinkle(g,rnd,'T',5,'.,'); sprinkle(g,rnd,'M',4,'.'); },
+  volcano(g, rnd){ const n=noiseGrid(rnd,4); for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) g[y][x] = n[y][x]>0.68? 'L' : (n[y][x]>0.55? 'r' : (n[y][x]<0.2? 'R' : '.')); sprinkle(g,rnd,'B',3,'L'); },
+  island(g, rnd){ const n=noiseGrid(rnd,5); for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++){ const dx=(x-9.5)/9.5, dy=(y-9.5)/9.5; const r=Math.sqrt(dx*dx+dy*dy); const v = n[y][x]*0.5 + (1-r); g[y][x] = v>0.95? '.' : (v>0.8? 'S' : (v>0.68? 'w' : 'W')); } sprinkle(g,rnd,'T',6,'.'); sprinkle(g,rnd,'R',3,'.S'); },
+};
+function generateMap(kind, seed){
+  if (!GEN[kind]) kind = 'field';
+  const rnd = mulberry32(seedFrom(kind + ':' + seed));
+  const g = blank('.');
+  GEN[kind](g, rnd);
+  return { kind, seed: String(seed), w: MAP_W, h: MAP_H, cells: g.map(r=>r.join('')).join('') };
+}
+function mapCell(map, x, y){ if (!map || !inb(x,y)) return 'R'; return map.cells[y*MAP_W + x] || '.'; }
+function setMapCell(map, x, y, ch){ if (!inb(x,y)) return; const a = map.cells.split(''); a[y*MAP_W+x] = ch; map.cells = a.join(''); }
+function cellPassable(map, x, y){ const t = TILE[mapCell(map,x,y)]; return !!(t && t.pass); }
+function cellDist(a, b){ return Math.max(Math.abs(a.x-b.x), Math.abs(a.y-b.y)); } // Chebyshev: ทแยง = 1 ช่อง
+function rangeBand(cells){ const m = cells*CELL_M; if (cells <= 1) return {id:'eng', label:'เขตปะทะ', m}; if (m <= 25) return {id:'near', label:'เขตใกล้เคียง', m}; return {id:'far', label:'เขตไกล', m}; }
+function freeCell(map, tokens, preferRows, rnd=Math.random){
+  for (let guard=0; guard<400; guard++){ const y = preferRows[Math.floor(rnd()*preferRows.length)]; const x = Math.floor(rnd()*MAP_W); if (cellPassable(map,x,y) && !tokens.some(t=>t.x===x&&t.y===y)) return {x,y}; }
+  for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) if (cellPassable(map,x,y) && !tokens.some(t=>t.x===x&&t.y===y)) return {x,y};
+  return {x:0,y:0};
+}
+/* ย่อภาพตัวละครเป็นรูปหมาก 56px (เก็บในเอกสารห้องได้โดยไม่หนัก) */
+function makeThumb(dataUrl){
+  return new Promise(res => { if (!dataUrl) return res(null); const img = new Image(); img.onload = ()=>{ const cv = document.createElement('canvas'); cv.width = cv.height = 56; const ctx = cv.getContext('2d'); const s = Math.min(img.width, img.height); ctx.drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, 56, 56); res(cv.toDataURL('image/jpeg', 0.7)); }; img.onerror = ()=>res(null); img.src = dataUrl; });
+}
+
+/* ===== Online table: rooms, 20×20 grid combat map, encounter order, shared chat & dice, fate clocks ===== */
+function newRoom(name){ const id = uid(); return {id, name, gmId: Store.me||'local', gmName: Store.displayName||'', gmKey: uid().slice(0,6).toUpperCase(), createdAt:Date.now(), updatedAt:Date.now(), map: generateMap('field', id), tokens:[], enc:{active:false, round:0, turnIdx:0, order:[]}, clocks:[], scene:''}; }
+/* ห้องรุ่นเก่าที่ใช้โซน: สร้างแผนที่ให้ และวางหมากเดิมลงกริด (GM บันทึกครั้งถัดไปจึงติดถาวร) */
+function migrateRoom(r){ if (!r) return r; if (!r.map){ r.map = generateMap('field', r.id); } if (!r.tokens) r.tokens = []; for (const t of r.tokens){ if (t.x==null || t.y==null){ const pos = freeCell(r.map, r.tokens, t.kind==='npc' ? [0,1,2,3] : [16,17,18,19]); t.x = pos.x; t.y = pos.y; } } delete r.zones; return r; }
 function gmKeys(){ try { return JSON.parse(localStorage.getItem('kirana.gmkeys')||'{}'); } catch(e){ return {}; } }
 function rememberGmKey(roomId, key){ const k = gmKeys(); k[roomId] = key; try { localStorage.setItem('kirana.gmkeys', JSON.stringify(k)); } catch(e){} }
 
 const Table = {
   roomId:null, room:null, chat:[], unsub:[], peers:[], localMode:false, writing:false, pending:null, presence:null,
   rollLock:null, rolling:false, seenRolls:new Set(), chatReady:false,
+  roomChars:[], sel:null, brush:null, hover:null,
   isGM(){ if (!this.room) return false; if (this.localMode || this.room.gmId===Store.me || Store.isOwner) return true; const k = gmKeys()[this.room.id]; return !!(k && this.room.gmKey && k===this.room.gmKey); },
   async open(id){
     this.close(); this.roomId = id; this.localMode = !Store.db;
-    if (this.localMode){ const rooms = loadLocalRooms(); this.room = rooms.find(r=>r.id===id)||null; this.chat = loadLocalChat(id); renderTable(); return; }
+    if (this.localMode){ const rooms = loadLocalRooms(); this.room = migrateRoom(rooms.find(r=>r.id===id)||null); this.chat = loadLocalChat(id); renderTable(); return; }
     try {
-      const u1 = Store.db.doc('rooms/'+id).onSnapshot(snap => { const d = docData(snap); if (d){ this.room = d; renderTable(); } }, err=>{ console.warn(err); toast('อ่านห้องไม่ได้'); });
+      const u1 = Store.db.doc('rooms/'+id).onSnapshot(snap => { const d = docData(snap); if (d){ this.room = migrateRoom(d); renderTable(); } }, err=>{ console.warn(err); toast('อ่านห้องไม่ได้'); });
+      const u4 = Store.db.collection('rooms/'+id+'/chars').onSnapshot(snap => { this.roomChars = snapDocs(snap).filter(Boolean); if (location.hash.startsWith('#sheet-')) { const sid = location.hash.slice(7); if (!Store.chars.some(c=>c.id===sid) && this.roomChars.some(c=>c.id===sid)) renderSheet(sid); } }, err=>console.warn('roomchars', err));
+      this.unsub.push(u4);
       let q = Store.db.collection('rooms/'+id+'/chat');
       try { q = q.orderBy('ts','desc').limit(120); } catch(e){}
       const u2 = q.onSnapshot(snap => { const docs = snapDocs(snap).filter(Boolean); docs.sort((a,b)=>(b.ts||0)-(a.ts||0)); this.chat = docs.slice(0,120); renderChatOnly(); this.detectNewRolls(); }, err=>console.warn('chat', err));
       const u3 = Store.db.doc('rooms/'+id+'/meta/roll').onSnapshot(snap => { this.rollLock = docData(snap); updateRollLockUI(); }, err=>console.warn('rolllock', err));
       this.unsub.push(u1,u2,u3);
     } catch(e){ console.warn(e); toast('เชื่อมต่อห้องไม่ได้'); }
-    if (Store.room){ try { const r = await Store.room.join('kirana-'+id); this.presence = r; const me = Store.me||'guest'; r.presence({who: me, at: Date.now()}); r.onPeers(p=>{ this.peers = Array.isArray(p)? p : Object.values(p||{}); renderPeers(); }); } catch(e){ console.warn('room', e); } }
+    if (Store.room){ try { const r = await Store.room.join('kirana-'+id); this.presence = r; const me = Store.me||'guest'; r.presence({who: me, name: Store.displayName||'', at: Date.now()}); r.onPeers(p=>{ this.peers = Array.isArray(p)? p : Object.values(p||{}); renderPeers(); }); } catch(e){ console.warn('room', e); } }
     renderTable();
   },
-  close(){ for (const u of this.unsub) try{ typeof u==='function' && u(); }catch(e){} this.unsub=[]; if (this.presence){ try{ this.presence.leave(); }catch(e){} this.presence=null; } this.roomId=null; this.room=null; this.chat=[]; this.peers=[]; this.rollLock=null; this.rolling=false; this.seenRolls=new Set(); this.chatReady=false; DiceShow.clear(); updateRollLockUI(); },
+  close(){ for (const u of this.unsub) try{ typeof u==='function' && u(); }catch(e){} this.unsub=[]; if (this.presence){ try{ this.presence.leave(); }catch(e){} this.presence=null; } this.roomId=null; this.room=null; this.chat=[]; this.peers=[]; this.roomChars=[]; this.sel=null; this.brush=null; this.rollLock=null; this.rolling=false; this.seenRolls=new Set(); this.chatReady=false; DiceShow.clear(); updateRollLockUI(); },
   /* ---- ด่านล็อกการทอย: ทอยได้ทีละคน ระหว่างเต๋าเด้งอยู่บนจอทุกคน คนอื่นกดทอยไม่ได้ ---- */
   lockActive(lk){ lk = lk===undefined ? this.rollLock : lk; return !!(lk && lk.at && (Date.now() - lk.at) < ROLL_LOCK_TTL); },
   lockedByOther(){ return this.lockActive() && this.rollLock.by !== (Store.me||'local'); },
@@ -1963,16 +2160,16 @@ function saveLocalChat(id, c){ try{ localStorage.setItem('kirana.chat.'+id, JSON
 let roomsCache = []; let roomsUnsub = null;
 function renderTableHome(){
   const root = clear($('#v-table'));
-  root.append(h('div',{class:'stephead'}, h('div',null, h('h2',{text:'โต๊ะเล่น'}), h('p',{text:'ห้องหนึ่งคือหนึ่งโต๊ะ GM สร้างห้องแล้วส่งลิงก์ ผู้เล่นวางตัวละครลงบอร์ดโซน ทอยเต๋าร่วมกันในแชต'}))));
+  root.append(h('div',{class:'stephead'}, h('div',null, h('h2',{text:'โต๊ะเล่น'}), h('p',{text:'ห้องหนึ่งคือหนึ่งโต๊ะ GM สร้างห้องแล้วส่งลิงก์ ผู้เล่นวางตัวละครลงแผนที่ 20×20 ทอยเต๋าร่วมกันในแชต'}))));
   if (!Store.db){
-    root.append(h('div',{class:'warnbox',style:'margin-bottom:12px'}, 'ตอนนี้ไม่มีการเชื่อมต่อฐานข้อมูล (เปิดไฟล์ออฟไลน์ หรือเชื่อม Firebase ไม่สำเร็จ) ห้องที่สร้างจะอยู่ในเครื่องนี้เท่านั้น ใช้ทดลองวางโซนและทอยเต๋าได้ แต่คนอื่นจะไม่เห็น'));
+    root.append(h('div',{class:'warnbox',style:'margin-bottom:12px'}, 'ตอนนี้ไม่มีการเชื่อมต่อฐานข้อมูล (เปิดไฟล์ออฟไลน์ หรือเชื่อม Firebase ไม่สำเร็จ) ห้องที่สร้างจะอยู่ในเครื่องนี้เท่านั้น ใช้ทดลองแผนที่และทอยเต๋าได้ แต่คนอื่นจะไม่เห็น'));
   } else if (Store.canWrite===false){
     root.append(h('div',{class:'warnbox',style:'margin-bottom:12px'}, 'คุณเปิดเพจแบบดูอย่างเดียว: อ่านห้องได้แต่ย้ายตัวละครหรือส่งข้อความไม่ได้ ขอให้เจ้าของเพจแชร์ให้คุณเป็น Contributor'));
   }
   const nameInp = h('input',{placeholder:'ชื่อห้อง เช่น คืนวันสถาปนา',style:'min-width:240px'});
   root.append(h('div',{class:'card',style:'margin-bottom:14px'}, h('div',{class:'row'}, nameInp, h('button',{class:'primary',onclick:async()=>{ const nm = nameInp.value.trim()||'โต๊ะใหม่'; const r = newRoom(nm); rememberGmKey(r.id, r.gmKey); if (!Store.db){ const rooms=loadLocalRooms(); rooms.push(r); saveLocalRooms(rooms); } else { try{ await Store.db.doc('rooms/'+r.id).set(r); }catch(e){ toast('สร้างห้องไม่ได้ (สิทธิ์ไม่พอ?)'); return; } } location.hash='#room-'+r.id; },text:'สร้างห้อง (คุณเป็น GM)'}))));
   const list = h('div',{class:'grid two'});
-  const draw = (rooms)=>{ clear(list); if(!rooms.length) list.append(h('div',{class:'card dim',text:'ยังไม่มีห้อง'})); for (const r of rooms.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))) list.append(h('div',{class:'card pick',onclick:()=>{location.hash='#room-'+r.id;}}, h('h3',{text:r.name||'(ไม่มีชื่อ)'}), h('div',{class:'gives'}, tag(`${(r.tokens||[]).length} ตัวละครบนบอร์ด`), r.enc&&r.enc.active? tag(`กำลังสู้ รอบ ${r.enc.round}`,'neg') : null, (r.gmId===Store.me||!Store.db||(r.gmKey&&gmKeys()[r.id]===r.gmKey))? tag('คุณเป็น GM','prop'):null), h('div',{class:'desc',text: r.scene? r.scene.slice(0,120) : ''}))); };
+  const draw = (rooms)=>{ clear(list); if(!rooms.length) list.append(h('div',{class:'card dim',text:'ยังไม่มีห้อง'})); for (const r of rooms.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))) list.append(h('div',{class:'card pick',onclick:()=>{location.hash='#room-'+r.id;}}, h('h3',{text:r.name||'(ไม่มีชื่อ)'}), h('div',{class:'gives'}, tag(`${(r.tokens||[]).length} ตัวละครบนบอร์ด`), r.enc&&r.enc.active? tag(`กำลังสู้ รอบ ${r.enc.round}`,'neg') : null, (r.gmId===Store.me||!Store.db||(r.gmKey&&gmKeys()[r.id]===r.gmKey))? tag('คุณเป็น GM','prop'):null), h('div',{class:'desc',text: (r.gmName? 'GM: '+r.gmName+' · ' : '') + (r.scene? r.scene.slice(0,100) : '')}))); };
   root.append(list);
   if (!Store.db) draw(loadLocalRooms());
   else { draw(roomsCache); if (!roomsUnsub){ try{ roomsUnsub = Store.db.collection('rooms').onSnapshot(snap=>{ roomsCache = snapDocs(snap).filter(Boolean); if (location.hash==='#table') renderTableHome(); }, e=>console.warn(e)); }catch(e){ console.warn(e);} } }
@@ -1984,7 +2181,9 @@ function renderTable(){
   const r = Table.room;
   if (!r){ root.append(h('div',{class:'card',text: Table.localMode ? 'ไม่พบห้องนี้ในเครื่อง (ถ้าเป็นห้องออนไลน์ รอการเชื่อมต่อสักครู่)' : 'กำลังเปิดห้อง… (ถ้าค้างนาน แปลว่าไม่พบห้องนี้)'}), h('button',{style:'margin-top:10px',onclick:()=>{location.hash='#table';},text:'← กลับรายการห้อง'})); return; }
   const gm = Table.isGM();
-  const myChars = Store.chars.filter(c=>c.done && (!Store.me || !c.ownerId || c.ownerId===Store.me));
+  const myChars = Store.chars.filter(c=>c.done && Store.isMine(c));
+  // หมากของฉันที่ยังไม่มีสำเนาชีทในห้อง (วางไว้ตั้งแต่รุ่นก่อน) → แชร์ให้ GM เห็นได้
+  if (!Table.localMode) for (const t of r.tokens||[]) if (t.charId && t.ownerId===Store.me && !Table.roomChars.some(x=>x.id===t.charId)){ const c = Store.chars.find(x=>x.id===t.charId); if (c && !(c.roomIds||[]).includes(r.id)) Store.shareToRoom(c, r.id); }
   // header
   const gmKeyBtn = gm && r.gmKey ? h('button',{class:'small ghost',title:'รหัสสำหรับเข้าเป็น GM จากเครื่องอื่น',onclick:()=>{ modal(h('div',null, h('h3',{text:'รหัส GM ของห้องนี้'}), h('p',{class:'desc',text:'ใช้เมื่อคุณเปิดห้องจากเครื่องหรือเบราว์เซอร์อื่น: กด "เข้าเป็น GM" แล้วกรอกรหัสนี้ อย่าให้ผู้เล่นเห็น'}), h('div',{style:'font-family:var(--font-display);font-size:28px;letter-spacing:4px',text:r.gmKey}))); },text:'รหัส GM'}) : null;
   const becomeGm = !gm && r.gmKey ? h('button',{class:'small ghost',onclick:()=>{ const k=(prompt('กรอกรหัส GM ของห้องนี้')||'').trim().toUpperCase(); if(!k) return; if (k===r.gmKey){ rememberGmKey(r.id,k); toast('คุณเป็น GM ของห้องนี้แล้ว'); renderTable(); } else toast('รหัสไม่ถูกต้อง'); },text:'เข้าเป็น GM'}) : null;
@@ -1998,22 +2197,13 @@ function renderTable(){
   else if (r.scene) left.append(h('div',{class:'card',style:'margin-bottom:12px'}, h('div',{class:'kicker',text:'ฉาก'}), h('p',{style:'margin:4px 0 0',text:r.scene})));
   // add token controls
   const addRow = h('div',{class:'row',style:'margin-bottom:10px'});
-  if (myChars.length){ const sel = h('select',null, myChars.map(c=>h('option',{value:c.id,text:c.name}))); addRow.append(sel, h('button',{class:'small primary',onclick:()=>{ const c=Store.get(sel.value); if(!c) return; if (r.tokens.some(t=>t.charId===c.id)){ toast('ตัวละครนี้อยู่บนบอร์ดแล้ว'); return; } const d=compute(c); r.tokens.push({id:uid(), name:c.name, kind:'pc', charId:c.id, ownerId:Store.me||'local', zoneId:'near', hp:(c.current&&c.current.hp)??d.hp, hpMax:d.hp, san:(c.current&&c.current.sanity)??d.sanity, sanMax:d.sanity, init:d.initiative, hidden:false, note:''}); Table.save(); Table.post({kind:'sys', who:'', text:`${c.name} เข้าร่วมฉาก`}); },text:'วางตัวละครลงบอร์ด'})); }
+  if (myChars.length){ const sel = h('select',null, myChars.map(c=>h('option',{value:c.id,text:c.name}))); addRow.append(sel, h('button',{class:'small primary',onclick:()=>placeCharacter(Store.get(sel.value), r),text:'วางตัวละครลงบอร์ด'})); }
   else addRow.append(h('span',{class:'dim',style:'font-size:13px',text:'ยังไม่มีตัวละครที่พร้อมเล่น สร้างในหน้า "สร้างตัวละคร" ก่อน'}));
-  if (gm){ const nm=h('input',{placeholder:'ชื่อ NPC/ศัตรู',style:'width:150px'}); const hp=h('input',{type:'number',placeholder:'HP',style:'width:70px',value:10}); const ini=h('input',{type:'number',placeholder:'Init',style:'width:70px',value:0}); addRow.append(nm,hp,ini, h('button',{class:'small',onclick:()=>{ const n=nm.value.trim()||'ศัตรู'; r.tokens.push({id:uid(), name:n, kind:'npc', zoneId:'engA', hp:+hp.value||10, hpMax:+hp.value||10, san:0, sanMax:0, init:+ini.value||0, hidden:true, note:''}); Table.save(); },text:'+ NPC (ซ่อนไว้ก่อน)'}), h('button',{class:'small ghost',onclick:()=>{ const nmz = prompt('ชื่อเขตปะทะใหม่', 'เขตปะทะ '+String.fromCharCode(65+r.zones.filter(z=>z.kind==='eng').length)); if(!nmz) return; r.zones.splice(r.zones.filter(z=>z.kind==='eng').length,0,{id:uid(),name:nmz,kind:'eng'}); Table.save(); },text:'+ เขตปะทะ'})); }
+  if (gm){ const nm=h('input',{placeholder:'ชื่อ NPC/ศัตรู',style:'width:150px'}); const hp=h('input',{type:'number',placeholder:'HP',style:'width:70px',value:10}); const ini=h('input',{type:'number',placeholder:'Init',style:'width:70px',value:0}); addRow.append(nm,hp,ini, h('button',{class:'small',onclick:()=>{ const n=nm.value.trim()||'ศัตรู'; const pos = freeCell(r.map, r.tokens, [0,1,2,3]); r.tokens.push({id:uid(), name:n, kind:'npc', x:pos.x, y:pos.y, hp:+hp.value||10, hpMax:+hp.value||10, san:0, sanMax:0, init:+ini.value||0, hidden:true, note:''}); Table.save(); },text:'+ NPC (ซ่อนไว้ก่อน)'})); }
   left.append(addRow);
-  // zones
-  const zones = h('div',{class:'zones'});
-  const cur = r.enc.active ? r.enc.order[r.enc.turnIdx] : null;
-  for (const z of r.zones){
-    const zel = h('div',{class:'zone '+z.kind}, h('h4',null, z.name, h('span',{class:'range',text:ZONE_KINDS[z.kind].range})));
-    const toks = r.tokens.filter(t=>t.zoneId===z.id && (gm || !t.hidden || t.ownerId===Store.me));
-    for (const t of toks) zel.append(tokenEl(t, r, gm, cur===t.id));
-    if (gm && z.kind==='eng' && r.zones.filter(x=>x.kind==='eng').length>1 && !toks.length) zel.append(h('button',{class:'small ghost',style:'margin-top:6px',onclick:()=>{ r.zones=r.zones.filter(x=>x.id!==z.id); Table.save(); },text:'ลบเขตนี้'}));
-    zones.append(zel);
-  }
-  left.append(zones);
-  left.append(h('p',{class:'dim',style:'font-size:12px;margin-top:8px',text:'Maneuver: ใกล้เคียง→ปะทะ 1 Swift · ปะทะ→ใกล้เคียง 1 Swift (โดนโจมตีฉวยโอกาส) · ใกล้เคียง→ไกล Swift + 1 AP · Melee โจมตีได้เฉพาะเขตปะทะเดียวกัน · Range ยิงได้ทุกเขต (ไกล/มีที่กำบัง = Disadvantage)'}));
+  // ---- แผนที่ต่อสู้ 20×20 ----
+  left.append(mapPanel(r, gm));
+  left.append(h('p',{class:'dim',style:'font-size:12px;margin-top:8px',text:`1 ช่อง = ${CELL_M} เมตร · ติดกัน (รวมทแยง) = เขตปะทะ · ไม่เกิน 25 ม. = เขตใกล้เคียง · ไกลกว่านั้น = เขตไกล · Maneuver: ใกล้เคียง→ปะทะ 1 Swift · ปะทะ→ใกล้เคียง 1 Swift (โดนโจมตีฉวยโอกาส) · ใกล้เคียง→ไกล Swift + 1 AP · ช่องช้า (น้ำตื้น หิมะ โคลน เศษหิน) นับ 2 ช่อง`}));
   // encounter panel
   const enc = h('div',{class:'card',style:'margin-bottom:12px'});
   enc.append(h('h3',null, 'ลำดับเทิร์น ', r.enc.active? tag(`รอบ ${r.enc.round}`,'neg') : tag('ยังไม่เริ่ม')));
@@ -2035,14 +2225,14 @@ function renderTable(){
   right.append(ck);
   // chat + dice
   const chatBox = h('div',{class:'card chat'}, h('h3',{text:'แชตและการทอยของโต๊ะ'}), h('div',{class:'log',id:'chatlog'}));
-  const who = h('select',{id:'chat-who'}, h('option',{value:'',text: gm?'GM':'ผู้เล่น'}), myChars.map(c=>h('option',{value:c.id,text:c.name})));
+  const who = h('select',{id:'chat-who'}, h('option',{value:'',text: gm?'GM'+(Store.displayName?' ('+Store.displayName+')':'') : (Store.displayName||'ผู้เล่น')}), myChars.map(c=>h('option',{value:c.id,text:c.name})));
   const inp = h('input',{placeholder:'พิมพ์ข้อความ หรือ /r 2d6+2 · /adv · /dis · /gm (ลับ)',style:'flex:1;min-width:160px'});
-  const send = ()=>{ const txt = inp.value.trim(); if(!txt) return; inp.value=''; const c = Store.get(who.value); const name = c? c.name : (gm?'GM':'ผู้เล่น'); handleChatInput(txt, name, c, gm); };
+  const send = ()=>{ const txt = inp.value.trim(); if(!txt) return; inp.value=''; const c = Store.get(who.value); const name = c? c.name : (gm?'GM':(Store.displayName||'ผู้เล่น')); handleChatInput(txt, name, c, gm); };
   inp.onkeydown = (e)=>{ if (e.key==='Enter' && !e.isComposing){ e.preventDefault(); send(); } };
   chatBox.append(h('div',{class:'row'}, who, inp, h('button',{class:'primary small',onclick:send,text:'ส่ง'})));
   const quick = h('div',{class:'row'});
   const selChar = ()=>Store.get(who.value);
-  const whoName = ()=>{ const c=selChar(); return c? c.name : (gm?'GM':'ผู้เล่น'); };
+  const whoName = ()=>{ const c=selChar(); return c? c.name : (gm?'GM':(Store.displayName||'ผู้เล่น')); };
   const qroll = (label, kind)=>{ const c=selChar(); Table.guardedRoll(whoName(), ()=>Table.postRoll(doRoll({label, kind, c}), c), label); };
   quick.append(h('button',{class:'small rollbtn',onclick:()=>qroll('2d6','check'),text:'2d6'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Attack Roll','attack'),text:'Attack (CV)'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Luck Saving Throw','luck'),text:'Luck'}),
     ...(gm? [h('button',{class:'small ghost rollbtn',onclick:()=>{ Table.guardedRoll('GM', ()=>{ const e=doRoll({label:'ทอยลับของ GM'}); Table.post({kind:'roll',who:'GM',text:e.label,roll:{dice:e.r.dice,kept:e.r.kept,keptIdx:e.r.keptIdx,sum:e.r.sum,crit:e.r.crit,double:e.r.double,mode:e.mode},mod:0,pm:0,total:e.total,judge:e.judge,gmOnly:true}); }, 'ทอยลับ'); },text:'ทอยลับ (GM)'})] : []));
@@ -2058,22 +2248,79 @@ function renderTable(){
   root.append(h('div',{class:'table-wrap'}, left, right));
   renderChatOnly(); renderPeers();
 }
-function tokenEl(t, r, gm, isTurn){
+/* วางตัวละครของฉันลงบอร์ด: สร้างหมาก + แชร์สำเนาชีทเข้าห้อง (ผู้เล่นคนอื่นและ GM จึงเห็นชีทได้เฉพาะในแคมเปญนี้) */
+async function placeCharacter(c, r){
+  if (!c) return;
+  if (r.tokens.some(t=>t.charId===c.id)){ toast('ตัวละครนี้อยู่บนบอร์ดแล้ว'); return; }
+  const d = compute(c); const thumb = await makeThumb(c.portrait);
+  const pos = freeCell(r.map, r.tokens, [16,17,18,19]);
+  r.tokens.push({id:uid(), name:c.name, kind:'pc', charId:c.id, ownerId:Store.me||'local', ownerName: Store.displayName||'', x:pos.x, y:pos.y, hp:(c.current&&c.current.hp)??d.hp, hpMax:d.hp, san:(c.current&&c.current.sanity)??d.sanity, sanMax:d.sanity, init:d.initiative, hidden:false, note:'', thumb: thumb||null});
+  Table.save(); Table.post({kind:'sys', who:'', text:`${c.name} เข้าร่วมฉาก`});
+  Store.shareToRoom(c, r.id);
+}
+function mapPanel(r, gm){
+  const wrap = h('div',{class:'mapwrap'});
+  const map = r.map;
+  // แถบควบคุมแผนที่ (GM)
+  if (gm){
+    const kindSel = h('select',null, MAP_KINDS.map(([k,l])=>h('option',{value:k,selected:k===map.kind,text:l})));
+    const ctl = h('div',{class:'row mapctl'}, h('span',{class:'dim',style:'font-size:12px',text:'สถานที่'}), kindSel,
+      h('button',{class:'small primary',onclick:()=>{ r.map = generateMap(kindSel.value, uid()); Table.sel=null; Table.save(); Table.post({kind:'sys',who:'GM',text:`เปลี่ยนฉากต่อสู้เป็น ${MAP_KINDS.find(x=>x[0]===kindSel.value)[1]}`}); for (const t of r.tokens){ const pos = freeCell(r.map, r.tokens.filter(x=>x!==t), t.kind==='npc'?[0,1,2,3]:[16,17,18,19]); t.x=pos.x; t.y=pos.y; } Table.save(); },text:'สุ่มแผนที่ใหม่'}),
+      h('button',{class:'small',onclick:()=>{ r.map = generateMap(map.kind, uid()); for (const t of r.tokens){ const pos = freeCell(r.map, r.tokens.filter(x=>x!==t), t.kind==='npc'?[0,1,2,3]:[16,17,18,19]); t.x=pos.x; t.y=pos.y; } Table.save(); },text:'สุ่มใหม่ (สถานที่เดิม)'}));
+    const brushSel = h('select',{title:'พู่กัน: เลือกชนิดพื้นแล้วคลิกช่องเพื่อแก้แผนที่'}, h('option',{value:'',text:'พู่กัน: ปิด'}), Object.entries(TILE).map(([k,v])=>h('option',{value:k,selected:Table.brush===k,text:`${v.th}`})));
+    brushSel.onchange = ()=>{ Table.brush = brushSel.value||null; Table.sel=null; renderTable(); };
+    ctl.append(brushSel, h('button',{class:'small ghost',onclick:()=>{ if(!confirm('เอาหมากทุกตัวออกจากบอร์ด?')) return; r.tokens=[]; r.enc={active:false,round:0,turnIdx:0,order:[]}; Table.save(); },text:'ล้างหมาก'}));
+    wrap.append(ctl);
+  } else wrap.append(h('div',{class:'row mapctl'}, h('span',{class:'dim',style:'font-size:12px'}, 'สถานที่: ', h('b',{text:(MAP_KINDS.find(x=>x[0]===map.kind)||['','?'])[1]}))));
+  const grid = h('div',{class:'gridmap'+(Table.brush?' painting':'')});
+  const selTok = Table.sel ? r.tokens.find(t=>t.id===Table.sel) : null;
+  const visible = (t)=> gm || !t.hidden || t.ownerId===Store.me;
+  const byPos = {}; for (const t of r.tokens) if (visible(t)) byPos[t.x+','+t.y] = t;
+  const cur = r.enc.active ? r.enc.order[r.enc.turnIdx] : null;
+  for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++){
+    const ch = mapCell(map,x,y); const tile = TILE[ch]||TILE['.'];
+    const cell = h('div',{class:'cell t-'+(ch.replace(/[^A-Za-z]/g, m=>({'.':'ground',',':'grass','=':'road','#':'wall','~':'chasm'}[m]||'ground'))),title:`(${x},${y}) ${tile.th}`,dataset:{x,y}});
+    if (selTok && !(selTok.x===x && selTok.y===y)){ const dist = cellDist(selTok,{x,y}); const band = rangeBand(dist); cell.classList.add('rng-'+band.id); if (tile.pass && !byPos[x+','+y] && (gm || selTok.ownerId===Store.me)) cell.classList.add('canmove'); }
+    cell.onclick = ()=>{
+      if (Table.brush && gm){ setMapCell(r.map, x, y, Table.brush); Table.save(); return; }
+      const t = byPos[x+','+y];
+      if (t){ if (Table.sel===t.id) Table.sel=null; else if (selTok && selTok.id!==t.id){ const dist = cellDist(selTok,t); const band = rangeBand(dist); toast(`${selTok.name} → ${t.name}: ${dist} ช่อง (~${band.m} ม.) ${band.label}`); Table.sel = (gm || t.ownerId===Store.me) ? t.id : Table.sel; } else Table.sel = t.id; renderTable(); return; }
+      if (selTok && (gm || selTok.ownerId===Store.me)){ if (!tile.pass){ toast('ผ่านช่องนี้ไม่ได้ ('+tile.th+')'); return; } const dist = cellDist(selTok,{x,y}); selTok.x=x; selTok.y=y; Table.save(); if (!selTok.hidden) Table.post({kind:'sys',who:'',text:`${selTok.name} เคลื่อนที่ ${dist} ช่อง ไป (${x},${y})${tile.pass===2?' ('+tile.th+')':''}`}); return; }
+      Table.sel = null; renderTable();
+    };
+    const t = byPos[x+','+y];
+    if (t){ const tk = h('div',{class:`gtok ${t.kind}${t.hidden?' hid':''}${cur===t.id?' turn':''}${Table.sel===t.id?' sel':''}${t.hp<=0?' down':''}`,title:`${t.name} HP ${t.hp}/${t.hpMax}`}); if (t.thumb) tk.append(h('img',{src:t.thumb,alt:t.name})); else tk.append(h('span',{class:'ini',text:(t.name||'?').slice(0,2)})); const pct = t.hpMax? Math.max(0,Math.min(100,t.hp/t.hpMax*100)) : 0; tk.append(h('i',{class:'hpbar',style:`--p:${pct}%`})); cell.append(tk); }
+    grid.append(cell);
+  }
+  wrap.append(grid);
+  // ตำนานพื้นที่ปรากฏ
+  const used = [...new Set(map.cells.split(''))].filter(k=>TILE[k]);
+  wrap.append(h('div',{class:'legend'}, used.map(k=>h('span',{class:'lg'}, h('i',{class:'sw t-'+(k.replace(/[^A-Za-z]/g, m=>({'.':'ground',',':'grass','=':'road','#':'wall','~':'chasm'}[m]||'ground')))}), TILE[k].th))));
+  // รายชื่อหมาก + แผงหมากที่เลือก
+  const list = h('div',{class:'toklist'});
+  for (const t of r.tokens.filter(visible)) list.append(tokenRow(t, r, gm, cur===t.id));
+  if (!r.tokens.filter(visible).length) list.append(h('div',{class:'dim',style:'font-size:13px',text:'ยังไม่มีหมากบนบอร์ด'}));
+  wrap.append(list);
+  return wrap;
+}
+function tokenRow(t, r, gm, isTurn){
   const mine = t.ownerId===Store.me || gm || Table.localMode;
-  const el = h('div',{class:`tok ${t.kind}${t.hidden?' hid':''}${isTurn?' turn':''}`}, h('div',{class:'av',text:(t.name||'?').slice(0,2)}), h('div',{class:'nm'}, h('div',{text:t.name + (t.hidden?' (ซ่อน)':'')}), h('div',{class:'mini'}, h('span',{class:'num',text:`HP ${t.hp}/${t.hpMax}`}), t.sanMax? h('span',{class:'num',text:`SAN ${t.san}/${t.sanMax}`}):null, h('span',{class:'num',text:`Init ${signed(t.init||0)}`}))));
+  const el = h('div',{class:`tok ${t.kind}${t.hidden?' hid':''}${isTurn?' turn':''}${Table.sel===t.id?' sel':''}`,onclick:(e)=>{ if (e.target.closest('button,select,input,a')) return; Table.sel = Table.sel===t.id? null : t.id; renderTable(); }},
+    t.thumb ? h('img',{class:'av',src:t.thumb,alt:''}) : h('div',{class:'av',text:(t.name||'?').slice(0,2)}),
+    h('div',{class:'nm'}, h('div',null, t.name + (t.hidden?' (ซ่อน)':''), t.ownerName? h('span',{class:'dim',style:'font-size:11px',text:' · '+t.ownerName}):null), h('div',{class:'mini'}, h('span',{class:'num',text:`HP ${t.hp}/${t.hpMax}`}), t.sanMax? h('span',{class:'num',text:`SAN ${t.san}/${t.sanMax}`}):null, h('span',{class:'num',text:`Init ${signed(t.init||0)}`}), h('span',{class:'num dim',text:`(${t.x},${t.y})`}))));
   if (mine){
     const ctl = h('div',{class:'ctl'});
-    const mv = h('select',{title:'ย้ายเขต',onchange:(e)=>{ const z=r.zones.find(x=>x.id===e.target.value); t.zoneId=e.target.value; Table.save(); if(!t.hidden) Table.post({kind:'sys',who:'',text:`${t.name} เคลื่อนที่ไป ${z?z.name:''}`}); }}, r.zones.map(z=>h('option',{value:z.id,selected:z.id===t.zoneId,text:z.name})));
-    ctl.append(mv);
     ctl.append(h('button',{class:'small',title:'HP -1',onclick:()=>{t.hp--; Table.save();},text:'−'}), h('button',{class:'small',title:'HP +1',onclick:()=>{t.hp=Math.min(t.hpMax,t.hp+1); Table.save();},text:'+'}));
-    if (gm){ ctl.append(h('button',{class:'small ghost',title:t.hidden?'เปิดเผย':'ซ่อน',onclick:()=>{t.hidden=!t.hidden; Table.save(); if(!t.hidden) Table.post({kind:'sys',who:'',text:`${t.name} ปรากฏตัวใน ${(r.zones.find(z=>z.id===t.zoneId)||{}).name||''}`});},text:t.hidden?'👁':'🙈'}), h('button',{class:'small ghost',title:'ลบ',onclick:()=>{ r.tokens=r.tokens.filter(x=>x.id!==t.id); r.enc.order=r.enc.order.filter(x=>x!==t.id); Table.save(); },text:'✕'})); }
+    if (t.charId && (gm || t.ownerId===Store.me || Store.isDevUid)) ctl.append(h('button',{class:'small ghost',title:'เปิดชีท',onclick:()=>{ location.hash='#sheet-'+t.charId; },text:'ชีท'}));
+    if (gm){ ctl.append(h('button',{class:'small ghost',title:t.hidden?'เปิดเผย':'ซ่อน',onclick:()=>{t.hidden=!t.hidden; Table.save(); if(!t.hidden) Table.post({kind:'sys',who:'',text:`${t.name} ปรากฏตัวที่ (${t.x},${t.y})`});},text:t.hidden?'👁':'🙈'}), h('button',{class:'small ghost',title:'เอาออกจากบอร์ด',onclick:()=>{ r.tokens=r.tokens.filter(x=>x!==t); r.enc.order=r.enc.order.filter(x=>x!==t.id); if (Table.sel===t.id) Table.sel=null; Table.save(); },text:'✕'})); }
+    else if (t.ownerId===Store.me) ctl.append(h('button',{class:'small ghost',title:'ถอนตัวละครออกจากบอร์ด',onclick:()=>{ r.tokens=r.tokens.filter(x=>x!==t); r.enc.order=r.enc.order.filter(x=>x!==t.id); if (Table.sel===t.id) Table.sel=null; Table.save(); },text:'✕'}));
     el.append(ctl);
   }
   return el;
 }
 function rollInitiative(r){
   const lines=[];
-  for (const t of r.tokens){ if (t.zoneId==='out') { t.initRoll=null; continue; } const rr = roll2d6(); t.initRoll = rr.sum + (t.init||0); lines.push(`${t.hidden?'(ซ่อน) ':''}${t.name}: ${rr.kept[0]}+${rr.kept[1]} ${signed(t.init||0)} = ${t.initRoll}`); }
+  for (const t of r.tokens){ const rr = roll2d6(); t.initRoll = rr.sum + (t.init||0); lines.push(`${t.hidden?'(ซ่อน) ':''}${t.name}: ${rr.kept[0]}+${rr.kept[1]} ${signed(t.init||0)} = ${t.initRoll}`); }
   r.enc.order = r.tokens.filter(t=>t.initRoll!=null).sort((a,b)=>b.initRoll-a.initRoll).map(t=>t.id);
   r.enc.active = true; r.enc.round = 1; r.enc.turnIdx = 0;
   Table.save();
@@ -2114,7 +2361,7 @@ function renderChatOnly(){
     else log.append(h('div',{class:'e'}, h('span',{class:'who',text:(m.who||'')+': '}), h('span',{text:m.text||''}), m.gmOnly? h('span',{class:'gm',text:' (ลับ)'}):null, h('span',{class:'dim',style:'font-size:11px;float:right',text:time})));
   }
 }
-function renderPeers(){ const p = document.getElementById('peers'); if (!p) return; const n = Table.peers.length; p.textContent = n ? `ออนไลน์ในห้อง ${n} คน` : ''; }
+function renderPeers(){ const p = document.getElementById('peers'); if (!p) return; const n = Table.peers.length; const names = Table.peers.map(x=>x.name||'').filter(Boolean); p.textContent = n ? `ออนไลน์ในห้อง ${n} คน${names.length? ': '+names.join(', ') : ''}` : ''; }
 
 /* ===== Home, rules reference, routing ===== */
 W.skFilter = {};
@@ -2127,7 +2374,7 @@ function renderHome(){
     h('div',{class:'card'}, h('h3',{text:'ระบบในฉบับนี้'}), h('ul',{style:'margin:8px 0 0;padding-left:18px;font-size:14px;color:var(--bone-dim)'},
       h('li',{text:`${DATA.kins.length} วงศา · ${DATA.kins.reduce((a,k)=>a+k.childhood.length+k.specialChildhood.length+k.adulthood.length,0)} พื้นหลัง · ${DATA.skills.filter(s=>s.category!=='Granted').length} ทักษะและเวทมนตร์ · ${DATA.knowledge.length} สาขาความรู้ · ${DATA.sets.sets.length} ชุดเริ่มต้น`}),
       h('li',null, T('ทอย 2d6 + Stat + Personality · Advantage/Disadvantage 3d6 · Critical [6,6]/[1,1] · Degrees of Success 10 / 7-9 / 6')),
-      h('li',null, T('โต๊ะเล่นแบบ Theater of the Mind: บอร์ดเขตปะทะ/ใกล้เคียง/ไกล ลำดับเทิร์น นาฬิกาชะตากรรม แชตและทอยเต๋าร่วมกัน')),
+      h('li',null, T('โต๊ะเล่นออนไลน์: แผนที่ต่อสู้ 20×20 สุ่มตามสถานที่ (ป่า แม่น้ำ เมือง ถ้ำ ดันเจี้ยน ภูเขา ทะเล เรือ ฯลฯ) หมากมีรูปตัวละคร ลำดับเทิร์น นาฬิกาชะตากรรม แชตและทอยเต๋าเด้งหน้าทุกคน')),
       h('li',null, 'คำเฉพาะทุกคำที่ขีดเส้นประ ', h('span',{class:'term',onclick:(e)=>showTerm('Mod', e.currentTarget),text:'กดดูความหมายได้'}), ' เช่น Mod, Toughness, Perfect Strike'),
       h('li',null, T('Beastman ยังไม่เปิดให้เลือก (รอข้อมูลอัปเดต)'))))));
   root.append(h('h3',{style:'margin-bottom:8px',text:'8 ขั้นของการสร้างตัวละคร'}));
@@ -2178,7 +2425,7 @@ function route(){
   const target = view==='room' ? 'table' : view;
   $('#v-'+target).classList.add('active');
   for (const a of document.querySelectorAll('#nav a')) a.classList.toggle('active', a.dataset.v===target || (view==='sheet' && a.dataset.v==='chars'));
-  if (view!=='room' && Table.roomId) Table.close();
+  if (view!=='room' && view!=='sheet' && Table.roomId) Table.close(); // เปิดชีทจากห้องแล้วยังค้างห้องไว้ให้กลับได้
   if (view!=='sheet') HUD.hide();
   switch(view){
     case 'home': renderHome(); break;
