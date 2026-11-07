@@ -342,6 +342,77 @@ body.roll-locked .dicepanel{opacity:.75}
 .ipcard .body{display:block;font-size:12px;color:var(--bone-dim);flex:1;max-height:150px;overflow:auto;line-height:1.5}
 .ipcard .gate{color:var(--gold)}
 .ipcard button{margin-top:auto}
+
+/* ---- HUD แบบเกม: ปุ่มลอย + หน้าต่างลอย ---- */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:50}
+#hud>*{pointer-events:auto}
+.hud-dock{z-index:2;position:fixed;right:14px;top:38%;display:flex;flex-direction:column;gap:8px;padding:8px 6px;border-radius:16px;background:linear-gradient(180deg,#1b232e,#0f151c);border:1px solid #3a4758;box-shadow:0 12px 30px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);cursor:grab;user-select:none}
+.hud-dock.dragging{cursor:grabbing;box-shadow:0 20px 40px rgba(0,0,0,.7)}
+.hud-grip{display:grid;place-items:center;color:var(--bone-mute);height:14px}
+.hud-grip .ico{width:16px;height:16px;display:block}
+.hud-btn{position:relative;width:62px;height:62px;padding:4px 2px 2px;border-radius:14px;border:1px solid #4a5a6e;background:radial-gradient(circle at 35% 30%,#2b3747,#161d26 70%);color:var(--bone);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s}
+.hud-btn .ico{width:30px;height:30px;display:block;color:var(--gold)}
+.hud-btn .ico svg{width:100%;height:100%}
+.hud-btn .lbl{font-size:10px;line-height:1;color:var(--bone-dim)}
+.hud-btn:hover{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 0 14px rgba(212,168,74,.25)}
+.hud-btn.on{border-color:var(--gold);background:radial-gradient(circle at 35% 30%,#4a3b16,#1c1710 70%);box-shadow:0 0 16px rgba(212,168,74,.35)}
+.hud-btn .badge{position:absolute;top:-6px;right:-6px;font-size:10px;font-family:var(--font-display);padding:1px 6px;border-radius:999px;background:var(--ink);border:1px solid var(--gold);color:var(--gold);white-space:nowrap}
+.hud-btn .badge.neg{border-color:var(--blood-2);color:var(--blood-2)}
+.hud-win{z-index:1;position:fixed;right:90px;top:12%;width:560px;max-width:calc(100vw - 24px);max-height:80vh;display:flex;flex-direction:column;border-radius:14px;border:1px solid #5a4a22;background:linear-gradient(180deg,#171d26,#0e1319);box-shadow:0 24px 60px rgba(0,0,0,.7),0 0 0 1px rgba(212,168,74,.15),inset 0 1px 0 rgba(255,255,255,.05);animation:popin .2s cubic-bezier(.2,1.2,.4,1)}
+.hud-win.dragging{box-shadow:0 30px 70px rgba(0,0,0,.8)}
+.hud-head{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid #3a3222;background:linear-gradient(90deg,rgba(212,168,74,.12),transparent);border-radius:14px 14px 0 0;cursor:grab;user-select:none;font-family:var(--font-display)}
+.hud-head .ico{width:22px;height:22px;color:var(--gold)}
+.hud-head .ico svg{width:100%;height:100%}
+.hud-head .hud-sub{font-size:12px;font-family:var(--font-body)}
+.hud-x{margin-left:auto;width:28px;height:28px;padding:4px;border-radius:8px;background:transparent;border:1px solid transparent;color:var(--bone-dim)}
+.hud-x:hover{border-color:var(--blood);color:var(--blood-2)}
+.hud-x .ico{width:100%;height:100%;display:block}
+.hud-body{padding:10px 12px 12px;overflow:auto}
+.hud-meter{display:flex;align-items:center;gap:10px;font-size:12px;margin-bottom:8px}
+.hud-meter .bar{flex:1;height:8px;border-radius:999px;background:var(--ink);border:1px solid var(--line-2);overflow:hidden}
+.hud-meter .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--mana-2),var(--gold))}
+.hud-meter.over .bar i{background:var(--blood-2)}
+.hud-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.tile{position:relative;min-height:78px;padding:8px 8px 20px;border-radius:10px;border:1px solid #3b4454;background:linear-gradient(160deg,#222c38,#141a22);box-shadow:inset 0 0 0 1px rgba(255,255,255,.03),0 2px 6px rgba(0,0,0,.4);cursor:pointer;transition:transform .1s,border-color .1s;font-size:12px}
+.tile:hover{transform:translateY(-2px);border-color:var(--gold)}
+.tile.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,168,74,.35),0 4px 10px rgba(0,0,0,.5)}
+.tile.wearable{border-left:3px solid var(--mana-2)}
+.tile .nm{font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tile .qty{position:absolute;top:4px;right:6px;font-family:var(--font-display);color:var(--gold);font-size:12px}
+.tile .wt{position:absolute;bottom:5px;right:7px;font-size:10px;color:var(--bone-mute)}
+.tile.add{display:grid;place-items:center;border-style:dashed;background:transparent;text-align:center;padding:8px}
+.tile.add .plus{font-size:26px;color:var(--gold);line-height:1}
+.hud-detail{margin-top:10px;padding:10px;border-radius:10px;border:1px solid #3b4454;background:rgba(0,0,0,.25)}
+.hud-detail input{padding:3px 6px;font-size:13px}
+.hud-detail .row>input:first-child{flex:1;min-width:140px;font-weight:600}
+.hud-detail textarea{width:100%;margin-top:6px;padding:4px 6px;font-size:13px;min-height:28px;resize:none;overflow:hidden;line-height:1.45}
+.hud-detail label{font-size:11px}
+.hud-hint{font-size:12px;margin:8px 0 0}
+/* คัมภีร์ */
+.hud-win.book{width:720px}
+.book{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:300px;border-radius:10px;overflow:hidden;border:1px solid #4a3f24;background:linear-gradient(90deg,#1a1710 0,#221d14 48%,#0f0d09 50%,#211c13 52%,#1a1710 100%)}
+.book .page{padding:12px 14px;overflow:auto;max-height:60vh}
+.book .toc{border-right:1px solid #3d341d}
+.book .toc-h{font-family:var(--font-display);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin:8px 0 4px}
+.book .toc-i{display:flex;justify-content:space-between;gap:6px;width:100%;text-align:left;padding:4px 8px;margin:1px 0;border-radius:6px;background:transparent;border:1px solid transparent;font-size:13px;color:var(--bone)}
+.book .toc-i:hover{border-color:#5a4a22}
+.book .toc-i.on{background:rgba(212,168,74,.15);border-color:var(--gold)}
+.book .detail h3{margin:0 0 6px;font-family:var(--font-display);color:var(--bone)}
+.book .detail .txt{margin-top:8px;font-size:13px;line-height:1.6}
+.book .detail .lim{color:var(--warn)}
+/* ถุงย่าม paper doll */
+.doll{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;grid-auto-rows:minmax(58px,auto);gap:6px;padding:6px}
+.doll .sil{position:absolute;left:50%;top:0;transform:translateX(-50%);height:100%;width:auto;fill:rgba(79,209,197,.07);stroke:rgba(79,209,197,.2);stroke-width:1.5;pointer-events:none}
+.dslot{position:relative;padding:6px 8px 16px;border-radius:9px;border:1px dashed #3b4454;background:rgba(10,14,19,.75);cursor:pointer;font-size:12px;min-height:56px;transition:border-color .1s,transform .1s}
+.dslot .sl{font-size:10px;color:var(--bone-mute);letter-spacing:.3px}
+.dslot .nm{font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--bone-dim)}
+.dslot.filled{border-style:solid;border-color:#4e5d72;background:linear-gradient(160deg,#243040,#141a22)}
+.dslot.filled .nm{color:var(--bone)}
+.dslot:hover{border-color:var(--gold);transform:translateY(-1px)}
+.dslot.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,168,74,.35)}
+.dslot .wt{position:absolute;bottom:3px;right:6px;font-size:10px;color:var(--bone-mute)}
+.hudhint{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
+@media (max-width:760px){.hud-win{right:6px;left:6px!important;width:auto;top:8vh;max-height:84vh}.hud-win.book{width:auto}.book{grid-template-columns:1fr}.book .toc{border-right:0;border-bottom:1px solid #3d341d;max-height:30vh}.hud-btn{width:54px;height:54px}.hud-btn .ico{width:24px;height:24px}.hud-dock{flex-direction:row;top:auto;bottom:12px;right:10px;padding:6px 8px}.hud-grip{width:14px;height:auto}}
 </style>
 </head>
 <body>
@@ -1475,8 +1546,8 @@ function renderSheet(id){
   const root = clear($('#v-sheet'));
   const c = Store.get(id);
   if (!c){ root.append(h('div',{class:'card',text:'ไม่พบตัวละครนี้'})); return; }
-  const d = compute(c); const kin = KIN[c.kin];
-  ensureSheetState(c, d);
+  let d = compute(c); const kin = KIN[c.kin];
+  ensureSheetState(c, d); d = compute(c); // สวมของอัตโนมัติอาจเปลี่ยน Parry Dice
   const cur = c.current; const det = c.details;
   const save = ()=>{ Store.upsert(c); };
   const rerender = ()=>renderSheet(id);
@@ -1523,48 +1594,10 @@ function renderSheet(id){
   if (c.adaptation) profs.push({name:'Adaptation: '+c.adaptation, text:'ได้ Advantage ในการทอยป้องกันผลจากสภาพแวดล้อมแบบนี้'});
   const col = (title, items, cls) => h('div',{class:'box'}, h('h4',null, T(title)), items.length ? items.map(it=>h('div',{style:'margin:6px 0;font-size:13px'}, h('div',null, tag(it.name, cls), it.src? h('span',{class:'muted',style:'font-size:11px',text:' '+it.src}):null), h('div',{class:'desc',style:'font-size:12px'}, T(it.text)))) : h('div',{class:'muted',text:'-'}));
   mid.append(h('div',{class:'grid three'}, col('Trait', traits, 'ok'), col('Hindrance', hinds, 'neg'), col('Proficiency Trait', profs, 'prop')));
-  // ===== ลิ้นชักใกล้มือ: สกิล / ของสวมใส่ / กระเป๋า (เปิดทีละอัน ประหยัดพื้นที่) =====
-  const sks = allSkills(c);
+  // ===== สกิล / ของสวมใส่ / กระเป๋า อยู่ใน HUD ลอยข้างจอ (hud.js) =====
   const grow = (ta)=>{ ta.rows = 1; const fit=()=>{ ta.style.height='auto'; ta.style.height = (ta.scrollHeight+2)+'px'; }; ta.addEventListener('input', fit); requestAnimationFrame(fit); return ta; };
-  const eqW = equipWeight(c), bagW = bagWeight(c), totalW = eqW + bagW;
-  const eqCount = Object.values(c.equip).filter(e=>e && (e.name||'').trim()).length;
-  const bar = h('div',{class:'drawerbar'});
-  const panel = h('div',{class:'drawerpanel'});
-  const tabs = [['skills', `Skill (${sks.length})`], ['equip', `ของสวมใส่ (${eqCount} · ${eqW.toFixed(1)} กก.)`], ['bag', `กระเป๋า (${c.inventory.length} · ${bagW.toFixed(1)} กก.)`]];
-  for (const [key,label] of tabs) bar.append(h('button',{class:'drawertab'+(SheetUI.drawer===key?' open':''),onclick:()=>{ SheetUI.drawer = SheetUI.drawer===key ? null : key; rerender(); },text:label}));
-  bar.append(h('span',{class:'num weight '+(totalW>d.capacity?'res-fail':''),title:'ของสวมใส่ + กระเป๋า',text:`แบก ${totalW.toFixed(1)} / ${d.capacity} กก.`}));
-  if (SheetUI.drawer==='skills'){
-    panel.append(h('div',{class:'grid two'}, sks.map(n=>{ const sk=SKILL_BY_NAME[n]; if(!sk) return h('div',{class:'skcard'}, h('b',{text:n})); return h('div',{class:'skcard'}, h('div',{class:'h'}, h('b',{text:sk.nameEn}), h('span',{class:'typ',text:sk.type||sk.subcategory})), h('div',{class:'dim',style:'font-size:12px',text:`${sk.nameTh||''} · ${sk.subcategory}${sk.tier? ' · '+sk.tier:''}${sk.components? ' · '+sk.components:''}`}), h('div',{style:'margin-top:4px'}, h('b',{text:'Effect: '}), T(sk.effect||'')), sk.condition? h('div',{class:'lim'}, h('b',{text:'Limitation: '}), T(sk.condition)) : null, sk.cost? h('div',{class:'cost'}, h('b',{text:'Cost: '}), T(sk.cost)) : null, sk.extra&&sk.extra.length? h('details',null, h('summary',{text:'เพิ่มเติม'}), sk.extra.map(x=>h('div',{class:'desc',style:'font-size:12px'}, T(x)))) : null); })));
-    if (!sks.length) panel.append(h('div',{class:'muted',text:'ยังไม่มีสกิล'}));
-    if (c.talent) panel.append(h('div',{class:'gives',style:'margin-top:8px'}, tag('Talent: '+DATA.talents.find(t=>t.key===c.talent).label,'prop')));
-  } else if (SheetUI.drawer==='equip'){
-    panel.append(h('div',{class:'row',style:'justify-content:space-between;margin-bottom:6px'}, h('span',{class:'dim',style:'font-size:12px',text:'แต่ละชิ้นมีชื่อ คุณสมบัติ น้ำหนัก · ถอดแล้วกลับเข้ากระเป๋า'}), h('button',{class:'small ghost',title:'ถอดทั้งหมดกลับกระเป๋าแล้วสวมใหม่ตามชุดเริ่มต้น',onclick:()=>{ if (!confirm('ถอดทุกชิ้นกลับกระเป๋าแล้วสวมใหม่อัตโนมัติ?')) return; autoEquip(c); save(); rerender(); },text:'สวมอัตโนมัติ'})));
-    const sg = h('div',{class:'eqlist'});
-    for (const [k,label] of EQUIP_SLOTS){
-      const e = c.equip[k];
-      const row = h('div',{class:'eqslot'+(e&&e.name?' filled':'')}, h('span',{class:'k',text:label}));
-      if (e && (e.name||'').trim()){
-        row.append(h('div',{class:'eqbody'}, h('div',{class:'row',style:'gap:6px;align-items:center'}, txt(e,'name','ชื่อไอเทม'), h('label',{class:'dim',text:'กก.'}), h('input',{type:'number',step:'0.1',value:e.weight||0,style:'width:70px',onchange:(ev)=>{ e.weight=+ev.target.value||0; save(); rerender(); }}), h('button',{class:'small ghost',title:'ถอดกลับกระเป๋า',onclick:()=>{ unequip(c,k); save(); rerender(); },text:'ถอด'})), grow(txt(e,'effect','คุณสมบัติ',true))));
-      } else {
-        row.append(h('div',{class:'eqbody'}, h('div',{class:'row',style:'gap:6px'}, h('span',{class:'muted',text:'ว่าง'}), h('button',{class:'small ghost',onclick:()=>{ c.equip[k]={name:'',effect:'',weight:0}; SheetUI.editSlot=k; save(); rerender(); },text:'+ ใส่ของใหม่'}))));
-      }
-      sg.append(row);
-    }
-    panel.append(sg);
-  } else if (SheetUI.drawer==='bag'){
-    const list = h('div',{class:'invlist'});
-    c.inventory.forEach((row,i)=>{
-      const slotSel = h('select',{title:'สวมที่ช่อง'}, h('option',{value:'',text:'สวม…'}), EQUIP_SLOTS.map(([k,l])=>h('option',{value:k,text:l})));
-      const guess = itemSlot(row.name, row.effect); if (guess){ const g = guess==='weapon' ? (c.equip.weapon1 && c.equip.weapon1.name ? 'weapon2':'weapon1') : guess; slotSel.value=''; slotSel.dataset.guess=g; }
-      slotSel.onchange = ()=>{ if (!slotSel.value) return; wearItem(c, i, slotSel.value); save(); rerender(); };
-      list.append(h('div',{class:'invitem'},
-        h('div',{class:'row',style:'gap:6px;align-items:center'}, txt(row,'name','ชื่อไอเทม'), h('label',{class:'dim',text:'จำนวน'}), h('input',{type:'number',value:row.qty,style:'width:60px',onchange:(e)=>{row.qty=+e.target.value||0; save(); rerender();}}), h('label',{class:'dim',text:'กก.'}), h('input',{type:'number',step:'0.1',value:row.weight,style:'width:70px',onchange:(e)=>{row.weight=+e.target.value||0; save(); rerender();}}),
-          guess ? h('button',{class:'small',title:'สวมที่ช่องที่เดาให้',onclick:()=>{ wearItem(c, i, slotSel.dataset.guess); save(); rerender(); },text:'สวม'}) : null, slotSel,
-          h('button',{class:'small ghost',title:'ลบ',onclick:()=>{ c.inventory.splice(i,1); save(); rerender(); },text:'✕'})),
-        grow(txt(row,'effect','คุณสมบัติ',true)))); });
-    panel.append(list, h('div',{class:'row',style:'margin-top:8px;justify-content:space-between'}, h('button',{class:'small',onclick:()=>{ c.inventory.push({name:'',effect:'',qty:1,weight:0}); save(); rerender(); },text:'+ เพิ่มของ'}), h('span',{class:'num',text:`ในกระเป๋า ${bagW.toFixed(1)} กก. · สวมอยู่ ${eqW.toFixed(1)} กก.`})));
-  }
-  mid.append(h('div',{class:'box drawers'}, bar, SheetUI.drawer ? panel : null));
+  const totalW = equipWeight(c) + bagWeight(c);
+  mid.append(h('div',{class:'box hudhint'}, h('span',{class:'dim',text:'กระเป๋า คัมภีร์ทักษะ และถุงย่ามอยู่ที่ปุ่มลอยข้างจอ (ลากย้ายได้)'}), h('span',{class:'num '+(totalW>d.capacity?'res-fail':''),text:`แบก ${totalW.toFixed(1)} / ${d.capacity} กก.`})));
   const nt = h('div',{class:'box notes'}, h('div',{class:'grid two'}, h('div',null, h('h4',{text:'Quest'}), txt(c.extraText,'quest','',true)), h('div',null, h('h4',{text:'Note'}), txt(c.extraText,'note','',true)), h('div',null, h('h4',{text:'Reputation (Faction)'}), txt(c.extraText,'reputation','',true)), h('div',null, h('h4',{text:'Relationship (Character)'}), txt(c.extraText,'relationship','',true))));
   mid.append(nt);
   // ===== right =====
@@ -1587,7 +1620,159 @@ function renderSheet(id){
   kb.append(h('div',{class:'tablewrap'}, kt)); right.append(kb);
   right.append(dicePanel(c, (e)=>{ if (Table.roomId) Table.postRoll(e, c); }));
   root.append(h('div',{class:'cs'}, left, mid, right));
+  renderHUD(c, d, {save, rerender, txt, grow});
 }
+
+/* ===== HUD แบบเกม: ปุ่มลอยข้างจอ (กระเป๋า / คัมภีร์สกิล / ถุงย่ามของสวมใส่) ลากย้ายได้ เปิดเป็นหน้าต่างลอย ===== */
+const HUD = {
+  pos: null, open: null, winPos: {}, sel: {},  // sel = สิ่งที่เลือกอยู่ในแต่ละหน้าต่าง
+  load(){ try{ Object.assign(this, JSON.parse(localStorage.getItem('kirana.hud')||'{}')); }catch(e){} },
+  persist(){ try{ localStorage.setItem('kirana.hud', JSON.stringify({pos:this.pos, winPos:this.winPos, open:this.open})); }catch(e){} },
+  hide(){ const el = $('#hud'); if (el) clear(el); },
+};
+HUD.load();
+/* ไอคอน SVG วาดเอง */
+const HUD_ICONS = {
+  bag: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M14 18h20l3 22H11z" fill="rgba(0,0,0,.25)"/><path d="M17 18v-3a7 7 0 0 1 14 0v3"/><path d="M11 24h26"/><path d="M19 30h10"/><circle cx="24" cy="34" r="1.6" fill="currentColor"/></svg>',
+  book: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M10 10h13a4 4 0 0 1 4 4v24a4 4 0 0 0-4-4H10z" fill="rgba(0,0,0,.25)"/><path d="M38 10H25a4 4 0 0 0-4 4v24a4 4 0 0 1 4-4h13z" fill="rgba(0,0,0,.25)"/><path d="M15 17h6M15 22h6M27 17h6M27 22h6"/><path d="M24 14v24"/></svg>',
+  pouch: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M16 20c-6 6-6 20 8 20s14-14 8-20z" fill="rgba(0,0,0,.25)"/><path d="M16 20c2-4 6-6 8-6s6 2 8 6"/><path d="M18 14l-2-5M30 14l2-5M24 13V8"/><path d="M15 20h18"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  grip: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
+};
+function svgEl(name, cls){ const w = document.createElement('span'); w.className = 'ico' + (cls? ' '+cls : ''); w.innerHTML = HUD_ICONS[name]; return w; }
+/* ลากด้วย pointer events: handle = ส่วนที่จับ, el = สิ่งที่ขยับ (position:fixed) */
+function makeDraggable(el, handle, onEnd){
+  let sx=0, sy=0, ox=0, oy=0, moved=false, id=null;
+  handle.style.touchAction = 'none';
+  handle.addEventListener('pointerdown', (e)=>{ if (e.button!==0 || e.target.closest('button,input,textarea,select')) return; id = e.pointerId; handle.setPointerCapture(id); const r = el.getBoundingClientRect(); sx=e.clientX; sy=e.clientY; ox=r.left; oy=r.top; moved=false; el.classList.add('dragging'); e.preventDefault(); });
+  handle.addEventListener('pointermove', (e)=>{ if (id==null || e.pointerId!==id) return; const dx=e.clientX-sx, dy=e.clientY-sy; if (Math.abs(dx)+Math.abs(dy) > 3) moved=true; const w = el.offsetWidth, hh = el.offsetHeight; const x = Math.max(4, Math.min(window.innerWidth - w - 4, ox+dx)), y = Math.max(4, Math.min(window.innerHeight - hh - 4, oy+dy)); el.style.left = x+'px'; el.style.top = y+'px'; el.style.right='auto'; el.style.bottom='auto'; });
+  const up = (e)=>{ if (id==null) return; try{ handle.releasePointerCapture(id); }catch(x){} id=null; el.classList.remove('dragging'); if (moved && onEnd) onEnd({x: parseFloat(el.style.left), y: parseFloat(el.style.top)}); if (moved) el.dataset.justDragged = '1'; setTimeout(()=>{ delete el.dataset.justDragged; }, 50); };
+  handle.addEventListener('pointerup', up); handle.addEventListener('pointercancel', up);
+}
+function renderHUD(c, d, ctx){
+  let root = $('#hud'); if (!root){ root = h('div',{id:'hud'}); document.body.append(root); }
+  clear(root);
+  const eqW = equipWeight(c), bagW = bagWeight(c), totalW = eqW + bagW, over = totalW > d.capacity;
+  const sks = allSkills(c);
+  const eqCount = Object.values(c.equip).filter(e=>e && (e.name||'').trim()).length;
+  // ---- dock ----
+  const dock = h('div',{class:'hud-dock'});
+  const grip = h('div',{class:'hud-grip',title:'ลากเพื่อย้าย'}, svgEl('grip'));
+  dock.append(grip);
+  const mk = (key, icon, label, badge, badgeCls)=>{ const b = h('button',{class:'hud-btn'+(HUD.open===key?' on':''),title:label,onclick:()=>{ if (dock.dataset.justDragged) return; HUD.open = HUD.open===key ? null : key; HUD.persist(); renderHUD(c, d, ctx); }}, svgEl(icon), h('span',{class:'lbl',text:label}), badge!=null? h('span',{class:'badge'+(badgeCls?' '+badgeCls:''),text:String(badge)}):null); dock.append(b); };
+  mk('bag', 'bag', 'กระเป๋า', `${totalW.toFixed(1)}/${d.capacity}`, over?'neg':'');
+  mk('book', 'book', 'คัมภีร์', sks.length);
+  mk('pouch', 'pouch', 'ถุงย่าม', eqCount);
+  if (HUD.pos){ dock.style.left = HUD.pos.x+'px'; dock.style.top = HUD.pos.y+'px'; dock.style.right='auto'; }
+  root.append(dock);
+  makeDraggable(dock, dock, (p)=>{ HUD.pos = p; HUD.persist(); });
+  requestAnimationFrame(()=>{ // กันหลุดจอเมื่อขนาดหน้าต่างเปลี่ยน
+    const r = dock.getBoundingClientRect(); if (r.right > window.innerWidth || r.bottom > window.innerHeight || r.left < 0 || r.top < 0){ HUD.pos = null; dock.style.left=''; dock.style.top=''; dock.style.right=''; } });
+  if (!HUD.open) return;
+  // ---- window ----
+  const win = h('div',{class:'hud-win '+HUD.open});
+  const title = {bag:'กระเป๋าสัมภาระ', book:'คัมภีร์ทักษะ', pouch:'ถุงย่าม · ของสวมใส่'}[HUD.open];
+  const head = h('div',{class:'hud-head'}, svgEl({bag:'bag',book:'book',pouch:'pouch'}[HUD.open]), h('b',{text:title}), h('span',{class:'dim hud-sub'}), h('button',{class:'hud-x',title:'ปิด',onclick:()=>{ HUD.open=null; HUD.persist(); renderHUD(c, d, ctx); }}, svgEl('close')));
+  const body = h('div',{class:'hud-body'});
+  win.append(head, body);
+  const wp = HUD.winPos[HUD.open]; if (wp){ win.style.left = wp.x+'px'; win.style.top = wp.y+'px'; win.style.right='auto'; }
+  root.append(win);
+  makeDraggable(win, head, (p)=>{ HUD.winPos[HUD.open] = p; HUD.persist(); });
+  hudCtx = ctx;
+  const {save, rerender, txt, grow} = ctx;
+  const refresh = ()=>{ save(); rerender(); };
+  if (HUD.open==='bag') renderBagWin(c, d, body, head, {save, rerender, txt, grow, refresh, bagW, eqW, totalW, over});
+  else if (HUD.open==='book') renderBookWin(c, d, body, head, sks);
+  else renderPouchWin(c, d, body, head, {save, rerender, txt, grow, refresh, eqW});
+  requestAnimationFrame(()=>{ const r = win.getBoundingClientRect(); if (r.right > window.innerWidth+2 || r.bottom > window.innerHeight+2 || r.left < 0){ delete HUD.winPos[HUD.open]; win.style.left=''; win.style.top=''; win.style.right=''; } });
+}
+/* ---- กระเป๋า: ตารางช่องของ + แถบน้ำหนัก + รายละเอียดของชิ้นที่เลือก ---- */
+function renderBagWin(c, d, body, head, o){
+  head.querySelector('.hud-sub').textContent = `${c.inventory.length} ชิ้น`;
+  const meter = h('div',{class:'hud-meter'+(o.over?' over':'')}, h('div',{class:'bar'}, h('i',{style:`width:${Math.min(100, d.capacity? o.totalW/d.capacity*100 : 0)}%`})), h('span',{class:'num',text:`แบก ${o.totalW.toFixed(1)} / ${d.capacity} กก.`}), h('span',{class:'dim',text:`(ย่าม ${o.eqW.toFixed(1)} · กระเป๋า ${o.bagW.toFixed(1)})`}));
+  body.append(meter);
+  const grid = h('div',{class:'hud-grid'});
+  const selIdx = HUD.sel.bag;
+  c.inventory.forEach((row,i)=>{
+    const guess = itemSlot(row.name, row.effect);
+    const t = h('div',{class:'tile'+(selIdx===i?' sel':'')+(guess?' wearable':''),tabindex:0,onclick:()=>{ HUD.sel.bag = selIdx===i ? null : i; renderHUD(c, d, o); }}, h('div',{class:'nm',text:row.name||'(ไม่มีชื่อ)'}), (row.qty||1)>1? h('span',{class:'qty',text:'×'+row.qty}):null, h('span',{class:'wt',text:(row.weight||0)+' กก.'}));
+    grid.append(t);
+  });
+  grid.append(h('div',{class:'tile add',tabindex:0,onclick:()=>{ c.inventory.push({name:'',effect:'',qty:1,weight:0}); HUD.sel.bag = c.inventory.length-1; o.refresh(); }}, h('div',{class:'plus',text:'+'}), h('div',{class:'nm dim',text:'เพิ่มของ'})));
+  body.append(grid);
+  const row = c.inventory[selIdx];
+  if (row){
+    const guess = itemSlot(row.name, row.effect); const gslot = guess==='weapon' ? (c.equip.weapon1 && c.equip.weapon1.name ? 'weapon2' : 'weapon1') : guess;
+    const slotSel = h('select',null, h('option',{value:'',text:'สวมที่ช่อง…'}), EQUIP_SLOTS.map(([k,l])=>h('option',{value:k,text:l})));
+    slotSel.onchange = ()=>{ if (!slotSel.value) return; wearItem(c, selIdx, slotSel.value); HUD.sel.bag=null; o.refresh(); };
+    body.append(h('div',{class:'hud-detail'},
+      h('div',{class:'row',style:'gap:6px;align-items:center'}, o.txt(row,'name','ชื่อไอเทม'), h('label',{class:'dim',text:'×'}), h('input',{type:'number',value:row.qty,style:'width:58px',onchange:(e)=>{row.qty=+e.target.value||0; o.refresh();}}), h('label',{class:'dim',text:'กก.'}), h('input',{type:'number',step:'0.1',value:row.weight,style:'width:70px',onchange:(e)=>{row.weight=+e.target.value||0; o.refresh();}})),
+      o.grow(o.txt(row,'effect','คุณสมบัติ / ผลของไอเทม',true)),
+      h('div',{class:'row',style:'gap:6px;margin-top:6px'}, gslot? h('button',{class:'small primary',onclick:()=>{ wearItem(c, selIdx, gslot); HUD.sel.bag=null; o.refresh(); },text:'สวม → '+EQUIP_SLOTS.find(x=>x[0]===gslot)[1]}):null, slotSel, h('button',{class:'small ghost',style:'margin-left:auto',onclick:()=>{ if (!confirm(`ทิ้ง "${row.name}"?`)) return; c.inventory.splice(selIdx,1); HUD.sel.bag=null; o.refresh(); },text:'ทิ้ง'}))));
+  } else body.append(h('p',{class:'dim hud-hint',text:'แตะช่องเพื่อดูรายละเอียด สวม หรือแก้ไข'}));
+}
+/* ---- คัมภีร์: หน้าซ้ายสารบัญ หน้าขวารายละเอียด ---- */
+function renderBookWin(c, d, body, head, sks){
+  head.querySelector('.hud-sub').textContent = `${sks.length} ทักษะ`;
+  if (!HUD.sel.book || !sks.includes(HUD.sel.book)) HUD.sel.book = sks[0] || null;
+  const left = h('div',{class:'page toc'});
+  const groups = {};
+  for (const n of sks){ const sk = SKILL_BY_NAME[n]; const g = sk ? (sk.category==='Sorcery' ? sk.subcategory : (sk.subcategory||sk.category||'อื่น ๆ')) : 'อื่น ๆ'; (groups[g] = groups[g]||[]).push(n); }
+  for (const [g, names] of Object.entries(groups)){
+    left.append(h('div',{class:'toc-h',text:g}));
+    for (const n of names){ const sk = SKILL_BY_NAME[n]; left.append(h('button',{class:'toc-i'+(HUD.sel.book===n?' on':''),onclick:()=>{ HUD.sel.book = n; renderHUD(c, d, hudCtx); }}, h('span',{text:n}), sk && sk.cost? h('span',{class:'dim',text:sk.cost}):null)); }
+  }
+  if (!sks.length) left.append(h('div',{class:'dim',text:'ยังไม่มีทักษะ ใช้ Insight Point ซื้อได้ที่หน้าชีท'}));
+  if (c.talent) left.append(h('div',{class:'toc-h',style:'margin-top:10px',text:'Talent'}), h('div',{class:'dim',style:'font-size:12px',text:DATA.talents.find(t=>t.key===c.talent).label}));
+  const right = h('div',{class:'page detail'});
+  const n = HUD.sel.book; const sk = n ? SKILL_BY_NAME[n] : null;
+  if (sk){
+    right.append(...[h('h3',null, sk.nameEn, h('span',{class:'en',text:' '+(sk.nameTh||'')})),
+      h('div',{class:'gives'}, tag(sk.subcategory, sk.category==='Sorcery'?'prop':''), sk.tier? tag(sk.tier, sk.tier==='Master'?'neg':sk.tier==='Expert'?'warn':'ok'):null, sk.type? tag(sk.type.length>40? sk.type.slice(0,40)+'…' : sk.type):null, sk.cost? tag('Cost '+sk.cost,'stat'):null, sk.components? tag('Comp '+sk.components):null, sk.ipCost!=null? tag(sk.ipCost+' IP'):null),
+      h('div',{class:'txt'}, h('b',{text:'Effect '}), T(sk.effect||'')),
+      sk.condition? h('div',{class:'txt lim'}, h('b',{text:'Limitation '}), T(sk.condition)) : null,
+      sk.extra&&sk.extra.length? h('div',{class:'txt'}, sk.extra.map(x=>h('div',{class:'desc'}, T(x)))) : null,
+      sk.branch? h('div',{class:'dim',style:'font-size:11px;margin-top:8px',text:sk.branch}) : null].filter(Boolean));
+  } else if (n) right.append(h('h3',{text:n}), h('p',{class:'dim',text:'ไม่พบรายละเอียดในฐานข้อมูลสกิล'}));
+  body.append(h('div',{class:'book'}, left, right));
+}
+/* ---- ถุงย่าม: หุ่นสวมใส่ (paper doll) + รายละเอียดช่องที่เลือก ---- */
+const DOLL_LAYOUT = [ // [slot, column(1-3), row]
+  ['head',2,1], ['neck',3,1], ['cape',1,1],
+  ['shirt',2,2], ['weapon1',1,2], ['weapon2',3,2],
+  ['chestIn',2,3], ['shield',1,3], ['back',3,3],
+  ['chestOut',2,4], ['hands',1,4], ['waist',3,4],
+  ['legs',2,5], ['feet',2,6],
+];
+const DOLL_LABEL = {weapon1:'Weapon 1', weapon2:'Weapon 2', shield:'Shield', head:'Head', neck:'Neck', back:'Back', shirt:'Shirt', chestIn:'Chest (In)', chestOut:'Chest (Out)', hands:'Hands', waist:'Waist', legs:'Legs', feet:'Feet', cape:'Cape'};
+function renderPouchWin(c, d, body, head, o){
+  head.querySelector('.hud-sub').textContent = `${o.eqW.toFixed(1)} กก. · Parry Dice ${d.parryDice}`;
+  const doll = h('div',{class:'doll'});
+  doll.innerHTML = '<svg class="sil" viewBox="0 0 120 300" aria-hidden="true"><ellipse cx="60" cy="30" rx="18" ry="22"/><path d="M42 58h36l14 20v70l-10 6V98h-6v70l8 110h-20l-8-90-8 90H28l8-110V98h-6v56l-10-6V78z"/></svg>';
+  const sel = HUD.sel.pouch;
+  for (const [k,col,row] of DOLL_LAYOUT){
+    const label = EQUIP_SLOTS.find(x=>x[0]===k)[1]; const e = c.equip[k];
+    const filled = e && (e.name||'').trim();
+    doll.append(h('div',{class:'dslot'+(filled?' filled':'')+(sel===k?' sel':''),style:`grid-column:${col};grid-row:${row}`,tabindex:0,onclick:()=>{ HUD.sel.pouch = sel===k ? null : k; renderHUD(c, d, o); }}, h('div',{class:'sl',text:DOLL_LABEL[k]||label}), h('div',{class:'nm',text: filled? e.name : '—'}), filled && e.weight? h('span',{class:'wt',text:e.weight+' กก.'}):null));
+  }
+  body.append(doll);
+  body.append(h('div',{class:'row',style:'justify-content:space-between;margin-top:6px'}, h('span',{class:'dim',style:'font-size:12px',text:'แตะช่องเพื่อดู แก้ หรือถอด · ของในกระเป๋ากด "สวม" ได้จากหน้าต่างกระเป๋า'}), h('button',{class:'small ghost',onclick:()=>{ if (!confirm('ถอดทุกชิ้นกลับกระเป๋าแล้วสวมใหม่อัตโนมัติ?')) return; autoEquip(c); o.refresh(); },text:'สวมอัตโนมัติ'})));
+  if (sel){
+    const e = c.equip[sel]; const label = EQUIP_SLOTS.find(x=>x[0]===sel)[1];
+    if (e){
+      body.append(h('div',{class:'hud-detail'}, h('div',{class:'kicker',text:label}),
+        h('div',{class:'row',style:'gap:6px;align-items:center'}, o.txt(e,'name','ชื่อไอเทม'), h('label',{class:'dim',text:'กก.'}), h('input',{type:'number',step:'0.1',value:e.weight||0,style:'width:70px',onchange:(ev)=>{ e.weight=+ev.target.value||0; recalcParry(c); o.refresh(); }})),
+        o.grow(o.txt(e,'effect','คุณสมบัติ',true)),
+        h('div',{class:'row',style:'margin-top:6px'}, h('button',{class:'small',onclick:()=>{ unequip(c, sel); HUD.sel.pouch=null; o.refresh(); },text:'ถอดกลับกระเป๋า'}))));
+    } else {
+      const cands = c.inventory.map((r,i)=>({r,i})).filter(x=>{ const g = itemSlot(x.r.name, x.r.effect); return g && (g===sel || (g==='weapon' && /^weapon/.test(sel))); });
+      body.append(h('div',{class:'hud-detail'}, h('div',{class:'kicker',text:label+' · ว่าง'}),
+        cands.length ? h('div',{class:'row',style:'gap:6px;flex-wrap:wrap'}, h('span',{class:'dim',style:'font-size:12px',text:'ในกระเป๋ามี:'}), cands.map(x=>h('button',{class:'small',onclick:()=>{ wearItem(c, x.i, sel); o.refresh(); },text:'สวม '+x.r.name}))) : null,
+        h('div',{class:'row',style:'margin-top:6px'}, h('button',{class:'small ghost',onclick:()=>{ c.equip[sel]={name:'',effect:'',weight:0}; o.refresh(); },text:'+ เขียนของใหม่ลงช่องนี้'}))));
+    }
+  }
+}
+let hudCtx = null;
 
 /* ===== Insight Point shop: การ์ดตัวเลือกแบบ Roguelike (สุ่มมือ 5 ใบ สับใหม่ได้ หรือดูทั้งหมด) ===== */
 function ipOptions(c){
@@ -1994,6 +2179,7 @@ function route(){
   $('#v-'+target).classList.add('active');
   for (const a of document.querySelectorAll('#nav a')) a.classList.toggle('active', a.dataset.v===target || (view==='sheet' && a.dataset.v==='chars'));
   if (view!=='room' && Table.roomId) Table.close();
+  if (view!=='sheet') HUD.hide();
   switch(view){
     case 'home': renderHome(); break;
     case 'create': renderWizard(); break;
