@@ -340,6 +340,7 @@ body.roll-locked .dicepanel{opacity:.75}
 .ipcard h4{margin:4px 48px 0 0;font-size:15px;line-height:1.3}
 .ipcard .sub{font-size:11px;color:var(--bone-mute)}
 .ipcard .body{display:block;font-size:12px;color:var(--bone-dim);flex:1;max-height:150px;overflow:auto;line-height:1.5}
+.ipcard .gate{color:var(--gold)}
 .ipcard button{margin-top:auto}
 </style>
 </head>
@@ -442,9 +443,9 @@ function judgeDefense(total, dc, kind){
   if (total === dc) return {cls:'res-crit', text:`Perfect ${nm} (เท่ากับ ${dc} ได้ 1 AP คืน)`};
   return total > dc ? {cls:'res-full', text:`ป้องกันได้ (${total} > ${dc})`} : {cls:'res-fail', text:`ป้องกันไม่ได้ (${total} < ${dc})`};
 }
-/* ค่าซื้อด้วย Insight Point (ตารางในไฟล์แกน): Mod ติดลบ→0 ขั้นละ 3 · 0→1 3 · 1→2 4 · 2→3 5 · 3→4 6 · 4→5 7 · Knowledge Level Up 4 + 2 ต่อระดับที่มี */
+/* ค่าซื้อด้วย Insight Point (ตารางในไฟล์แกน): Mod ติดลบ→0 ขั้นละ 3 · 0→1 3 · 1→2 4 · 2→3 5 · 3→4 6 · 4→5 7 · Knowledge Level Up 4 / 6 / 9 */
 function ipCostStat(mod){ if (mod >= 5) return null; if (mod < 0) return 3; return [3,4,5,6,7][mod]; }
-function ipCostKnowledge(level){ if (level >= 3) return null; return 4 + 2*level; }
+function ipCostKnowledge(level){ if (level >= 3) return null; return [4,6,9][level]; } // ผู้ใช้เคาะ 29 ส.ค. 2026 (บทที่ 13 V.3): Lv1 4 · Lv2 6 · Lv3 9 IP
 function renderDice(r){
   return h('span', {class:'inline-roll'}, r.dice.map((d,i)=>h('span',{class:'die' + (r.keptIdx.includes(i)?'':' drop'), text:d})));
 }
@@ -1615,7 +1616,7 @@ function openIpShop(c, onChange){
     const opts = ipOptions(c); if (!hand) hand = drawHand(opts, c);
     const ip = c.current.ip||0;
     wrap.append(h('div',{class:'row',style:'justify-content:space-between;align-items:baseline'}, h('h3',null, 'ใช้ Insight Point ', h('span',{class:'ipbal',text:`${ip} IP`})), h('div',{class:'row'}, h('button',{class:'small',onclick:()=>{ hand = drawHand(opts, c); showAll=false; render(); },text:'สับการ์ดใหม่'}), h('button',{class:'small ghost',onclick:()=>{ showAll=!showAll; render(); },text: showAll? 'กลับไปดูการ์ด' : 'ดูตัวเลือกทั้งหมด'}))));
-    wrap.append(h('p',{class:'desc',style:'margin:4px 0 10px',text:'เลือกการ์ด 1 ใบต่อครั้ง (ทอยเสี่ยงโชคได้ด้วยการสับใหม่ ไม่เสีย IP) · ค่าใช้จ่ายตามตารางไฟล์แกน · GM ตัดสินได้ว่าเงื่อนไขของสกิลผ่านหรือไม่'}));
+    wrap.append(h('p',{class:'desc',style:'margin:4px 0 10px',text:'เลือกการ์ด 1 ใบต่อครั้ง (สับใหม่ได้ ไม่เสีย IP) · ใช้ IP ได้ตอนจบเซสชั่นหรือช่วง Downtime · ประตู: Novice เรียนเองได้ · Expert ต้องมีครู ตำรา หรือเคยเห็นถูกใช้ · Master ต้องมีปรมาจารย์หรือเนื้อเรื่อง (GM ตัดสิน) · ความรู้ Lv1/2/3 = 4/6/9 IP'}));
     const cardEl = (o)=>{
       const can = ip >= o.cost;
       const el = h('div',{class:`ipcard ${o.kind}${can?'':' locked'}`},
@@ -1624,6 +1625,7 @@ function openIpShop(c, onChange){
         h('h4',{text:o.title}), h('div',{class:'sub',text:o.sub||''}),
         h('div',{class:'body cardtext'}, T(o.desc||'')),
         o.kind==='skill' && (o.skill.cost||o.skill.condition) ? h('div',{class:'sub'}, o.skill.cost? `Cost ${o.skill.cost}` : '', o.skill.condition? ` · ${o.skill.condition}` : '') : null,
+        o.kind==='skill' && o.skill.tier && o.skill.tier!=='Novice' ? h('div',{class:'sub gate',text: o.skill.tier==='Master' ? 'ประตู: ต้องมีปรมาจารย์หรือเนื้อเรื่อง' : 'ประตู: ต้องมีครู ตำรา หรือเคยเห็นถูกใช้'}) : null,
         h('button',{class:'primary small',disabled:!can,onclick:()=>choose(o),text: can? 'เลือกการ์ดนี้' : `ขาดอีก ${o.cost-ip} IP`}));
       return el; };
     if (!showAll){ wrap.append(h('div',{class:'hand'}, hand.map(cardEl))); }
