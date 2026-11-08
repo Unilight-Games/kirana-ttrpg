@@ -821,6 +821,8 @@ const Store = {
       for (const rid of c.roomIds||[]) this.db.doc(`rooms/${rid}/chars/${c.id}`).set(copy).catch(()=>{}); } },
   /* แชร์สำเนาชีทเข้าห้อง: GM และผู้เล่นในห้องเห็นได้เฉพาะตัวละครที่ถูกหยิบมาเล่นในแคมเปญนี้ */
   shareToRoom(c, rid){ c.roomIds = [...new Set([...(c.roomIds||[]), rid])]; this.upsert(c); },
+  /* ถอนตัวละครออกจากห้อง: เลิกซิงก์และลบสำเนาในห้อง */
+  unshareFromRoom(c, rid){ if (!c) return; c.roomIds = (c.roomIds||[]).filter(x=>x!==rid); if (this.isMine(c)) this.upsert(c); if (this.db) this.db.doc(`rooms/${rid}/chars/${c.id}`).delete().catch(()=>{}); },
   remove(id){ const c = this.get(id); this.chars = this.chars.filter(x=>x.id!==id); saveLocal(this.chars); this.notify(); if (this.db){ this.db.doc('chars/'+id).delete().catch(()=>{}); for (const rid of (c&&c.roomIds)||[]) this.db.doc(`rooms/${rid}/chars/${id}`).delete().catch(()=>{}); } },
   get(id){ return this.chars.find(x=>x.id===id) || (typeof Table!=='undefined' && Table.roomChars.find(x=>x.id===id)) || null; },
   isMine(c){ return !c.ownerId || !this.me || c.ownerId===this.me; },
@@ -869,6 +871,7 @@ async function initFirebase(cfg){
   const coll = (path, cons=[]) => ({
     orderBy: (f, d) => coll(path, [...cons, F.orderBy(f, d||'asc')]), limit: n => coll(path, [...cons, F.limit(n)]), where: (a, op, v) => coll(path, [...cons, F.where(a, op, v)]),
     doc: id => docRef(path + '/' + id),
+    get: async () => ({ docs: (await F.getDocs(cons.length ? F.query(F.collection(fdb, path), ...cons) : F.collection(fdb, path))).docs.map(wrapDoc) }),
     onSnapshot: (ok, err) => F.onSnapshot(cons.length ? F.query(F.collection(fdb, path), ...cons) : F.collection(fdb, path), s => ok({ docs: s.docs.map(wrapDoc) }), err) });
   const db = { doc: docRef, collection: coll };
   // ---- login gate: config/site = {requireLogin, devUids, devIps} ----
@@ -2506,7 +2509,7 @@ function makeThumb(dataUrl){
 }
 
 /* ===== Online table: rooms, 20×20 grid combat map, encounter order, shared chat & dice, fate clocks ===== */
-function newRoom(name){ const id = uid(); return {id, name, gmId: Store.me||'local', gmName: Store.displayName||'', gmKey: uid().slice(0,6).toUpperCase(), createdAt:Date.now(), updatedAt:Date.now(), map: generateMap('field', id), tokens:[], enc:{active:false, round:0, turnIdx:0, order:[]}, clocks:[], scene:''}; }
+function newRoom(name){ const id = uid(); return {id, name, gmId: Store.me||'local', gmName: Store.displayName||'', gmKey: uid().slice(0,6).toUpperCase(), hasKey:false, createdAt:Date.now(), updatedAt:Date.now(), map: generateMap('field', id), tokens:[], enc:{active:false, round:0, turnIdx:0, order:[]}, clocks:[], scene:''}; }
 /* ห้องรุ่นเก่าที่ใช้โซน: สร้างแผนที่ให้ และวางหมากเดิมลงกริด (GM บันทึกครั้งถัดไปจึงติดถาวร) */
 function migrateRoom(r){ if (!r) return r; if (!r.map){ r.map = generateMap('field', r.id); } if (!r.tokens) r.tokens = []; for (const t of r.tokens){ if (t.x==null || t.y==null){ const pos = freeCell(r.map, r.tokens, t.kind==='npc' ? [0,1,2,3] : [16,17,18,19]); t.x = pos.x; t.y = pos.y; } } delete r.zones; return r; }
 function gmKeys(){ try { return JSON.parse(localStorage.getItem('kirana.gmkeys')||'{}'); } catch(e){ return {}; } }
@@ -2519,7 +2522,16 @@ const Table = {
   isGM(){ if (!this.room) return false; if (this.localMode || this.room.gmId===Store.me || Store.isOwner) return true; const k = gmKeys()[this.room.id]; return !!(k && this.room.gmKey && k===this.room.gmKey); },
   async open(id){
     this.close(); this.roomId = id; this.localMode = !Store.db;
-    if (this.localMode){ const rooms = loadLocalRooms(); this.room = migrateRoom(rooms.find(r=>r.id===id)||null); this.chat = loadLocalChat(id); renderTable(); return; }
+    if (this.localMode){ const rooms = loadLocalRooms(); const lr = rooms.find(r=>r.id===id)||null; if (lr && lr.joinKey && !gmKeys()[id] && localStorage.getItem('kirana.joined.'+id)!==lr.joinKey){ const k = prompt('ห้องนี้ล็อกด้วยรหัส กรอกรหัสเข้าห้อง'); if (k!==lr.joinKey){ toast('รหัสไม่ถูกต้อง'); location.hash='#table'; return; } localStorage.setItem('kirana.joined.'+id, k); } this.room = migrateRoom(lr); this.chat = loadLocalChat(id); renderTable(); return; }
+    // ห้องที่ล็อกด้วยรหัส: ดูล็อบบี้ก่อน ถ้ายังไม่เป็นสมาชิกให้กรอกรหัส
+    try {
+      const lb = docData(await Store.db.doc('lobby/'+id).get());
+      if (lb && lb.hasKey && lb.gmId !== Store.me && !Store.isDevUid){
+        const mem = await Store.db.doc(`rooms/${id}/members/${Store.me}`).get().catch(()=>null);
+        if (!mem || !mem.exists){ this.room = null; renderTable(); const ok = await askRoomKey(id, lb); if (!ok){ location.hash = '#table'; return; } }
+      }
+    } catch(e){ console.warn('lobby', e); }
+    if (this.roomId !== id) return;
     try {
       const u1 = Store.db.doc('rooms/'+id).onSnapshot(snap => { const d = docData(snap); if (d){ this.room = migrateRoom(d); renderTable(); } }, err=>{ console.warn(err); toast('อ่านห้องไม่ได้'); });
       const u4 = Store.db.collection('rooms/'+id+'/chars').onSnapshot(snap => { this.roomChars = snapDocs(snap).filter(Boolean); if (location.hash.startsWith('#sheet-')) { const sid = location.hash.slice(7); if (!Store.chars.some(c=>c.id===sid) && this.roomChars.some(c=>c.id===sid)) renderSheet(sid); } }, err=>console.warn('roomchars', err));
@@ -2579,7 +2591,7 @@ const Table = {
     renderTable();
     if (this.writing){ this.pending = true; return; }
     this.writing = true;
-    try { await Store.db.doc('rooms/'+r.id).set(JSON.parse(JSON.stringify(r))); } catch(e){ console.warn('save room', e); toast('บันทึกห้องไม่ได้ (สิทธิ์ไม่พอ?)'); }
+    try { await Store.db.doc('rooms/'+r.id).set(JSON.parse(JSON.stringify(r))); Store.db.doc('lobby/'+r.id).set(lobbyDoc(r)).catch(()=>{}); } catch(e){ console.warn('save room', e); toast('บันทึกห้องไม่ได้ (สิทธิ์ไม่พอ?)'); }
     this.writing = false; if (this.pending){ this.pending=false; this.save(); }
   },
   async post(msg){
@@ -2627,6 +2639,40 @@ function loadLocalChat(id){ try{ return JSON.parse(localStorage.getItem('kirana.
 function saveLocalChat(id, c){ try{ localStorage.setItem('kirana.chat.'+id, JSON.stringify(c)); }catch(e){} }
 
 let roomsCache = []; let roomsUnsub = null;
+/* ---- ล็อบบี้: ข้อมูลห้องที่ทุกคนเห็นได้ (ชื่อ GM มีรหัสไหม) แยกจากตัวห้องซึ่งอาจล็อกด้วยรหัส ---- */
+function lobbyDoc(r){ return { id:r.id, name:r.name||'', gmId:r.gmId||'', gmName:r.gmName||'', hasKey:!!r.hasKey, tokens:(r.tokens||[]).length, encActive:!!(r.enc&&r.enc.active), round:(r.enc&&r.enc.round)||0, scene:(r.scene||'').slice(0,100), updatedAt:r.updatedAt||Date.now() }; }
+async function joinRoomWithKey(id, key){ const me = Store.me; await Store.db.doc(`rooms/${id}/members/${me}`).set({ uid: me, name: Store.displayName||'', key: String(key), at: Date.now() }); try { await Store.db.doc(`rooms/${id}/members/${me}`).set({ uid: me, name: Store.displayName||'', at: Date.now() }); } catch(e){} }
+async function setRoomKey(r, key){ // GM เท่านั้น: key ว่าง = ปลดล็อก
+  if (!Store.db){ r.joinKey = key || null; r.hasKey = !!key; Table.save(); return; }
+  if (key){ await Store.db.doc('roomsecrets/'+r.id).set({ value: String(key), roomId: r.id, at: Date.now() }); r.hasKey = true; await Table.save(); try { await joinRoomWithKey(r.id, key); } catch(e){} }
+  else { r.hasKey = false; await Table.save(); try { await Store.db.doc('roomsecrets/'+r.id).delete(); } catch(e){} }
+}
+/* ลบสำเนาชีทของหมากที่ถูกเอาออกจากบอร์ด (เจ้าของ: เลิกซิงก์ด้วย) */
+function dropTokenCopy(r, t){ if (!t || !t.charId) return; const mine = Store.chars.find(c=>c.id===t.charId && Store.isMine(c)); if (mine) Store.unshareFromRoom(mine, r.id); else if (Store.db) Store.db.doc(`rooms/${r.id}/chars/${t.charId}`).delete().catch(()=>{}); }
+async function deleteCollection(path){ if (!Store.db) return; try { const snap = await Store.db.collection(path).get(); await Promise.all(snap.docs.map(d => Store.db.doc(path+'/'+d.id).delete().catch(()=>{}))); } catch(e){ console.warn('delete', path, e); } }
+async function deleteRoomDeep(r){
+  for (const t of r.tokens||[]) { const mine = Store.chars.find(c=>c.id===t.charId && Store.isMine(c)); if (mine) Store.unshareFromRoom(mine, r.id); }
+  if (!Store.db) return;
+  for (const sub of ['chars','chat','members','meta','presence']) await deleteCollection(`rooms/${r.id}/${sub}`);
+  try { await Store.db.doc('lobby/'+r.id).delete(); } catch(e){}
+  try { await Store.db.doc('roomsecrets/'+r.id).delete(); } catch(e){}
+  try { await Store.db.doc('rooms/'+r.id).delete(); } catch(e){ toast('ลบห้องไม่ได้'); }
+}
+function roomKeyModal(r){
+  const inp = h('input',{placeholder:'รหัสเข้าห้อง (4 ตัวขึ้นไป)',style:'min-width:220px',value:''});
+  modal(h('div',null, h('h3',{text:'รหัสเข้าห้อง'}), h('p',{class:'desc'}, r.hasKey ? 'ห้องนี้มีรหัสอยู่แล้ว ผู้เล่นต้องกรอกรหัสก่อนเข้าครั้งแรก (บัญชีที่เข้าแล้วไม่ต้องกรอกซ้ำ) รหัสใหม่ใช้กับคนที่ยังไม่เคยเข้า' : 'ตั้งรหัสแล้ว คนที่มีแค่ลิงก์จะเข้าห้องไม่ได้จนกว่าจะกรอกรหัสถูก แชต หมาก และสำเนาชีทในห้องอ่านได้เฉพาะคนในห้อง'),
+    h('div',{class:'row',style:'margin-top:8px'}, inp, h('button',{class:'primary small',onclick:async()=>{ const k = inp.value.trim(); if (k.length < 4){ toast('รหัสสั้นเกินไป'); return; } try { await setRoomKey(r, k); toast('ตั้งรหัสเข้าห้องแล้ว'); modal(null); renderTable(); } catch(e){ console.warn(e); toast('ตั้งรหัสไม่ได้ (ต้องเป็น GM ที่สร้างห้อง และ Rules ต้องเป็นรุ่น v1.2)'); } },text: r.hasKey ? 'เปลี่ยนรหัส' : 'ตั้งรหัส'}),
+      r.hasKey ? h('button',{class:'small ghost',onclick:async()=>{ try { await setRoomKey(r, ''); toast('ปลดรหัสแล้ว ห้องเปิดให้ทุกคนที่มีลิงก์'); modal(null); renderTable(); } catch(e){ toast('ปลดรหัสไม่ได้'); } },text:'ปลดรหัส'}) : null)));
+}
+function askRoomKey(id, lobby){
+  return new Promise(resolve => {
+    const inp = h('input',{placeholder:'รหัสเข้าห้อง',style:'min-width:220px'});
+    const go = async ()=>{ const k = inp.value.trim(); if (!k) return; try { await joinRoomWithKey(id, k); modal(null); resolve(true); } catch(e){ console.warn(e); toast('รหัสไม่ถูกต้อง'); } };
+    inp.onkeydown = (e)=>{ if (e.key==='Enter') go(); };
+    modal(h('div',null, h('h3',{text:`ห้อง "${lobby.name||''}" ล็อกด้วยรหัส`}), h('p',{class:'desc',text:`GM: ${lobby.gmName||'-'} · ขอรหัสเข้าห้องจาก GM แล้วกรอกครั้งเดียว บัญชีนี้จะเข้าได้ตลอด`}), h('div',{class:'row',style:'margin-top:8px'}, inp, h('button',{class:'primary small',onclick:go,text:'เข้าห้อง'}), h('button',{class:'small ghost',onclick:()=>{ modal(null); resolve(false); },text:'ยกเลิก'}))));
+    setTimeout(()=>inp.focus(), 50);
+  });
+}
 function renderTableHome(){
   const root = clear($('#v-table'));
   root.append(h('div',{class:'stephead'}, h('div',null, h('h2',{text:'โต๊ะเล่น'}), h('p',{text:'ห้องหนึ่งคือหนึ่งโต๊ะ GM สร้างห้องแล้วส่งลิงก์ ผู้เล่นวางตัวละครลงแผนที่ 20×20 ทอยเต๋าร่วมกันในแชต'}))));
@@ -2636,12 +2682,14 @@ function renderTableHome(){
     root.append(h('div',{class:'warnbox',style:'margin-bottom:12px'}, 'คุณเปิดเพจแบบดูอย่างเดียว: อ่านห้องได้แต่ย้ายตัวละครหรือส่งข้อความไม่ได้ ขอให้เจ้าของเพจแชร์ให้คุณเป็น Contributor'));
   }
   const nameInp = h('input',{placeholder:'ชื่อห้อง เช่น คืนวันสถาปนา',style:'min-width:240px'});
-  root.append(h('div',{class:'card',style:'margin-bottom:14px'}, h('div',{class:'row'}, nameInp, h('button',{class:'primary',onclick:async()=>{ const nm = nameInp.value.trim()||'โต๊ะใหม่'; const r = newRoom(nm); rememberGmKey(r.id, r.gmKey); if (!Store.db){ const rooms=loadLocalRooms(); rooms.push(r); saveLocalRooms(rooms); } else { try{ await Store.db.doc('rooms/'+r.id).set(r); }catch(e){ toast('สร้างห้องไม่ได้ (สิทธิ์ไม่พอ?)'); return; } } location.hash='#room-'+r.id; },text:'สร้างห้อง (คุณเป็น GM)'}))));
+  root.append(h('div',{class:'card',style:'margin-bottom:14px'}, h('div',{class:'row'}, nameInp, h('button',{class:'primary',onclick:async()=>{ const nm = nameInp.value.trim()||'โต๊ะใหม่'; const r = newRoom(nm); rememberGmKey(r.id, r.gmKey); if (!Store.db){ const rooms=loadLocalRooms(); rooms.push(r); saveLocalRooms(rooms); } else { try{ await Store.db.doc('rooms/'+r.id).set(r); await Store.db.doc('lobby/'+r.id).set(lobbyDoc(r)); }catch(e){ toast('สร้างห้องไม่ได้ (สิทธิ์ไม่พอ?)'); return; } } location.hash='#room-'+r.id; },text:'สร้างห้อง (คุณเป็น GM)'}))));
   const list = h('div',{class:'grid two'});
-  const draw = (rooms)=>{ clear(list); if(!rooms.length) list.append(h('div',{class:'card dim',text:'ยังไม่มีห้อง'})); for (const r of rooms.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))) list.append(h('div',{class:'card pick',onclick:()=>{location.hash='#room-'+r.id;}}, h('h3',{text:r.name||'(ไม่มีชื่อ)'}), h('div',{class:'gives'}, tag(`${(r.tokens||[]).length} ตัวละครบนบอร์ด`), r.enc&&r.enc.active? tag(`กำลังสู้ รอบ ${r.enc.round}`,'neg') : null, (r.gmId===Store.me||!Store.db||(r.gmKey&&gmKeys()[r.id]===r.gmKey))? tag('คุณเป็น GM','prop'):null), h('div',{class:'desc',text: (r.gmName? 'GM: '+r.gmName+' · ' : '') + (r.scene? r.scene.slice(0,100) : '')}))); };
+  const draw = (rooms)=>{ clear(list); if(!rooms.length) list.append(h('div',{class:'card dim',text:'ยังไม่มีห้อง'})); for (const r of rooms.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))) list.append(h('div',{class:'card pick',onclick:()=>{location.hash='#room-'+r.id;}}, h('h3',{text:r.name||'(ไม่มีชื่อ)'}), h('div',{class:'gives'}, tag(`${Array.isArray(r.tokens)? r.tokens.length : (r.tokens||0)} ตัวละครบนบอร์ด`), (r.encActive || (r.enc&&r.enc.active))? tag(`กำลังสู้ รอบ ${r.round||(r.enc&&r.enc.round)||0}`,'neg') : null, r.hasKey ? tag('🔒 มีรหัส','warn') : null, (r.gmId===Store.me||!Store.db||gmKeys()[r.id])? tag('คุณเป็น GM','prop'):null), h('div',{class:'desc',text: (r.gmName? 'GM: '+r.gmName+' · ' : '') + (r.scene? r.scene.slice(0,100) : '')}))); };
   root.append(list);
   if (!Store.db) draw(loadLocalRooms());
-  else { draw(roomsCache); if (!roomsUnsub){ try{ roomsUnsub = Store.db.collection('rooms').onSnapshot(snap=>{ roomsCache = snapDocs(snap).filter(Boolean); if (location.hash==='#table') renderTableHome(); }, e=>console.warn(e)); }catch(e){ console.warn(e);} } }
+  else { draw(roomsCache); if (!roomsUnsub){ const merge = (a, b)=>{ const m = new Map(); for (const x of [...a, ...b]) if (x && x.id && !m.has(x.id)) m.set(x.id, x); return [...m.values()]; }; let lobbyList = [], legacy = []; const refresh = ()=>{ roomsCache = merge(lobbyList, legacy); if (location.hash==='#table') renderTableHome(); };
+      try{ roomsUnsub = Store.db.collection('lobby').onSnapshot(snap=>{ lobbyList = snapDocs(snap).filter(Boolean); refresh(); }, e=>console.warn('lobby', e)); }catch(e){ console.warn(e); }
+      try{ Store.db.collection('rooms').onSnapshot(snap=>{ legacy = snapDocs(snap).filter(Boolean).map(r=>Object.assign(lobbyDoc(r), {legacy:true})); refresh(); }, e=>{ /* Rules รุ่นใหม่ไม่ให้ query ห้องตรง ๆ ใช้ล็อบบี้แทน */ }); }catch(e){} } }
 }
 
 function renderTable(){
@@ -2653,12 +2701,17 @@ function renderTable(){
   const myChars = Store.chars.filter(c=>c.done && Store.isMine(c));
   // หมากของฉันที่ยังไม่มีสำเนาชีทในห้อง (วางไว้ตั้งแต่รุ่นก่อน) → แชร์ให้ GM เห็นได้
   if (!Table.localMode) for (const t of r.tokens||[]) if (t.charId && t.ownerId===Store.me && !Table.roomChars.some(x=>x.id===t.charId)){ const c = Store.chars.find(x=>x.id===t.charId); if (c && !(c.roomIds||[]).includes(r.id)) Store.shareToRoom(c, r.id); }
+  // ห้องรุ่นก่อนไม่มีเอกสารล็อบบี้: GM เขียนให้ครั้งแรกที่เปิด
+  if (gm && !Table.localMode && Table.lobbyWritten !== r.id){ Table.lobbyWritten = r.id; Store.db.doc('lobby/'+r.id).set(lobbyDoc(r)).catch(()=>{}); }
+  // ตัวละครของฉันที่ยังซิงก์กับห้องนี้แต่หมากถูกเอาออกไปแล้ว → เลิกซิงก์และลบสำเนา
+  if (!Table.localMode) for (const c of Store.chars) if (Store.isMine(c) && (c.roomIds||[]).includes(r.id) && !(r.tokens||[]).some(t=>t.charId===c.id)) Store.unshareFromRoom(c, r.id);
   // header
   const gmKeyBtn = gm && r.gmKey ? h('button',{class:'small ghost',title:'รหัสสำหรับเข้าเป็น GM จากเครื่องอื่น',onclick:()=>{ modal(h('div',null, h('h3',{text:'รหัส GM ของห้องนี้'}), h('p',{class:'desc',text:'ใช้เมื่อคุณเปิดห้องจากเครื่องหรือเบราว์เซอร์อื่น: กด "เข้าเป็น GM" แล้วกรอกรหัสนี้ อย่าให้ผู้เล่นเห็น'}), h('div',{style:'font-family:var(--font-display);font-size:28px;letter-spacing:4px',text:r.gmKey}))); },text:'รหัส GM'}) : null;
   const becomeGm = !gm && r.gmKey ? h('button',{class:'small ghost',onclick:()=>{ const k=(prompt('กรอกรหัส GM ของห้องนี้')||'').trim().toUpperCase(); if(!k) return; if (k===r.gmKey){ rememberGmKey(r.id,k); toast('คุณเป็น GM ของห้องนี้แล้ว'); renderTable(); } else toast('รหัสไม่ถูกต้อง'); },text:'เข้าเป็น GM'}) : null;
+  const keyBtn = gm ? h('button',{class:'small ghost'+(r.hasKey?' on':''),title:'ตั้งรหัสให้ผู้เล่นต้องกรอกก่อนเข้าห้อง',onclick:()=>roomKeyModal(r),text: r.hasKey ? '🔒 รหัสเข้าห้อง' : 'ตั้งรหัสเข้าห้อง'}) : (r.hasKey ? tag('🔒 ห้องมีรหัส') : null);
   const shareBtn = h('button',{class:'small ghost',onclick:()=>{ const url = location.href.split('#')[0] + '#room-' + r.id; navigator.clipboard.writeText(url).then(()=>toast('คัดลอกลิงก์ห้องแล้ว')).catch(()=>modal(h('div',null, h('h3',{text:'ลิงก์ห้อง'}), h('input',{style:'width:100%',value:url,readonly:true})))); },text:'ลิงก์ห้อง'});
   const head = h('div',{class:'stephead'}, h('div',null, h('h2',{text:r.name}), h('p',null, gm? tag('คุณเป็น GM','prop') : tag('ผู้เล่น'), ' ', h('span',{id:'peers',class:'dim',style:'font-size:13px'}), Table.localMode? [' ', tag('ห้องในเครื่องนี้','warn')] : null)),
-    h('div',{class:'row'}, shareBtn, gmKeyBtn, becomeGm, gm? h('button',{class:'small ghost',onclick:async()=>{ if(!confirm(`ลบห้อง "${r.name}" ถาวร? แชตและบอร์ดจะหายทั้งหมด`)) return; const id=r.id; Table.close(); if (!Store.db){ saveLocalRooms(loadLocalRooms().filter(x=>x.id!==id)); } else { try{ await Store.db.doc('rooms/'+id).delete(); }catch(e){ toast('ลบห้องไม่ได้'); } } location.hash='#table'; },text:'ลบห้อง'}) : null, h('button',{class:'small ghost',onclick:()=>{ Table.close(); location.hash='#table'; },text:'← ออกจากห้อง'})));
+    h('div',{class:'row'}, shareBtn, keyBtn, gmKeyBtn, becomeGm, gm? h('button',{class:'small ghost',onclick:async()=>{ if(!confirm(`ลบห้อง "${r.name}" ถาวร? แชต บอร์ด และสำเนาชีทในห้องจะหายทั้งหมด`)) return; const id=r.id; const snapshot = JSON.parse(JSON.stringify(r)); Table.close(); if (!Store.db){ saveLocalRooms(loadLocalRooms().filter(x=>x.id!==id)); for (const t of snapshot.tokens||[]){ const mine = Store.chars.find(c=>c.id===t.charId); if (mine) Store.unshareFromRoom(mine, id); } } else { toast('กำลังลบห้องและสำเนาชีท…'); await deleteRoomDeep(snapshot); } location.hash='#table'; },text:'ลบห้อง'}) : null, h('button',{class:'small ghost',onclick:()=>{ Table.close(); location.hash='#table'; },text:'← ออกจากห้อง'})));
   root.append(head);
   const left = h('div'); const right = h('div');
   // scene text
@@ -2738,7 +2791,7 @@ function mapPanel(r, gm){
       h('button',{class:'small',onclick:()=>{ r.map = generateMap(map.kind, uid()); for (const t of r.tokens){ const pos = freeCell(r.map, r.tokens.filter(x=>x!==t), t.kind==='npc'?[0,1,2,3]:[16,17,18,19]); t.x=pos.x; t.y=pos.y; } Table.save(); },text:'สุ่มใหม่ (สถานที่เดิม)'}));
     const brushSel = h('select',{title:'พู่กัน: เลือกชนิดพื้นแล้วคลิกช่องเพื่อแก้แผนที่'}, h('option',{value:'',text:'พู่กัน: ปิด'}), Object.entries(TILE).map(([k,v])=>h('option',{value:k,selected:Table.brush===k,text:`${v.th}`})));
     brushSel.onchange = ()=>{ Table.brush = brushSel.value||null; Table.sel=null; renderTable(); };
-    ctl.append(brushSel, h('button',{class:'small ghost',onclick:()=>{ if(!confirm('เอาหมากทุกตัวออกจากบอร์ด?')) return; r.tokens=[]; r.enc={active:false,round:0,turnIdx:0,order:[]}; Table.save(); },text:'ล้างหมาก'}));
+    ctl.append(brushSel, h('button',{class:'small ghost',onclick:()=>{ if(!confirm('เอาหมากทุกตัวออกจากบอร์ด? (สำเนาชีทในห้องจะถูกลบด้วย)')) return; for (const t of r.tokens) dropTokenCopy(r, t); r.tokens=[]; r.enc={active:false,round:0,turnIdx:0,order:[]}; Table.save(); },text:'ล้างหมาก'}));
     wrap.append(ctl);
   } else wrap.append(h('div',{class:'row mapctl'}, h('span',{class:'dim',style:'font-size:12px'}, 'สถานที่: ', h('b',{text:(MAP_KINDS.find(x=>x[0]===map.kind)||['','?'])[1]}))));
   const grid = h('div',{class:'gridmap'+(Table.brush?' painting':'')});
@@ -2781,8 +2834,8 @@ function tokenRow(t, r, gm, isTurn){
     const ctl = h('div',{class:'ctl'});
     ctl.append(h('button',{class:'small',title:'HP -1',onclick:()=>{t.hp--; Table.save();},text:'−'}), h('button',{class:'small',title:'HP +1',onclick:()=>{t.hp=Math.min(t.hpMax,t.hp+1); Table.save();},text:'+'}));
     if (t.charId && (gm || t.ownerId===Store.me || Store.isDevUid)) ctl.append(h('button',{class:'small ghost',title:'เปิดชีท',onclick:()=>{ location.hash='#sheet-'+t.charId; },text:'ชีท'}));
-    if (gm){ ctl.append(h('button',{class:'small ghost',title:t.hidden?'เปิดเผย':'ซ่อน',onclick:()=>{t.hidden=!t.hidden; Table.save(); if(!t.hidden) Table.post({kind:'sys',who:'',text:`${t.name} ปรากฏตัวที่ (${t.x},${t.y})`});},text:t.hidden?'👁':'🙈'}), h('button',{class:'small ghost',title:'เอาออกจากบอร์ด',onclick:()=>{ r.tokens=r.tokens.filter(x=>x!==t); r.enc.order=r.enc.order.filter(x=>x!==t.id); if (Table.sel===t.id) Table.sel=null; Table.save(); },text:'✕'})); }
-    else if (t.ownerId===Store.me) ctl.append(h('button',{class:'small ghost',title:'ถอนตัวละครออกจากบอร์ด',onclick:()=>{ r.tokens=r.tokens.filter(x=>x!==t); r.enc.order=r.enc.order.filter(x=>x!==t.id); if (Table.sel===t.id) Table.sel=null; Table.save(); },text:'✕'}));
+    if (gm){ ctl.append(h('button',{class:'small ghost',title:t.hidden?'เปิดเผย':'ซ่อน',onclick:()=>{t.hidden=!t.hidden; Table.save(); if(!t.hidden) Table.post({kind:'sys',who:'',text:`${t.name} ปรากฏตัวที่ (${t.x},${t.y})`});},text:t.hidden?'👁':'🙈'}), h('button',{class:'small ghost',title:'เอาออกจากบอร์ด (ลบสำเนาชีทในห้องด้วย)',onclick:()=>{ r.tokens=r.tokens.filter(x=>x!==t); r.enc.order=r.enc.order.filter(x=>x!==t.id); if (Table.sel===t.id) Table.sel=null; dropTokenCopy(r, t); Table.save(); },text:'✕'})); }
+    else if (t.ownerId===Store.me) ctl.append(h('button',{class:'small ghost',title:'ถอนตัวละครออกจากบอร์ด (GM จะไม่เห็นชีทอีก)',onclick:()=>{ r.tokens=r.tokens.filter(x=>x!==t); r.enc.order=r.enc.order.filter(x=>x!==t.id); if (Table.sel===t.id) Table.sel=null; dropTokenCopy(r, t); Table.save(); },text:'✕'}));
     el.append(ctl);
   }
   return el;

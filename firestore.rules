@@ -6,6 +6,14 @@ service cloud.firestore {
       return signedIn() && exists(/databases/$(db)/documents/config/site)
         && request.auth.uid in get(/databases/$(db)/documents/config/site).data.devUids;
     }
+    // ---- ห้องที่ล็อกด้วยรหัส (v1.2) ----
+    // roomsecrets/<rid> = {value} อ่านไม่ได้จากฝั่งเว็บ ใช้เทียบตอนสมัครเป็นสมาชิกเท่านั้น
+    function roomLocked(rid) { return exists(/databases/$(db)/documents/roomsecrets/$(rid)); }
+    function roomKey(rid) { return get(/databases/$(db)/documents/roomsecrets/$(rid)).data.value; }
+    function isMember(rid) { return exists(/databases/$(db)/documents/rooms/$(rid)/members/$(request.auth.uid)); }
+    function isRoomGm(rid) { return exists(/databases/$(db)/documents/rooms/$(rid)) && get(/databases/$(db)/documents/rooms/$(rid)).data.gmId == request.auth.uid; }
+    function canEnter(rid) { return signedIn() && (isDev() || !roomLocked(rid) || isMember(rid) || isRoomGm(rid)); }
+
     // ตั้งค่าเว็บ: อ่านได้ทุกคน เขียนได้เฉพาะผู้พัฒนาที่ล็อกอิน Google (อ้างสิทธิ์ครั้งแรกได้เมื่อยังไม่มีผู้พัฒนา)
     match /config/{doc} {
       allow read: if true;
@@ -23,8 +31,34 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if signedIn() && request.auth.uid == uid;
     }
-    // ห้องเล่น แชต หมาก สำเนาชีทในห้อง ล็อกทอย presence ในห้อง
-    match /rooms/{id} { allow read, write: if signedIn(); }
-    match /rooms/{id}/{sub=**} { allow read, write: if signedIn(); }
+    // ล็อบบี้: รายชื่อห้องที่ทุกคนเห็น (ชื่อ GM มีรหัสไหม จำนวนหมาก) เขียนโดยคนที่เข้าห้องนั้นได้
+    match /lobby/{rid} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if canEnter(rid);
+    }
+    // รหัสเข้าห้อง: ไม่มีใครอ่านได้ GM ผู้สร้างห้อง (หรือผู้พัฒนา) ตั้ง/ลบ
+    match /roomsecrets/{rid} {
+      allow read: if false;
+      allow write: if signedIn() && (isDev() || isRoomGm(rid));
+    }
+    // ห้องเล่น: ห้องไม่มีรหัส = ทุกคนที่ล็อกอิน · ห้องมีรหัส = สมาชิก GM ผู้พัฒนา
+    match /rooms/{rid} {
+      allow create: if signedIn();
+      allow read, update, delete: if canEnter(rid);
+      // สมัครเป็นสมาชิกด้วยรหัสที่ถูกต้อง (หรือห้องไม่มีรหัส) ลบตัวเองได้ GM ลบใครก็ได้
+      match /members/{uid} {
+        allow read: if signedIn() && (request.auth.uid == uid || isRoomGm(rid) || isDev());
+        allow create: if signedIn() && request.auth.uid == uid
+          && (!roomLocked(rid) || request.resource.data.key == roomKey(rid));
+        allow update: if signedIn() && request.auth.uid == uid && isMember(rid);
+        allow delete: if signedIn() && (request.auth.uid == uid || isRoomGm(rid) || isDev());
+      }
+      // แชต สำเนาชีทในห้อง ล็อกทอย presence ในห้อง: เฉพาะคนที่เข้าห้องได้
+      match /chat/{doc} { allow read, write: if canEnter(rid); }
+      match /chars/{doc} { allow read, write: if canEnter(rid); }
+      match /meta/{doc} { allow read, write: if canEnter(rid); }
+      match /presence/{doc} { allow read, write: if canEnter(rid); }
+    }
   }
 }
