@@ -584,6 +584,48 @@ main{position:relative}
 @media (prefers-reduced-motion:no-preference){.coach.fresh .coach-bubble{animation:nempop .3s ease-out}}
 .coach.off .coach-mini{height:26px;width:auto;vertical-align:middle;margin-right:4px;object-fit:cover}
 .coach.off button{display:inline-flex;align-items:center}
+
+/* ===== ภาพประกอบในฉากสอนเล่น ===== */
+.vn-fighost{position:absolute;right:2.5%;top:14%;width:50%;max-width:620px;bottom:calc(2.5% + 190px);z-index:3;display:block;pointer-events:none}
+.vn-fig{pointer-events:auto;display:block;width:100%;box-sizing:border-box;max-height:100%;overflow:auto;scrollbar-width:thin;background:linear-gradient(180deg,rgba(18,13,16,.9),rgba(12,9,11,.94));border:1px solid var(--brass);box-shadow:0 0 0 3px rgba(20,5,7,.8),0 14px 40px rgba(0,0,0,.6);border-radius:8px;padding:12px 14px;color:var(--parch);font-size:13.5px;line-height:1.55;cursor:default}
+@media (prefers-reduced-motion:no-preference){.vn-fig{animation:figin .35s ease-out}}
+@keyframes figin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fig-title{font-family:var(--font-gothic);color:var(--gold);font-size:14px;margin-bottom:8px;letter-spacing:.3px}
+.fig-note{font-size:12.5px;color:#cbb58a;margin-top:8px;border-top:1px solid rgba(176,138,70,.3);padding-top:6px}
+.fig-note .term,.vn-fig .term{color:#ffd98a;border-bottom-color:#ffd98a}
+.die .die-bg{fill:#f1e7d2;stroke:#6b5a3e;stroke-width:1.5}.die .pip{fill:#1a1014}
+.die.ok .die-bg{fill:#dff5e3;stroke:var(--ok)}.die.bad .die-bg{fill:#f8d7d3;stroke:var(--blood)}.die.dim{opacity:.35}
+.fig-dice{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fig-op{font-size:20px;color:#cbb58a}.fig-big{font-size:26px;font-weight:700;font-family:var(--font-display)}.fig-big.hi{color:var(--gold)}.fig-lbl{font-size:12px;color:#cbb58a}
+.fig-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}.fig-col{display:grid;gap:6px}
+.fig-cap{font-size:12.5px}.fig-cap.ok{color:var(--ok)}.fig-cap.bad{color:var(--blood-2)}
+.fig-table{border-collapse:collapse;width:100%;font-size:13px}.fig-table td{padding:3px 8px 3px 0;border-bottom:1px solid rgba(176,138,70,.2);vertical-align:top}.fig-table td.num{color:var(--gold);font-weight:600;white-space:nowrap}.fig-table td.num:last-child{text-align:right}.fig-row>.fig-table{flex:1;width:auto;min-width:180px}.fig-row{flex-wrap:nowrap}.fig-table td.ok{color:var(--ok)}
+.fig-bars{display:flex;align-items:flex-end;gap:5px;height:100px}.fig-bar{display:grid;justify-items:center;gap:2px}.fig-bar .b{width:18px;background:#8a6a3e;border-radius:3px 3px 0 0}.fig-bar.hi .b{background:var(--gold)}.fig-bar .n{font-size:11px;color:#cbb58a}.fig-bar.hi .n{color:var(--gold);font-weight:700}
+.fig-logline{margin-top:6px;font-size:12.5px;background:rgba(0,0,0,.3);padding:4px 8px;border-radius:4px}
+.fig-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.fig-stat{text-align:center;border:1px solid var(--sc);border-radius:6px;padding:4px 2px;background:rgba(0,0,0,.3)}.fig-stat .k{font-size:11px;color:var(--sc);font-weight:700}.fig-stat .v{font-size:20px;font-weight:700}.fig-stat .m{font-size:11px;color:#cbb58a}
+.fig-modrow{display:flex;gap:4px;flex-wrap:wrap}.fig-mod{text-align:center;min-width:40px;border:1px solid rgba(176,138,70,.4);border-radius:6px;padding:3px 4px;background:rgba(0,0,0,.3)}.fig-mod.odd{opacity:.5}.fig-mod .m{color:var(--gold);font-size:12px}
+.fig-chips{display:flex;gap:6px;flex-wrap:wrap}.fig-chips.big .tag{font-size:14px;padding:4px 12px}
+.fig-axes{display:grid;gap:6px}.fig-axis{display:grid;grid-template-columns:1fr 2fr 1fr;align-items:center;gap:8px;font-size:12px}.fig-axis.big{font-size:14px}.fig-axis .l{text-align:right;color:#cbb58a}.fig-axis .r{color:#cbb58a}.fig-axis .l.on{color:#f08c2e;font-weight:700}.fig-axis .r.on{color:#58b7ff;font-weight:700}
+.fig-axis .pbar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#1a1014}.fig-axis .pbar .warm{background:#f08c2e}.fig-axis .pbar .cool{background:#58b7ff}
+.fig-profile{display:grid;gap:6px;font-size:13px}
+.fig-steps{display:flex;gap:5px;flex-wrap:wrap}.fig-step{font-size:12.5px;padding:3px 9px;border-radius:999px;border:1px solid rgba(176,138,70,.4);color:#cbb58a}.fig-step.cur{background:var(--blood);border-color:var(--blood);color:#fff}.fig-step.done{border-color:var(--mana-2);color:var(--mana)}
+.fig-card{background:rgba(0,0,0,.3);border:1px solid rgba(176,138,70,.3);border-radius:6px;padding:8px 10px;font-size:13px}
+.fig-pop{margin-top:8px;background:var(--ink-3);border:1px solid var(--mana-2);border-radius:6px;padding:8px 10px;font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.5)}
+.fig-dock{display:flex;gap:10px;margin-bottom:10px}.fig-hudbtn{position:relative;width:58px;height:58px;border-radius:14px;background:radial-gradient(circle at 35% 30%,#3a2d1c,#1a1310 70%);border:1px solid var(--brass);display:grid;place-items:center;color:#e4d6b6}.fig-hudbtn .ico{width:26px;height:26px;display:block}.fig-hudbtn .ico svg{width:100%;height:100%}.fig-hudbtn .lbl{position:absolute;bottom:-16px;font-size:10px;color:#cbb58a;white-space:nowrap}.fig-hudbtn .badge{position:absolute;top:-6px;right:-8px;font-size:10px;background:#2a3645;border:1px solid var(--line-2);border-radius:999px;padding:0 5px}.fig-hudbtn .badge.gold{background:var(--gold);color:#1a1014;font-weight:700}
+.fig-bag{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:22px}.fig-tile{background:rgba(0,0,0,.35);border:1px solid rgba(176,138,70,.3);border-radius:5px;padding:5px 6px;font-size:11.5px;min-height:34px}.fig-tile.add{text-align:center;color:#cbb58a;font-size:18px;line-height:1.2}
+.fig-doll{width:70px;height:120px;flex:none}.fig-doll .bp{fill:#3a2d1c;stroke:var(--brass);stroke-width:1.2}.fig-doll .bp.hi{fill:var(--blood)}
+.fig-layout{position:relative;height:150px;border:1px dashed rgba(176,138,70,.4);border-radius:6px;background:rgba(0,0,0,.25)}.fig-box{position:absolute;border:1px solid var(--mana-2);background:rgba(20,27,36,.9);border-radius:4px;font-size:11px;overflow:hidden}.fig-box .grip{background:rgba(79,209,197,.15);padding:1px 6px;color:var(--mana);cursor:move}.fig-box .rs{position:absolute;right:2px;bottom:2px;width:8px;height:8px;border-right:2px solid var(--mana);border-bottom:2px solid var(--mana)}
+.fig-ip{display:flex;align-items:center;gap:10px}.fig-ip .k{color:#cbb58a}.fig-ip b{font-size:22px;color:var(--gold)}
+.fig-grid{display:grid;grid-template-columns:repeat(20,1fr);gap:1px;background:#05080c;border:2px solid #2a3645;border-radius:6px;padding:2px;aspect-ratio:1/1;width:290px;max-width:100%;margin:0 auto}.fig-grid .cell{cursor:default;font-size:0}.fig-grid .gtok{font-size:7px;inset:2%}.fig-grid .cell:hover{outline:0}.fig-grid .cell.rng-eng::after{background:rgba(224,90,74,.5)}.fig-grid .cell.rng-near::after{background:rgba(212,168,74,.26)}
+.fig-terrain{display:grid;grid-template-columns:repeat(5,1fr);gap:4px 8px;margin-bottom:8px}.fig-tile-l{display:flex;align-items:center;gap:6px;font-size:12px}.fig-tile-l .cell{width:18px;height:18px;border-radius:3px;cursor:default}
+.fig-flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:#cbb58a}.fig-flow.col{flex-direction:column;align-items:stretch}.fig-flowstep{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--parch)}.fig-flowstep .n{width:22px;height:22px;border-radius:50%;background:var(--blood);color:#fff;display:grid;place-items:center;font-size:12px;flex:none}
+.fig-tough{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.fig-tbox{text-align:center;border:1px solid rgba(176,138,70,.4);border-radius:6px;padding:4px;background:rgba(0,0,0,.3)}.fig-tbox .k{font-size:11px;color:#cbb58a}.fig-tbox.out{border-color:var(--blood);background:rgba(192,57,43,.25)}.fig-tbox.out .num{color:var(--blood-2);font-weight:700}
+.fig-res{display:grid;gap:6px}.fig-resrow{display:grid;grid-template-columns:64px 1fr 44px;align-items:center;gap:8px;font-size:12.5px}.fig-resrow .bar{height:10px;background:#1a1014;border-radius:5px;overflow:hidden}.fig-resrow .bar div{height:100%}
+.fig-cost{display:flex;gap:8px;align-items:center;margin:6px 0}.fig-cost .k{color:#cbb58a}
+.fig-topbar{display:flex;gap:10px;align-items:center;background:rgba(13,17,23,.9);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12.5px}
+.fig-pop-dice{text-align:center;background:rgba(0,0,0,.45);border:1px solid var(--gold);border-radius:10px;padding:10px;margin-bottom:8px}.fig-pop-dice .who{color:#cbb58a;font-size:12px;margin-bottom:6px}.fig-pop-dice .fig-dice{justify-content:center}.fig-pop-dice .tot{font-size:24px;color:var(--gold);font-weight:700;margin-top:4px}
+.fig-gmkey{font-size:28px;letter-spacing:4px;color:var(--gold);font-weight:700;background:rgba(0,0,0,.4);border:1px dashed var(--brass);border-radius:8px;padding:8px 14px;text-align:center}
+@media (max-width:760px){.vn-fighost{left:2%;right:2%;width:auto;max-width:none;top:16%;bottom:calc(2% + 170px);justify-content:center}.vn.has-fig .vn-sprite{opacity:.35}.vn-fig{font-size:12.5px;padding:10px}.fig-stats{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body class="bg-study">
@@ -2743,6 +2785,84 @@ function renderChatOnly(){
 }
 function renderPeers(){ const p = document.getElementById('peers'); if (!p) return; const n = Table.peers.length; const names = Table.peers.map(x=>x.name||'').filter(Boolean); p.textContent = n ? `ออนไลน์ในห้อง ${n} คน${names.length? ': '+names.join(', ') : ''}` : ''; }
 
+/* ===== ภาพประกอบในฉากสอนเล่น (วาดจากข้อมูลจริง ไม่ใช่รูปภาพ) =====
+ * vnFigure(spec) → DOM; spec = 'ชื่อ' หรือ {t:'ชื่อ', ...พารามิเตอร์} */
+const FIG_NS = 'http://www.w3.org/2000/svg';
+function svg(tag, attrs, ...kids){ const e = document.createElementNS(FIG_NS, tag); for (const [k,v] of Object.entries(attrs||{})) if (v!=null) e.setAttribute(k, v); for (const k of kids.flat()) if (k!=null) e.append(k); return e; }
+/* หน้าลูกเต๋า 1-6 */
+function dieFace(n, cls, size){ size = size || 44; const s = svg('svg',{viewBox:'0 0 44 44', width:size, height:size, class:'die '+(cls||'')});
+  s.append(svg('rect',{x:2,y:2,width:40,height:40,rx:8,class:'die-bg'}));
+  const P = {1:[[22,22]],2:[[12,12],[32,32]],3:[[12,12],[22,22],[32,32]],4:[[12,12],[32,12],[12,32],[32,32]],5:[[12,12],[32,12],[22,22],[12,32],[32,32]],6:[[12,11],[32,11],[12,22],[32,22],[12,33],[32,33]]};
+  for (const [x,y] of (P[n]||[])) s.append(svg('circle',{cx:x,cy:y,r:4.2,class:'pip'}));
+  return s; }
+function figTitle(t){ return h('div',{class:'fig-title',text:t}); }
+function figNote(t){ return h('div',{class:'fig-note'}, T(t)); }
+function statBox(s, raw){ const m = modOf(raw); return h('div',{class:'fig-stat sc-'+s, style:statStyle(s)}, h('div',{class:'k',text:s}), h('div',{class:'v num',text:raw}), h('div',{class:'m num',text:'Mod '+signed(m)})); }
+function miniGrid(kind, seed, tok, opts){
+  opts = opts || {};
+  const map = generateMap(kind, seed);
+  const g = h('div',{class:'fig-grid'});
+  for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++){
+    const ch = mapCell(map, x, y); const cls = 't-'+ch.replace(/[^A-Za-z]/g, m=>({'.':'ground',',':'grass','=':'road','#':'wall','~':'chasm'}[m]||'ground'));
+    const cell = h('div',{class:'cell '+cls});
+    if (tok){ const dist = cellDist(tok, {x,y}); if (dist>0 && opts.bands !== false){ const b = rangeBand(dist); if (b.id==='eng') cell.classList.add('rng-eng'); else if (b.id==='near' && cellPassable(map,x,y)) cell.classList.add('rng-near'); } }
+    if (tok && tok.x===x && tok.y===y) cell.append(h('div',{class:'gtok sel',text:'เจ้า'}));
+    if (opts.npc && opts.npc.x===x && opts.npc.y===y) cell.append(h('div',{class:'gtok npc',text:'ศัตรู'}));
+    g.append(cell);
+  }
+  return g;
+}
+const FIGS = {
+  kins(){ return h('div',null, figTitle('สิบสองวงศาของคีรันนา'), h('div',{class:'fig-chips'}, DATA.kins.map(k=>h('span',{class:'tag',text:k.name.split('/')[0].trim()})), h('span',{class:'tag neg',text:'Beastman (ยังไม่เปิด)'}))); },
+  roll(p){ const a=p.a||3, b=p.b||5, mod=p.mod==null?1:p.mod, dc=p.dc==null?7:p.dc; const total=a+b+mod; return h('div',null, figTitle('การทอยพื้นฐาน'), h('div',{class:'fig-dice'}, dieFace(a), dieFace(b), h('span',{class:'fig-op',text:'+'}), h('span',{class:'fig-big num',text:signed(mod)}), h('span',{class:'fig-lbl',text:'Mod'}), h('span',{class:'fig-op',text:'='}), h('span',{class:'fig-big num hi',text:total})), figNote(`เทียบ DC ${dc} → ${total>=dc?'สำเร็จ':'ล้มเหลว'} (ถ้าการกระทำเข้ากับนิสัย บวกคะแนนบุคลิกภาพเพิ่มอีก)`)); },
+  dc(){ return h('div',null, figTitle('ระดับความยาก (DC)'), h('table',{class:'fig-table'}, DATA.meta.dc.map(([k,v])=>h('tr',null, h('td',{text:k}), h('td',{class:'num',text:String(v)+(v===14?'+':'')}))))); },
+  avg(){ const ways=[0,0,1,2,3,4,5,6,5,4,3,2,1]; return h('div',null, figTitle('โอกาสของผลรวม 2d6'), h('div',{class:'fig-bars'}, ways.slice(2).map((w,i)=>h('div',{class:'fig-bar'+(i+2===7?' hi':'')}, h('div',{class:'b',style:`height:${w*13}px`}), h('div',{class:'n num',text:i+2})))), figNote('7 ออกบ่อยที่สุด (6 ใน 36) · โอกาสได้ 7 ขึ้นไป = 58% · Mod +1 ทำให้ "ได้ 7 ขึ้นไป" กลายเป็น "ได้ 6 ขึ้นไป" = 72%')); },
+  crit(){ return h('div',null, figTitle('คริติคอล'), h('div',{class:'fig-row'}, h('div',{class:'fig-col'}, h('div',{class:'fig-dice'}, dieFace(6,'ok'), dieFace(6,'ok')), h('div',{class:'fig-cap ok',text:'[6,6] Critical Success ผ่านทันที'})), h('div',{class:'fig-col'}, h('div',{class:'fig-dice'}, dieFace(1,'bad'), dieFace(1,'bad')), h('div',{class:'fig-cap bad',text:'[1,1] Critical Failure ล้มทันที'})))); },
+  advdis(){ return h('div',null, figTitle('Advantage / Disadvantage ทอยสามลูก'), h('div',{class:'fig-row'}, h('div',{class:'fig-col'}, h('div',{class:'fig-dice'}, dieFace(2,'dim'), dieFace(5,'ok'), dieFace(6,'ok')), h('div',{class:'fig-cap',text:'Advantage เก็บสองลูกดีสุด = 11'})), h('div',{class:'fig-col'}, h('div',{class:'fig-dice'}, dieFace(2,'bad'), dieFace(5,'bad'), dieFace(6,'dim')), h('div',{class:'fig-cap',text:'Disadvantage เก็บสองลูกแย่สุด = 7'})))); },
+  nodc(){ return h('div',null, figTitle('ไม่มี DC เว็บบอกแค่ตัวเลข'), h('div',{class:'fig-dice'}, dieFace(4), dieFace(4), h('span',{class:'fig-op',text:'='}), h('span',{class:'fig-big num hi',text:'8'})), h('div',{class:'fig-logline'}, h('b',{text:'PER Check'}), ' 2d6 4+4 = 8 · ออกคู่ [4,4]'), figNote('ไม่มีคำว่า "สำเร็จ" หรือ "ล้มเหลว" GM หรือผู้โจมตีเป็นคนเทียบเอง')); },
+  stats(){ return h('div',null, figTitle('ค่าพลังหกค่า (ตัวอย่างค่าดิบ)'), h('div',{class:'fig-stats'}, statBox('STR',12), statBox('AGI',8), statBox('VIT',10), statBox('PER',14), statBox('INF',9), statBox('INT',11)), figNote('Mod = ค่าดิบ ÷ 2 − 5 ปัดลง · 9 กับ 11 ได้ Mod เท่ากับ 8 กับ 10')); },
+  modtable(){ const rows=[8,9,10,11,12,13,14,16,18,20]; return h('div',null, figTitle('ค่าดิบ → Mod'), h('div',{class:'fig-modrow'}, rows.map(v=>h('div',{class:'fig-mod'+(v%2?' odd':'')}, h('div',{class:'num',text:v}), h('div',{class:'num m',text:signed(modOf(v))})))), figNote('ช่องสีจางคือเลขคี่ ให้ Mod เท่ากับเลขคู่ก่อนหน้า แต้ม Extra จึงควรหยุดที่เลขคู่')); },
+  derived(){ return h('div',null, figTitle('ค่าพลังรอง'), h('table',{class:'fig-table'}, [['HP','10 + VIT Mod + STR Mod'],['MP','10 + INF Mod + INT Mod'],['Sanity','5 + INF Mod'],['Passive PER','7 + PER Mod'],['Toughness / อวัยวะ','(VIT ดิบ + STR ดิบ) ÷ 10 + 1'],['แบกได้','STR × 3 กก. (Large ×4, Huge ×5)']].map(([k,v])=>h('tr',null, h('td',null, T(k)), h('td',{class:'dim',text:v}))))); },
+  proposed(){ return h('div',null, figTitle('ค่าที่ติดป้าย (เสนอ)'), h('div',{class:'fig-chips'}, ['Reflex = AGI Mod ÷ 2 + 1','Might = STR Mod ÷ 2 + 1','Sight = PER Mod ÷ 2 + 1','Initiative = PER Mod','VIT Saving Throw = VIT Mod','PER Saving Throw = PER Mod'].map(t=>h('span',{class:'tag prop',text:t}))), figNote('ไฟล์แกนยังไม่ล็อกสูตรเหล่านี้ เว็บใช้สูตรฝั่ง Bestiary ไปก่อน')); },
+  persaxes(p){ const vals = p.vals || [[ 'left',3],['right',2],['left',2],['left',1],['right',1],[null,0]]; return h('div',null, figTitle('หกคู่ตรงข้าม แจก 3 · 2 · 2 · 1 · 1 · 0'), h('div',{class:'fig-axes'}, DATA.meta.personality.map((ax,i)=>{ const [side,v]=vals[i]; const warm = v===0||!side ? .5 : side==='left' ? .5+v/6 : .5-v/6; return h('div',{class:'fig-axis'}, h('span',{class:'l'+(side==='left'&&v?' on':''),text:`${ax.leftTh} ${side==='left'&&v?signed(v):side==='right'&&v?signed(-v):'0'}`}), h('div',{class:'pbar'}, h('div',{class:'warm',style:`width:${warm*100}%`}), h('div',{class:'cool',style:`width:${(1-warm)*100}%`})), h('span',{class:'r'+(side==='right'&&v?' on':''),text:`${side==='right'&&v?signed(v):side==='left'&&v?signed(-v):'0'} ${ax.rightTh}`})); }))); },
+  persbar(){ return h('div',null, figTitle('ราคาของการเป็นใครสักคน'), h('div',{class:'fig-axis big'}, h('span',{class:'l on',text:'กล้าหาญ +3'}), h('div',{class:'pbar'}, h('div',{class:'warm',style:'width:100%'}), h('div',{class:'cool',style:'width:0%'})), h('span',{class:'r',text:'−3 ระแวดระวัง'})), figNote('ทอยที่ต้องกล้า: 2d6 + Mod + 3 · ทอยที่ต้องระวัง: 2d6 + Mod − 3')); },
+  profile(){ return h('div',null, figTitle('เว็บอ่านนิสัยให้ฟัง'), h('div',{class:'fig-profile'}, h('b',{text:'ลักษณะนิสัยโดยรวม'}), h('div',{class:'dim',text:'นักวางแผนตัวยง ทุกการตัดสินใจต้องมีเหตุผลรองรับ · ถนัดหลบมากกว่าชน · ไม่ไว้ใจอะไรง่าย ๆ'}), h('div',{class:'fig-chips'}, h('span',{class:'tag prop',text:'Controller (คอนโทรลเลอร์)'}), h('span',{class:'tag',text:'Specialist (สเปเชียลลิสต์)'})), h('div',{class:'dim',text:'เหมาะกับสาย Controller หรือ Specialist · Talent ที่เข้ากัน: INT, INF'}))); },
+  steps(p){ const cur = p.cur==null ? -1 : p.cur; const names=['วงศา','พื้นหลัง','บุคลิก','Extra','พรสวรรค์','คำนวณ','รายละเอียด','ชุดเริ่มต้น']; return h('div',null, figTitle('แปดขั้นของวิซาร์ด'), h('div',{class:'fig-steps'}, names.map((n,i)=>h('span',{class:'fig-step'+(i===cur?' cur':i<cur?' done':''),text:`${i+1}. ${n}`})))); },
+  bgcard(){ const k = KIN['nightkin']; const b = k.childhood[0]; return h('div',null, figTitle('การ์ดพื้นหลังบอกว่าได้อะไร'), h('div',{class:'fig-card'}, h('div',{class:'row',style:'gap:6px'}, h('span',{class:'tag',text:b.code}), h('b',{text:b.name}), h('span',{class:'dim',text:b.nameEn})), h('div',{class:'gives'}, Object.entries(b.stats).map(([s,v])=>h('span',{class:'tag stat',style:statStyle(s),text:`${signed(v)} ${s}`}))), h('div',{class:'dim',style:'font-size:12.5px'}, T(b.text.length>150? b.text.slice(0,150)+'…' : b.text)))); },
+  glossary(){ return h('div',null, figTitle('คำที่ขีดเส้นประ กดได้'), h('div',{class:'fig-card'}, 'ทอย ', h('span',{class:'term',text:'Perfect Strike'}), ' ได้เมื่อ ', h('span',{class:'term',text:'Combat Dice'}), ' ออกคู่'), h('div',{class:'fig-pop'}, h('b',{text:'Perfect Strike'}), h('div',{class:'dim',style:'font-size:12.5px'}, (GLOSSARY['Perfect Strike']||{}).text || 'ลูกเต๋าโจมตีออกเลขเหมือนกัน'))); },
+  hud(){ return h('div',null, figTitle('ปุ่มลอยสี่ปุ่ม ลากไปวางตรงไหนก็ได้'), h('div',{class:'fig-dock'}, ['bag','book','pouch','dice'].map((k,i)=>h('div',{class:'fig-hudbtn'}, svgEl(k), i===0? h('span',{class:'badge',text:'7.9/36'}) : i===3 ? h('span',{class:'badge gold',text:'9'}) : null, h('span',{class:'lbl',text:['กระเป๋า','คัมภีร์','ถุงย่าม','ทอยเต๋า'][i]})))), h('div',{class:'fig-bag'}, ['ดาบสั้น 1.2 กก.','เสื้อหนัง 2.0 กก.','เสบียง ×5 2.0 กก.','ถุงน้ำ 0.5 กก.','เชือก 1.5 กก.','+'].map(t=>h('div',{class:'fig-tile'+(t==='+'?' add':''),text:t})))); },
+  doll(){ const parts=[['ศีรษะ','1/1',22,8],['ลำตัว','2/1',22,34],['แขนขวา','0/0',4,34],['แขนซ้าย','0/0',40,34],['ขาขวา','1/0',13,66],['ขาซ้าย','1/0',31,66]]; const s = svg('svg',{viewBox:'0 0 56 96',class:'fig-doll'}); s.append(svg('circle',{cx:28,cy:12,r:8,class:'bp'}), svg('rect',{x:17,y:23,width:22,height:30,rx:4,class:'bp'}), svg('rect',{x:5,y:24,width:9,height:28,rx:4,class:'bp'}), svg('rect',{x:42,y:24,width:9,height:28,rx:4,class:'bp'}), svg('rect',{x:17,y:56,width:9,height:34,rx:4,class:'bp'}), svg('rect',{x:30,y:56,width:9,height:34,rx:4,class:'bp'})); return h('div',null, figTitle('เกราะ A/B ต่ออวัยวะ จากของที่สวม'), h('div',{class:'fig-row'}, s, h('table',{class:'fig-table'}, parts.map(([n,v])=>h('tr',null, h('td',{text:n}), h('td',{class:'num',text:v}))))), figNote('A กันกายภาพทั่วไป · B กันชนิดในวงเล็บ (ส่วนใหญ่ Blunt) · ชั้นใน + ชั้นนอกบวกกัน')); },
+  layout(){ return h('div',null, figTitle('จัดวางกรอบเอง'), h('div',{class:'fig-layout'}, [['ทรัพยากร',4,4,44,30],['Toughness',52,4,44,22],['ตัวตน',4,38,30,40],['Combat',38,30,58,48]].map(([n,x,y,w,hh])=>h('div',{class:'fig-box',style:`left:${x}%;top:${y}%;width:${w}%;height:${hh}%`}, h('div',{class:'grip',text:'⋮⋮ '+n}), h('div',{class:'rs'}))))); },
+  ip(){ return h('div',null, figTitle('ปุ่ม "ใช้ IP" ข้างแต้ม Insight Point'), h('div',{class:'fig-card fig-ip'}, h('span',{class:'k',text:'Insight Point'}), h('b',{class:'num',text:'5'}), h('button',{class:'small primary',disabled:true,text:'ใช้ IP'}))); },
+  turn(){ return h('div',null, figTitle('หนึ่งเทิร์น = หกวินาที'), h('div',{class:'fig-chips big'}, h('span',{class:'tag ok',text:'1 Swift Action'}), h('span',{class:'tag stat',text:'1 Basic Action'}), h('span',{class:'tag prop',text:'1 Cast'})), figNote('ลำดับทอย 2d6 + Initiative ตอนเริ่มฉาก คงอยู่ทั้งฉาก · ใช้ไม่ครบไม่สะสม')); },
+  grid(p){ return h('div',null, figTitle(p.title || 'แผนที่ 20×20 ช่องละ 2 เมตร'), miniGrid(p.kind||'forest', p.seed||'tutor-1', p.tok || {x:9,y:10}, {bands: p.bands !== false, npc: p.npc}), p.note ? figNote(p.note) : null); },
+  terrain(){ const rows=[['ผ่านไม่ได้','T W R # H C P ~ X','ต้นไม้ น้ำลึก หิน กำแพง บ้าน หน้าผา เสา เหว กองไฟ'],['เดินช้า (นับ 2 ช่อง)','w s M r L','น้ำตื้น หิมะ โคลน เศษหิน ลาวา'],['กำบัง',', G','หญ้าสูง หลุมศพ']]; return h('div',null, figTitle('ชนิดพื้น'), h('div',{class:'fig-terrain'}, [['t-T','ต้นไม้'],['t-W','น้ำลึก'],['t-R','หิน'],['t-wall','กำแพง'],['t-w','น้ำตื้น'],['t-s','หิมะ'],['t-M','โคลน'],['t-grass','หญ้าสูง'],['t-road','ถนน'],['t-B','สะพาน']].map(([c,n])=>h('div',{class:'fig-tile-l'}, h('div',{class:'cell '+c}), h('span',{text:n})))), h('table',{class:'fig-table'}, rows.map(([a,b,c])=>h('tr',null, h('td',{text:a}), h('td',{class:'dim',text:c}))))); },
+  move(){ return h('div',null, figTitle('ค่าเคลื่อนที่ระหว่างเขต'), h('table',{class:'fig-table'}, [['ใกล้เคียง → ปะทะ','1 Swift'],['ปะทะ → ถอยออก','1 Swift + โดนโจมตีฉวยโอกาส'],['ใกล้เคียง → ไกล','1 Swift + 1 AP'],['ภายในเขตเดียวกัน','เดินได้ตามช่อง (ช่องช้า นับ 2)']].map(([a,b])=>h('tr',null, h('td',null, T(a)), h('td',{class:'dim'}, T(b)))))); },
+  weapon(){ return h('div',null, figTitle('อาวุธกับเขต'), h('table',{class:'fig-table'}, [['ประชิด','เฉพาะเขตปะทะเดียวกัน'],['ระยะ → ปะทะ/ใกล้เคียง','ยิงได้ปกติ'],['ระยะ → ไกล หรือมีกำบัง','ยิงได้ แต่ Disadvantage']].map(([a,b])=>h('tr',null, h('td',null, T(a)), h('td',{class:'dim'}, T(b)))))); },
+  attack(){ return h('div',null, figTitle('Attack Roll'), h('div',{class:'fig-dice'}, dieFace(4,'ok'), dieFace(4,'ok'), h('span',{class:'fig-op',text:'='}), h('span',{class:'fig-big num hi',text:'8'}), h('span',{class:'fig-lbl',text:'CV'})), figNote('ออกคู่ = Perfect Strike (Might หรือ Sight ×2) · ฝ่ายรับต้องประกาศ Parry หรือ Evade ก่อน ไม่ประกาศ = โดนเต็ม')); },
+  parry(){ return h('div',null, figTitle('Parry: ทอย 2 + Parry Dice แล้วเลือกเอง 2 ลูก'), h('div',{class:'fig-dice'}, dieFace(2,'ok'), dieFace(4,'dim'), dieFace(6,'ok'), h('span',{class:'fig-op',text:'→'}), h('span',{class:'fig-big num hi',text:'8'})), figNote('ผู้โจมตีได้ CV 8 · เลือก 2+6 = 8 เท่ากันพอดี = Perfect Parry ได้ 1 AP คืน · หรือเลือก 4+6 = 10 ป้องกันได้เฉย ๆ · Disadvantage ทอย 2d6 เปล่า โล่ไม่ช่วย')); },
+  hitloc(){ const s = svg('svg',{viewBox:'0 0 56 96',class:'fig-doll'}); s.append(svg('circle',{cx:28,cy:12,r:8,class:'bp hi'}), svg('rect',{x:17,y:23,width:22,height:30,rx:4,class:'bp'}), svg('rect',{x:5,y:24,width:9,height:28,rx:4,class:'bp'}), svg('rect',{x:42,y:24,width:9,height:28,rx:4,class:'bp'}), svg('rect',{x:17,y:56,width:9,height:34,rx:4,class:'bp'}), svg('rect',{x:30,y:56,width:9,height:34,rx:4,class:'bp'})); return h('div',null, figTitle('ตำแหน่งที่โดน จากผลรวมลูกเต๋าโจมตี'), h('div',{class:'fig-row'}, s, h('table',{class:'fig-table'}, [['2 · 3 · 11 · 12','ศีรษะ'],['6 · 7 · 8','ลำตัว'],['4 หรือ 9','ทอย 1d6: 1-3 ขาขวา · 4-6 แขนขวา'],['5 หรือ 10','ทอย 1d6: 1-3 ขาซ้าย · 4-6 แขนซ้าย']].map(([a,b])=>h('tr',null, h('td',{class:'num',text:a}), h('td',{class:'dim',text:b})))))); },
+  damage(){ return h('div',null, figTitle('ลำดับการหักความเสียหาย'), h('div',{class:'fig-flow'}, h('span',{class:'tag',text:'ความเสียหาย 5'}), '→', h('span',{class:'tag prop',text:'เกราะลำตัว A 2'}), '→', h('span',{class:'tag neg',text:'HP −3'}), '+', h('span',{class:'tag neg',text:'Toughness ลำตัว −3'})), figNote('เกราะของอวัยวะที่โดนหักก่อน ที่เหลือหักทั้ง HP และ Toughness ของอวัยวะนั้น')); },
+  wound(){ return h('div',null, figTitle('Toughness ของอวัยวะหมด'), h('div',{class:'fig-tough'}, [['ศีรษะ',3,3],['ลำตัว',3,3],['แขนขวา',0,3],['แขนซ้าย',3,3],['ขาขวา',2,3],['ขาซ้าย',3,3]].map(([n,v,m])=>h('div',{class:'fig-tbox'+(v===0?' out':'')}, h('div',{class:'k',text:n}), h('div',{class:'num',text:`${v}/${m}`})))), figNote('แขนขวา 0 = ใช้ไม่ได้ ทอยตารางบาดแผลฉกรรจ์ · ติดลบจนถึง −3 (เท่าค่าเต็ม) = เสียอวัยวะ')); },
+  sanity(){ return h('div',null, figTitle('ทรัพยากรของตัวละคร'), h('div',{class:'fig-res'}, [['HP',12,14,'#e5484d'],['MP',6,10,'#58b7ff'],['Sanity',3,6,'#a371f7'],['Temp HP',2,2,'#d4a84a']].map(([n,v,m,c])=>h('div',{class:'fig-resrow'}, h('span',{class:'k',text:n}), h('div',{class:'bar'}, h('div',{style:`width:${v/m*100}%;background:${c}`})), h('span',{class:'num',text:`${v}/${m}`})))), figNote('Temporary Health หายก่อน HP จริง และพักผ่อนไม่คืน · Sanity ต่ำ = เสี่ยงเสียสติ')); },
+  cost(){ const sk = DATA.skills.find(s=>/Sanity/i.test(s.cost||'')) || DATA.skills.find(s=>s.cost); return h('div',null, figTitle('อ่านช่อง Cost ก่อนร่าย'), h('div',{class:'fig-card'}, h('b',{text: sk ? sk.nameEn : 'Blood Rite'}), h('div',{class:'dim',text: sk ? (sk.nameTh||'') : ''}), h('div',{class:'fig-cost'}, h('span',{class:'k',text:'Cost'}), h('span',{class:'tag neg',text: sk ? sk.cost : '1 Sanity'})), h('div',{class:'dim',style:'font-size:12.5px'}, T(sk ? String(sk.effect||'').slice(0,140)+'…' : '')))); },
+  ipgain(){ return h('div',null, figTitle('ได้ Insight Point เมื่อ'), h('table',{class:'fig-table'}, [['จบเซสชั่น','+1'],['เป้าหมายย่อย (Minor)','+2'],['ภารกิจสำคัญ (Major)','+3'],['เป้าหมายหลักของเรื่อง (Epic)','+4'],['บทเรียนจากความล้มเหลว','+1']].map(([a,b])=>h('tr',null, h('td',{text:a}), h('td',{class:'num ok',text:b}))))); },
+  ipmod(){ return h('div',null, figTitle('ยก Mod หนึ่งขั้น ราคาตามขั้น'), h('div',{class:'fig-modrow'}, [['−→0',3],['0→1',3],['1→2',4],['2→3',5],['3→4',6],['4→5',7]].map(([k,v])=>h('div',{class:'fig-mod'}, h('div',{class:'num',text:k}), h('div',{class:'num m',text:v+' IP'})))), figNote('บุคคลในตำนาน: ลด 2 IP ได้ไม่เกิน 3 ขั้น')); },
+  ipknow(){ return h('div',null, figTitle('ยกระดับความรู้ และประตูของแต่ละระดับ'), h('table',{class:'fig-table'}, [['ระดับ 1','4 IP','เคยใช้งานจริงในเรื่อง'],['ระดับ 2','6 IP','มีตำรา หรือมีครู'],['ระดับ 3','9 IP','มีปรมาจารย์ หรือเหตุการณ์ในเรื่อง']].map(([a,b,c])=>h('tr',null, h('td',{text:a}), h('td',{class:'num',text:b}), h('td',{class:'dim',text:c}))))); },
+  gates(){ return h('div',null, figTitle('ประตูของทักษะ'), h('table',{class:'fig-table'}, [['Novice','เรียนเองได้'],['Expert','ครู ตำรา หรือเคยเห็นใครใช้'],['Master','ปรมาจารย์ หรือเหตุการณ์ในเรื่อง']].map(([a,b])=>h('tr',null, h('td',{text:a}), h('td',{class:'dim',text:b})))), h('div',{class:'fig-chips'}, h('span',{class:'tag ok',text:'ตำราทั่วไป / ผู้ชำนาญการ −1 IP'}), h('span',{class:'tag prop',text:'ของหายาก / ปรมาจารย์ −2 IP'})), figNote('ส่วนลดใช้ได้สาขาละครั้งต่อช่วงระหว่าง Milestone · GM ติ๊กยืนยันประตูในหน้าต่าง "ใช้ IP"')); },
+  login(){ return h('div',null, figTitle('มุมขวาบนของเว็บ'), h('div',{class:'fig-topbar'}, h('span',{class:'tag ok',text:'● ออนไลน์ 3 คน'}), h('span',{class:'dim',text:'ผู้เล่นนิรนาม'}), h('button',{class:'small',disabled:true,text:'เข้าสู่ระบบ Google'})), figNote('ล็อกอินแล้วตัวละครตามไปทุกเครื่อง · ชีทเป็นของเจ้าคนเดียวจนกว่าจะวางลงบอร์ด')); },
+  roomflow(){ return h('div',null, figTitle('ลำดับการเปิดโต๊ะ'), h('div',{class:'fig-flow col'}, ['GM สร้างห้อง แล้วส่งลิงก์ #room-xxxx','ผู้เล่นกด "วางตัวละครลงบอร์ด" รูปจากชีทขึ้นบนหมาก','GM เลือกสถานที่ สุ่มแผนที่ เพิ่ม NPC (ซ่อนได้)','GM กด "เริ่มการต่อสู้" ทุกคนทอย Initiative แล้วเดินหมากของตัวเอง'].map((t,i)=>h('div',{class:'fig-flowstep'}, h('span',{class:'n num',text:i+1}), h('span',{text:t}))))); },
+  dicepop(){ return h('div',null, figTitle('ทุกการทอยเด้งหน้าทุกคน ทอยได้ทีละคน'), h('div',{class:'fig-pop-dice'}, h('div',{class:'who',text:'เคียร่า · PER Check'}), h('div',{class:'fig-dice'}, dieFace(5,'',56), dieFace(3,'',56)), h('div',{class:'tot num',text:'= 10'})), h('div',{class:'fig-chips'}, ['/r 2d6+2','/adv','/dis','/gm ข้อความลับ'].map(t=>h('span',{class:'tag',text:t})))); },
+  gmkey(){ return h('div',null, figTitle('รหัส GM ของห้อง'), h('div',{class:'fig-gmkey num',text:'K7Q-2MX'}), figNote('ใช้กลับมาเป็น GM เมื่อย้ายเครื่อง · อย่าให้ผู้เล่นเห็น')); },
+  rulespage(){ return h('div',null, figTitle('มีให้ดูเสมอ'), h('div',{class:'fig-chips big'}, h('span',{class:'tag',text:'กฎย่อ'}), h('span',{class:'tag',text:'ศัพท์ขีดเส้นประ กดดูได้ทุกที่'}), h('span',{class:'tag prop',text:'เนเมสไซอาร์ข้างวิซาร์ด'}))); },
+};
+function vnFigure(spec){
+  if (!spec) return null;
+  const p = typeof spec === 'string' ? {t:spec} : spec;
+  const f = FIGS[p.t]; if (!f) return null;
+  try { return h('div',{class:'vn-fig vf-'+p.t}, f(p)); } catch(e){ console.warn('figure', p.t, e); return null; }
+}
+
 /* ===== หน้าสอนเล่นแบบ visual novel: เนเมสไซอาร์ ศาสดาสีชาด เป็นผู้สอน =====
  * นางเรียกตัวเองว่า "เรา" เรียกผู้เล่นว่า "เจ้า" หรือ "ลูกรัก" อ่อนโยน ขี้เล่น ชอบตั้งคำถาม ไม่ชอบคนเชื่อโดยไม่คิด
  * ภาพจาก assets/nem-<mood>.webp (ask explain guilty mad panic shush smile smirk surprise think) 360×432 พื้นหลัง assets/scene-study.webp
@@ -2756,92 +2876,92 @@ const LESSONS = [
   { id:'welcome', nav:'ต้อนรับ', title:'ยินดีต้อนรับสู่โต๊ะของเรา', scene:'study', lines:[
     ['smile', 'อ้าว มาแล้วหรือ นั่งก่อนสิ ลูกรัก ฝนข้างนอกยังไม่ซาหรอก'],
     ['smile', 'เราคือเนเมสไซอาร์ ผู้คนเรียกเราว่าศาสดาสีชาด แต่บนโต๊ะนี้เราเป็นเพียงคนที่นั่งข้างเจ้า คอยอธิบายว่าลูกเต๋ากลิ้งไปทางไหน และทำไม'],
-    ['explain', 'คีรันนาเป็นโลกใต้ม่านมานา วงศาทั้งสิบสองใช้ชีวิตอยู่ร่วมกันอย่างกระอักกระอ่วน เวทมนตร์มีราคาที่ต้องจ่ายเสมอ และบาดแผลไม่หายไปเพราะพักหนึ่งคืน'],
-    ['think', 'เกมนี้จึงไม่ถามว่าเจ้าแข็งแกร่งแค่ไหน มันถามว่าเจ้ายอมเสียอะไร เพื่อให้ได้สิ่งที่ต้องการ'],
+    ['explain', 'คีรันนาเป็นโลกใต้ม่านมานา วงศาทั้งสิบสองใช้ชีวิตอยู่ร่วมกันอย่างกระอักกระอ่วน เวทมนตร์มีราคาที่ต้องจ่ายเสมอ และบาดแผลไม่หายไปเพราะพักหนึ่งคืน', 'kins'],
+    ['think', 'เกมนี้จึงไม่ถามว่าเจ้าแข็งแกร่งแค่ไหน มันถามว่าเจ้ายอมเสียอะไร เพื่อให้ได้สิ่งที่ต้องการ', null],
     ['smirk', 'บทเรียนต่อจากนี้สั้นทั้งนั้น อ่านแล้วอย่าเพิ่งเชื่อเรา ท้ายบทมีปุ่ม "ลองทำ" ไปจับของจริงดู เราชอบคนที่ตั้งคำถามมากกว่าคนที่พยักหน้า'],
     ['ask', 'พร้อมหรือยัง คลิกที่ไหนก็ได้บนฉากนี้ หรือกด Space เพื่อให้เราพูดต่อ'],
   ]},
   { id:'dice', nav:'ลูกเต๋าสองลูก', title:'ทุกอย่างเริ่มที่ลูกเต๋าสองลูก', scene:'study', lines:[
-    ['explain', 'เวลาผลลัพธ์ไม่แน่นอน เจ้าทอย 2d6 แล้วบวก Mod ของค่าพลังที่ใช้ ถ้าการกระทำนั้นเข้ากับนิสัยของตัวละคร ก็บวกคะแนนบุคลิกภาพเข้าไปด้วย'],
-    ['explain', 'ผลรวมเทียบกับ DC ที่ GM ตั้ง ง่าย 5 ปานกลาง 7 ยาก 10 ยากมาก 12 และเกือบเป็นไปไม่ได้ 14'],
-    ['think', 'ลูกเต๋าสองลูกให้ผลรวมเฉลี่ย 7 ดังนั้น DC 7 คือครึ่งต่อครึ่ง และ Mod +1 เพียงแต้มเดียวก็เปลี่ยนโอกาสไปหลายเปอร์เซ็นต์ อย่าดูถูกแต้มเล็ก ๆ'],
-    ['surprise', 'ออก [6,6] คือ Critical Success ผ่านทันที ออก [1,1] คือ Critical Failure ล้มเหลวทันที ไม่ว่า Mod จะสูงเพียงใด ลูกเต๋าไม่สนว่าเจ้าเป็นใคร'],
-    ['explain', 'Advantage ให้เจ้าทอยสามลูกแล้วเก็บสองลูกที่ดีที่สุด Disadvantage เก็บสองลูกที่แย่ที่สุด ได้ทั้งสองอย่างพร้อมกันก็หักล้างกัน ทอยปกติ'],
-    ['shush', 'ถ้าไม่มีใครตั้ง DC เว็บจะไม่ตัดสินให้ว่าสำเร็จหรือล้มเหลว เพราะการทอยนั้นอาจเป็น Parry ที่ต้องเทียบกับผู้โจมตี หรือเป็นเรื่องที่ GM อยากตัดสินเอง เว็บบอกแค่ตัวเลข ที่เหลือเป็นเรื่องของคนบนโต๊ะ'],
+    ['explain', 'เวลาผลลัพธ์ไม่แน่นอน เจ้าทอย 2d6 แล้วบวก Mod ของค่าพลังที่ใช้ ถ้าการกระทำนั้นเข้ากับนิสัยของตัวละคร ก็บวกคะแนนบุคลิกภาพเข้าไปด้วย', {t:'roll'}],
+    ['explain', 'ผลรวมเทียบกับ DC ที่ GM ตั้ง ง่าย 5 ปานกลาง 7 ยาก 10 ยากมาก 12 และเกือบเป็นไปไม่ได้ 14', 'dc'],
+    ['think', 'ลูกเต๋าสองลูกให้ผลรวมเฉลี่ย 7 ดังนั้น DC 7 คือครึ่งต่อครึ่ง และ Mod +1 เพียงแต้มเดียวก็เปลี่ยนโอกาสไปหลายเปอร์เซ็นต์ อย่าดูถูกแต้มเล็ก ๆ', 'avg'],
+    ['surprise', 'ออก [6,6] คือ Critical Success ผ่านทันที ออก [1,1] คือ Critical Failure ล้มเหลวทันที ไม่ว่า Mod จะสูงเพียงใด ลูกเต๋าไม่สนว่าเจ้าเป็นใคร', 'crit'],
+    ['explain', 'Advantage ให้เจ้าทอยสามลูกแล้วเก็บสองลูกที่ดีที่สุด Disadvantage เก็บสองลูกที่แย่ที่สุด ได้ทั้งสองอย่างพร้อมกันก็หักล้างกัน ทอยปกติ', 'advdis'],
+    ['shush', 'ถ้าไม่มีใครตั้ง DC เว็บจะไม่ตัดสินให้ว่าสำเร็จหรือล้มเหลว เพราะการทอยนั้นอาจเป็น Parry ที่ต้องเทียบกับผู้โจมตี หรือเป็นเรื่องที่ GM อยากตัดสินเอง เว็บบอกแค่ตัวเลข ที่เหลือเป็นเรื่องของคนบนโต๊ะ', 'nodc'],
   ], tryLabel:'ลองทอยที่ชีท (ต้องมีตัวละครก่อน)', tryHash:'#chars' },
   { id:'stats', nav:'ค่าพลังหกค่า', title:'ค่าพลังหกค่า และ Mod ที่ซ่อนอยู่ข้างใต้', scene:'study', lines:[
-    ['explain', 'ตัวละครมีค่าพลังหกค่า STR พละกำลัง AGI ความคล่องแคล่ว VIT ความแข็งแรง PER การรับรู้ INF อิทธิพล และ INT ปัญญา'],
-    ['think', 'ค่าดิบอยู่ราว 5 ถึง 20 แต่สิ่งที่ใช้ทอยจริงคือ Mod = ค่าดิบหารสอง ลบห้า ปัดลง ค่า 10 จึงเป็น Mod 0 ค่า 12 เป็น +1 ค่า 8 เป็น −1'],
+    ['explain', 'ตัวละครมีค่าพลังหกค่า STR พละกำลัง AGI ความคล่องแคล่ว VIT ความแข็งแรง PER การรับรู้ INF อิทธิพล และ INT ปัญญา', 'stats'],
+    ['think', 'ค่าดิบอยู่ราว 5 ถึง 20 แต่สิ่งที่ใช้ทอยจริงคือ Mod = ค่าดิบหารสอง ลบห้า ปัดลง ค่า 10 จึงเป็น Mod 0 ค่า 12 เป็น +1 ค่า 8 เป็น −1', 'modtable'],
     ['smirk', 'สังเกตให้ดี ค่าดิบเลขคี่ไม่ได้ให้ Mod เพิ่ม 9 กับ 10 ให้ Mod ต่างกัน แต่ 10 กับ 11 ให้เท่ากัน ตอนแจกแต้ม Extra ให้มองที่เลขคู่ถัดไปเสมอ ปุ่ม Auto Fill ในวิซาร์ดรู้เรื่องนี้ดี'],
-    ['explain', 'ค่าพลังรองคำนวณจาก Mod ทั้งหมด HP = 10 + VIT Mod + STR Mod · MP = 10 + INF Mod + INT Mod · Sanity = 5 + INF Mod · Passive PER = 7 + PER Mod'],
+    ['explain', 'ค่าพลังรองคำนวณจาก Mod ทั้งหมด HP = 10 + VIT Mod + STR Mod · MP = 10 + INF Mod + INT Mod · Sanity = 5 + INF Mod · Passive PER = 7 + PER Mod', 'derived'],
     ['explain', 'Toughness ต่ออวัยวะ = (VIT ดิบ + STR ดิบ) ÷ 10 + 1 และแบกของได้ STR × 3 กิโลกรัม ตัวใหญ่แบกได้มากกว่านั้น'],
-    ['guilty', 'ค่าที่ติดป้าย (เสนอ) เช่น Reflex Might Sight คือสิ่งที่ไฟล์แกนยังไม่ได้เขียนเป็นตารางให้ผู้เล่น เว็บใช้สูตรฝั่ง Bestiary ไปก่อน ถ้าเจ้าเห็นว่าไม่สมเหตุผล บอกคนทำกฎ อย่าบอกเรา เราแค่อ่านให้ฟัง'],
+    ['guilty', 'ค่าที่ติดป้าย (เสนอ) เช่น Reflex Might Sight คือสิ่งที่ไฟล์แกนยังไม่ได้เขียนเป็นตารางให้ผู้เล่น เว็บใช้สูตรฝั่ง Bestiary ไปก่อน ถ้าเจ้าเห็นว่าไม่สมเหตุผล บอกคนทำกฎ อย่าบอกเรา เราแค่อ่านให้ฟัง', 'proposed'],
   ]},
   { id:'pers', nav:'บุคลิกภาพ', title:'บุคลิกภาพคือค่าพลังที่เจ้าเลือกเอง', scene:'study', lines:[
-    ['ask', 'ทีนี้คำถามที่เราชอบที่สุด ตัวละครของเจ้าเป็นคนแบบไหน'],
-    ['explain', 'มีหกคู่ตรงข้าม ตรรกะกับสัญชาตญาณ เผชิญหน้ากับหลบเลี่ยง กล้าหาญกับระแวดระวัง เห็นแก่ส่วนรวมกับรักตัวเอง เห็นอกเห็นใจกับเลือดเย็น และเจ้าระเบียบกับไร้ระเบียบ'],
+    ['ask', 'ทีนี้คำถามที่เราชอบที่สุด ตัวละครของเจ้าเป็นคนแบบไหน', null],
+    ['explain', 'มีหกคู่ตรงข้าม ตรรกะกับสัญชาตญาณ เผชิญหน้ากับหลบเลี่ยง กล้าหาญกับระแวดระวัง เห็นแก่ส่วนรวมกับรักตัวเอง เห็นอกเห็นใจกับเลือดเย็น และเจ้าระเบียบกับไร้ระเบียบ', 'persaxes'],
     ['explain', 'เจ้าแจกแต้ม 3, 2, 2, 1, 1 และ 0 ให้คู่ละหนึ่งค่า แล้วเลือกว่าจะเอียงไปฝั่งไหน ฝั่งที่เลือกเป็นบวก ฝั่งตรงข้ามติดลบเท่ากัน'],
-    ['shush', 'คนที่กล้าหาญ +3 เวลาทอยอะไรที่ต้องใช้ความระแวดระวังจะได้ −3 นี่คือราคาของการเป็นใครสักคน ไม่มีใครเก่งทุกด้าน แม้แต่เรา'],
-    ['smile', 'ในวิซาร์ด แถบแต่ละคู่แบ่งเป็นสีโทนอุ่นกับโทนเย็น ฝั่งที่เจ้าเลือกจะกลืนแถบตามระดับ เลือกครบแล้วเราจะอ่านนิสัยของตัวละครให้ฟัง พร้อมบอกว่าสายการเล่นไหนเข้ากับนางหรือเขา'],
-    ['smirk', 'ฟังไว้ แต่ตัดสินใจเองนะลูกรัก คนที่เชื่อเราทุกคำมักจบไม่สวย'],
+    ['shush', 'คนที่กล้าหาญ +3 เวลาทอยอะไรที่ต้องใช้ความระแวดระวังจะได้ −3 นี่คือราคาของการเป็นใครสักคน ไม่มีใครเก่งทุกด้าน แม้แต่เรา', 'persbar'],
+    ['smile', 'ในวิซาร์ด แถบแต่ละคู่แบ่งเป็นสีโทนอุ่นกับโทนเย็น ฝั่งที่เจ้าเลือกจะกลืนแถบตามระดับ เลือกครบแล้วเราจะอ่านนิสัยของตัวละครให้ฟัง พร้อมบอกว่าสายการเล่นไหนเข้ากับนางหรือเขา', 'profile'],
+    ['smirk', 'ฟังไว้ แต่ตัดสินใจเองนะลูกรัก คนที่เชื่อเราทุกคำมักจบไม่สวย', null],
   ], tryLabel:'ดูขั้นบุคลิกภาพในวิซาร์ด', tryHash:'#wizard' },
   { id:'create', nav:'สร้างตัวละคร 8 ขั้น', title:'สร้างตัวละครทีละขั้น ทั้งหมดแปดขั้น', scene:'study', lines:[
-    ['explain', 'ขั้นที่หนึ่ง เลือกวงศา จากสิบสองวงศา การ์ดบอกแค่จุดเด่น จุดด้อย และค่าดิบ กด "ดูรายละเอียด" ถ้าอยากอ่านทั้งหมด Beastman ยังไม่เปิด รอข้อมูลอยู่'],
-    ['explain', 'ขั้นที่สอง พื้นหลังวัยเด็กและวัยผู้ใหญ่อย่างละใบ แต่ละใบให้แต้มค่าพลังและ Trait ติดตัวมา แผงขวามือจะสรุปให้ว่าเลือกอะไรไปแล้ว และเราจะยืนคอมเมนต์อยู่ข้าง ๆ ตลอดทาง'],
-    ['explain', 'ขั้นที่สาม บุคลิกภาพ ขั้นที่สี่ แต้ม Extra ของวงศา ใส่ลงค่าพลังที่อยากยก จำเรื่องเลขคู่ได้ใช่ไหม'],
-    ['think', 'ขั้นที่ห้า เลือก Talent ตามค่าพลังที่สูงที่สุดของเจ้า หรือเลือก Educated แทน แล้วอัปเกรดความรู้หนึ่งระดับ พร้อมรับทักษะเริ่มต้นจากวงศา ขั้นนี้ยาวที่สุด ใจเย็น ๆ ทุกช่องมีป้ายบอกว่าได้อะไร'],
-    ['explain', 'ขั้นที่หก เว็บคำนวณค่าพลังรองให้ทั้งหมด ขั้นที่เจ็ด ชื่อ อายุ รูปลักษณ์ แรงจูงใจ สิ่งที่อยาก สิ่งที่ต้องการ และสิ่งที่แสดงออก'],
-    ['smile', 'ขั้นที่แปด ชุดเริ่มต้นหนึ่งชุดจากสิบเจ็ดชุด พร้อมเงินติดตัว 15 เกรฟ กดเสร็จสิ้นแล้วชีทของเจ้าจะพร้อม ของในชุดถูกสวมให้ และค่าเกราะถูกเติมตามของที่สวม'],
-    ['ask', 'คำเฉพาะทุกคำที่ขีดเส้นประในวิซาร์ด กดแล้วมีความหมายขึ้นมา อย่าเดา ถ้าสงสัยก็กด เจ้าจะเดาไปทำไมในเมื่อถามได้'],
+    ['explain', 'ขั้นที่หนึ่ง เลือกวงศา จากสิบสองวงศา การ์ดบอกแค่จุดเด่น จุดด้อย และค่าดิบ กด "ดูรายละเอียด" ถ้าอยากอ่านทั้งหมด Beastman ยังไม่เปิด รอข้อมูลอยู่', {t:'steps',cur:0}],
+    ['explain', 'ขั้นที่สอง พื้นหลังวัยเด็กและวัยผู้ใหญ่อย่างละใบ แต่ละใบให้แต้มค่าพลังและ Trait ติดตัวมา แผงขวามือจะสรุปให้ว่าเลือกอะไรไปแล้ว และเราจะยืนคอมเมนต์อยู่ข้าง ๆ ตลอดทาง', 'bgcard'],
+    ['explain', 'ขั้นที่สาม บุคลิกภาพ ขั้นที่สี่ แต้ม Extra ของวงศา ใส่ลงค่าพลังที่อยากยก จำเรื่องเลขคู่ได้ใช่ไหม', {t:'steps',cur:3}],
+    ['think', 'ขั้นที่ห้า เลือก Talent ตามค่าพลังที่สูงที่สุดของเจ้า หรือเลือก Educated แทน แล้วอัปเกรดความรู้หนึ่งระดับ พร้อมรับทักษะเริ่มต้นจากวงศา ขั้นนี้ยาวที่สุด ใจเย็น ๆ ทุกช่องมีป้ายบอกว่าได้อะไร', {t:'steps',cur:4}],
+    ['explain', 'ขั้นที่หก เว็บคำนวณค่าพลังรองให้ทั้งหมด ขั้นที่เจ็ด ชื่อ อายุ รูปลักษณ์ แรงจูงใจ สิ่งที่อยาก สิ่งที่ต้องการ และสิ่งที่แสดงออก', {t:'steps',cur:6}],
+    ['smile', 'ขั้นที่แปด ชุดเริ่มต้นหนึ่งชุดจากสิบเจ็ดชุด พร้อมเงินติดตัว 15 เกรฟ กดเสร็จสิ้นแล้วชีทของเจ้าจะพร้อม ของในชุดถูกสวมให้ และค่าเกราะถูกเติมตามของที่สวม', {t:'steps',cur:7}],
+    ['ask', 'คำเฉพาะทุกคำที่ขีดเส้นประในวิซาร์ด กดแล้วมีความหมายขึ้นมา อย่าเดา ถ้าสงสัยก็กด เจ้าจะเดาไปทำไมในเมื่อถามได้', 'glossary'],
   ], tryLabel:'เริ่มสร้างตัวละครจริง', tryHash:'#wizard', tryNew:true },
   { id:'sheet', nav:'ชีทและปุ่มลอย', title:'ชีทไม่ใช่เอกสาร มันคือหน้าปัดของเจ้า', scene:'study', lines:[
-    ['smirk', 'เปิดชีทแล้วมองหาปุ่มลอยข้างจอสี่ปุ่ม กระเป๋า คัมภีร์ ถุงย่าม และทอยเต๋า ลากไปวางตรงไหนก็ได้ กดแล้วเปิดเป็นหน้าต่างลอยที่ลากและย่อขยายได้'],
+    ['smirk', 'เปิดชีทแล้วมองหาปุ่มลอยข้างจอสี่ปุ่ม กระเป๋า คัมภีร์ ถุงย่าม และทอยเต๋า ลากไปวางตรงไหนก็ได้ กดแล้วเปิดเป็นหน้าต่างลอยที่ลากและย่อขยายได้', 'hud'],
     ['explain', 'ของในกระเป๋ามีชื่อ คุณสมบัติ จำนวน และน้ำหนัก สวมแล้วย้ายไปอยู่ในถุงย่าม น้ำหนักรวมเทียบกับที่แบกได้อยู่บนป้ายของปุ่มกระเป๋าเสมอ'],
-    ['explain', 'ถุงย่ามเป็นหุ่นสวมใส่สิบสี่ช่อง ของที่สวมบอกค่าเกราะ A/B ของอวัยวะนั้นให้เอง A กันกายภาพทั่วไป B กันการกระแทก หรือชนิดที่วงเล็บไว้ เข็มขัดโซ่ไม่ทบกับเกราะลำตัว ใช้ค่าที่สูงกว่า'],
-    ['smile', 'ถ้าผังชีทไม่ถูกใจ กด "จัดวางกรอบเอง" แล้วลากทุกกรอบไปวางใหม่ ย่อขยายได้ เว็บจำผังของเจ้าไว้ในเบราว์เซอร์นี้'],
-    ['think', 'และปุ่ม "ใช้ IP" ข้างแต้ม Insight Point คือทางเดียวที่ตัวละครจะเติบโต เราจะพูดถึงมันอีกทีข้างหน้า'],
+    ['explain', 'ถุงย่ามเป็นหุ่นสวมใส่สิบสี่ช่อง ของที่สวมบอกค่าเกราะ A/B ของอวัยวะนั้นให้เอง A กันกายภาพทั่วไป B กันการกระแทก หรือชนิดที่วงเล็บไว้ เข็มขัดโซ่ไม่ทบกับเกราะลำตัว ใช้ค่าที่สูงกว่า', 'doll'],
+    ['smile', 'ถ้าผังชีทไม่ถูกใจ กด "จัดวางกรอบเอง" แล้วลากทุกกรอบไปวางใหม่ ย่อขยายได้ เว็บจำผังของเจ้าไว้ในเบราว์เซอร์นี้', 'layout'],
+    ['think', 'และปุ่ม "ใช้ IP" ข้างแต้ม Insight Point คือทางเดียวที่ตัวละครจะเติบโต เราจะพูดถึงมันอีกทีข้างหน้า', 'ip'],
   ], tryLabel:'ไปที่ตัวละครของฉัน', tryHash:'#chars' },
   { id:'combat', nav:'เทิร์นและระยะ', title:'เมื่อเลือดจะต้องตก: เทิร์น ระยะ และแผนที่', scene:'map', lines:[
-    ['explain', 'ฉากต่อสู้ยาวหนึ่งนาที แบ่งเป็นเทิร์นละหกวินาที ทุกคนทอย 2d6 + Initiative ตั้งลำดับ ในเทิร์นของเจ้าได้ 1 Swift Action 1 Basic Action และ 1 Cast ใช้ไม่ครบก็เสียเปล่า เลือกให้ดี'],
-    ['explain', 'แผนที่ต่อสู้เป็นตาราง 20 คูณ 20 ช่อง ช่องละ 2 เมตร GM สุ่มสถานที่ได้ ป่า แม่น้ำ เมือง ถ้ำ ดันเจี้ยน ภูเขา ทะเล บนเรือ และอื่น ๆ'],
-    ['think', 'ช่องน้ำลึก หิน หรือกำแพงผ่านไม่ได้ ช่องน้ำตื้น หิมะ โคลน เศษหินเดินช้า นับเป็นสองช่อง ดูพื้นก่อนวิ่ง เราเคยเห็นทหารทั้งกองจมโคลนมาแล้ว'],
-    ['explain', 'คลิกหมากของเจ้า ช่องรอบตัวจะระบายสี สีแดงคือเขตปะทะ ติดกันรวมทแยง สีทองคือเขตใกล้เคียงไม่เกิน 25 เมตร ไกลกว่านั้นคือเขตไกล'],
-    ['explain', 'จากใกล้เคียงเข้าปะทะใช้ 1 Swift ถอยจากปะทะออกมาก็ 1 Swift แต่โดนโจมตีฉวยโอกาส จากใกล้เคียงไปไกลใช้ Swift บวก 1 AP'],
-    ['shush', 'อาวุธประชิดตีได้เฉพาะในเขตปะทะเดียวกัน อาวุธระยะยิงได้ทุกเขต แต่ยิงไกลหรือมีที่กำบังจะติด Disadvantage'],
+    ['explain', 'ฉากต่อสู้ยาวหนึ่งนาที แบ่งเป็นเทิร์นละหกวินาที ทุกคนทอย 2d6 + Initiative ตั้งลำดับ ในเทิร์นของเจ้าได้ 1 Swift Action 1 Basic Action และ 1 Cast ใช้ไม่ครบก็เสียเปล่า เลือกให้ดี', 'turn'],
+    ['explain', 'แผนที่ต่อสู้เป็นตาราง 20 คูณ 20 ช่อง ช่องละ 2 เมตร GM สุ่มสถานที่ได้ ป่า แม่น้ำ เมือง ถ้ำ ดันเจี้ยน ภูเขา ทะเล บนเรือ และอื่น ๆ', {t:'grid',kind:'forest',seed:'tutor-forest',bands:false,title:'สุ่มแผนที่: ป่า'}],
+    ['think', 'ช่องน้ำลึก หิน หรือกำแพงผ่านไม่ได้ ช่องน้ำตื้น หิมะ โคลน เศษหินเดินช้า นับเป็นสองช่อง ดูพื้นก่อนวิ่ง เราเคยเห็นทหารทั้งกองจมโคลนมาแล้ว', 'terrain'],
+    ['explain', 'คลิกหมากของเจ้า ช่องรอบตัวจะระบายสี สีแดงคือเขตปะทะ ติดกันรวมทแยง สีทองคือเขตใกล้เคียงไม่เกิน 25 เมตร ไกลกว่านั้นคือเขตไกล', {t:'grid',kind:'ruins',seed:'tutor-ruins',tok:{x:9,y:10},npc:{x:14,y:7},title:'แดง = ปะทะ · ทอง = ใกล้เคียง (≤ 25 ม.)'}],
+    ['explain', 'จากใกล้เคียงเข้าปะทะใช้ 1 Swift ถอยจากปะทะออกมาก็ 1 Swift แต่โดนโจมตีฉวยโอกาส จากใกล้เคียงไปไกลใช้ Swift บวก 1 AP', 'move'],
+    ['shush', 'อาวุธประชิดตีได้เฉพาะในเขตปะทะเดียวกัน อาวุธระยะยิงได้ทุกเขต แต่ยิงไกลหรือมีที่กำบังจะติด Disadvantage', 'weapon'],
   ], tryLabel:'ดูโต๊ะเล่น', tryHash:'#table' },
   { id:'attack', nav:'โจมตีและป้องกัน', title:'โจมตี ป้องกัน และตำแหน่งที่โดน', scene:'map', lines:[
-    ['explain', 'ผู้โจมตีทอย Attack Roll 2d6 ผลรวมคือ CV ออกเลขคู่คือ Perfect Strike ฝ่ายรับต้องประกาศว่าจะ Parry หรือ Evade'],
+    ['explain', 'ผู้โจมตีทอย Attack Roll 2d6 ผลรวมคือ CV ออกเลขคู่คือ Perfect Strike ฝ่ายรับต้องประกาศว่าจะ Parry หรือ Evade', 'attack'],
     ['mad', 'ถ้าไม่ประกาศ โดนเต็ม ไม่มีการต่อรอง เราพูดเรื่องนี้กับทหารใหม่ทุกคน และทุกคนที่ไม่ฟังก็ไม่ได้กลับมาฟังซ้ำ'],
-    ['explain', 'Parry ทอย 2d6 บวกจำนวน Parry Dice จากโล่ แล้วเลือกเองว่าจะใช้สองลูกไหน จะเอาสูงสุด หรือจะเอาให้เท่ากับผลของผู้โจมตีเพื่อ Perfect Parry ก็ได้'],
+    ['explain', 'Parry ทอย 2d6 บวกจำนวน Parry Dice จากโล่ แล้วเลือกเองว่าจะใช้สองลูกไหน จะเอาสูงสุด หรือจะเอาให้เท่ากับผลของผู้โจมตีเพื่อ Perfect Parry ก็ได้', 'parry'],
     ['explain', 'Evade ทอย 2d6 + Reflex ถ้าได้ Advantage ก็เลือกลูกเองเช่นกัน แต่ Parry แบบ Disadvantage ทอยสองลูกเปล่า ๆ โล่ช่วยไม่ได้ ผลเท่ากับผู้โจมตีพอดีคือ Perfect ได้ 1 AP คืนทันที'],
-    ['think', 'เมื่อโดน ให้ดูว่าโดนตรงไหน ผลรวม 2 3 11 12 คือหัว 6 7 8 คือลำตัว 4 กับ 9 ทอย 1d6 ต่อ 1-3 ขาขวา 4-6 แขนขวา ส่วน 5 กับ 10 เป็นข้างซ้ายแบบเดียวกัน'],
-    ['explain', 'เกราะของอวัยวะนั้นหักความเสียหายกายภาพออกก่อน ที่เหลือหัก HP และ Toughness ของอวัยวะนั้น'],
-    ['guilty', 'Toughness ของอวัยวะไหนหมด อวัยวะนั้นใช้ไม่ได้และต้องทอยตารางบาดแผลฉกรรจ์ ติดลบจนถึงค่าเต็มคือเสียอวัยวะ เราเคยนำทัพในสงครามร้อยปี ลูกรัก เรารู้ว่าแขนที่หายไปไม่งอกกลับมาเพราะพักผ่อน คิดก่อนยืนรับดาบ'],
+    ['think', 'เมื่อโดน ให้ดูว่าโดนตรงไหน ผลรวม 2 3 11 12 คือหัว 6 7 8 คือลำตัว 4 กับ 9 ทอย 1d6 ต่อ 1-3 ขาขวา 4-6 แขนขวา ส่วน 5 กับ 10 เป็นข้างซ้ายแบบเดียวกัน', 'hitloc'],
+    ['explain', 'เกราะของอวัยวะนั้นหักความเสียหายกายภาพออกก่อน ที่เหลือหัก HP และ Toughness ของอวัยวะนั้น', 'damage'],
+    ['guilty', 'Toughness ของอวัยวะไหนหมด อวัยวะนั้นใช้ไม่ได้และต้องทอยตารางบาดแผลฉกรรจ์ ติดลบจนถึงค่าเต็มคือเสียอวัยวะ เราเคยนำทัพในสงครามร้อยปี ลูกรัก เรารู้ว่าแขนที่หายไปไม่งอกกลับมาเพราะพักผ่อน คิดก่อนยืนรับดาบ', 'wound'],
   ], tryLabel:'ทอย Parry ดูในหน้าต่างทอยเต๋า', tryHash:'#chars' },
   { id:'mind', nav:'จิตใจและราคาของเวท', title:'สิ่งที่หักไม่ใช่แค่กระดูก', scene:'study', lines:[
-    ['shush', 'Sanity คือสติของเจ้า ถูกดึงเมื่อเผชิญสิ่งบิดเบี้ยว เมื่อฝืนใจตัวเอง หรือเมื่อเวทบางบทเรียกเก็บแทน MP'],
-    ['think', 'เวทมนตร์ในคีรันนาไม่มีอะไรฟรี บางบทจ่ายด้วยเลือด บางบทจ่ายด้วยสติ อ่านช่อง Cost ของทุกสกิลก่อนร่าย เราเห็นคนร่ายโดยไม่อ่านมาเยอะ ส่วนใหญ่น่าสงสาร'],
-    ['explain', 'Temporary Health เป็นเกราะชั่วคราวที่บางสกิลหรือสถานะมอบให้ หายไปก่อน HP จริง และพักผ่อนก็ไม่คืน'],
-    ['ask', 'ตัวละครของเจ้ามีนิสัยที่เลือกไว้ตั้งแต่สร้าง เมื่อเจ้าให้นางหรือเขาทำสิ่งที่ขัดกับนิสัยนั้น GM มีสิทธิ์เรียกเก็บ Sanity เป็นค่าฝืน เรื่องนี้อยู่ในดุลยพินิจของโต๊ะ ไม่ใช่ของเว็บ'],
+    ['shush', 'Sanity คือสติของเจ้า ถูกดึงเมื่อเผชิญสิ่งบิดเบี้ยว เมื่อฝืนใจตัวเอง หรือเมื่อเวทบางบทเรียกเก็บแทน MP', 'sanity'],
+    ['think', 'เวทมนตร์ในคีรันนาไม่มีอะไรฟรี บางบทจ่ายด้วยเลือด บางบทจ่ายด้วยสติ อ่านช่อง Cost ของทุกสกิลก่อนร่าย เราเห็นคนร่ายโดยไม่อ่านมาเยอะ ส่วนใหญ่น่าสงสาร', 'cost'],
+    ['explain', 'Temporary Health เป็นเกราะชั่วคราวที่บางสกิลหรือสถานะมอบให้ หายไปก่อน HP จริง และพักผ่อนก็ไม่คืน', 'sanity'],
+    ['ask', 'ตัวละครของเจ้ามีนิสัยที่เลือกไว้ตั้งแต่สร้าง เมื่อเจ้าให้นางหรือเขาทำสิ่งที่ขัดกับนิสัยนั้น GM มีสิทธิ์เรียกเก็บ Sanity เป็นค่าฝืน เรื่องนี้อยู่ในดุลยพินิจของโต๊ะ ไม่ใช่ของเว็บ', null],
   ]},
   { id:'ip', nav:'Insight Point', title:'การเติบโตมีราคา และราคาเขียนไว้ชัด', scene:'study', lines:[
-    ['explain', 'ตัวละครได้ Insight Point จากเหตุการณ์สำคัญ จบเซสชั่น +1 เป้าหมายย่อย +2 ภารกิจสำคัญ +3 เป้าหมายหลักของเรื่อง +4 ใช้ได้เฉพาะตอนจบเซสชั่นหรือช่วง Downtime สะสมข้ามเซสชั่นได้ไม่จำกัด'],
-    ['explain', 'IP ซื้อได้สามอย่าง หนึ่ง ยก Mod ของค่าพลังขึ้นหนึ่งขั้น ราคาขึ้นตามขั้น ติดลบขึ้นมา 0 ขั้นละ 3 จากนั้น 3 4 5 6 7'],
-    ['explain', 'สอง ยกระดับความรู้ ระดับหนึ่ง 4 ระดับสอง 6 ระดับสาม 9 ต้องผ่านประตูของระดับนั้นก่อน เคยใช้งานจริง มีตำรา หรือมีครู สาม ซื้อทักษะและเวทตามราคาที่เขียนไว้ในรายการ'],
-    ['think', 'ทักษะระดับ Novice เรียนเองได้ Expert ต้องมีครู ตำรา หรือเคยเห็นใครใช้ Master ต้องมีปรมาจารย์หรือเหตุการณ์ในเรื่อง'],
+    ['explain', 'ตัวละครได้ Insight Point จากเหตุการณ์สำคัญ จบเซสชั่น +1 เป้าหมายย่อย +2 ภารกิจสำคัญ +3 เป้าหมายหลักของเรื่อง +4 ใช้ได้เฉพาะตอนจบเซสชั่นหรือช่วง Downtime สะสมข้ามเซสชั่นได้ไม่จำกัด', 'ipgain'],
+    ['explain', 'IP ซื้อได้สามอย่าง หนึ่ง ยก Mod ของค่าพลังขึ้นหนึ่งขั้น ราคาขึ้นตามขั้น ติดลบขึ้นมา 0 ขั้นละ 3 จากนั้น 3 4 5 6 7', 'ipmod'],
+    ['explain', 'สอง ยกระดับความรู้ ระดับหนึ่ง 4 ระดับสอง 6 ระดับสาม 9 ต้องผ่านประตูของระดับนั้นก่อน เคยใช้งานจริง มีตำรา หรือมีครู สาม ซื้อทักษะและเวทตามราคาที่เขียนไว้ในรายการ', 'ipknow'],
+    ['think', 'ทักษะระดับ Novice เรียนเองได้ Expert ต้องมีครู ตำรา หรือเคยเห็นใครใช้ Master ต้องมีปรมาจารย์หรือเหตุการณ์ในเรื่อง', 'gates'],
     ['smirk', 'ครูและตำราเปลี่ยนได้แค่สิทธิ์และราคา ตำราทั่วไปหรือผู้ชำนาญการลด 1 IP ของหายากหรือปรมาจารย์ลด 2 ใช้ได้สาขาละครั้งต่อช่วงระหว่าง Milestone GM เป็นคนติ๊กยืนยันประตูให้เจ้าในหน้าต่าง "ใช้ IP"'],
   ], tryLabel:'เปิดหน้าต่างใช้ IP ที่ชีท', tryHash:'#chars' },
   { id:'online', nav:'โต๊ะออนไลน์', title:'โต๊ะนี้นั่งได้ทั้งที่อยู่คนละเมือง', scene:'map', lines:[
-    ['surprise', 'รู้ไหม โต๊ะนี้นั่งได้ทั้งที่อยู่คนละเมือง ล็อกอินด้วยบัญชี Google ที่มุมขวาบน ตัวละครของเจ้าจะตามไปทุกเครื่อง'],
+    ['surprise', 'รู้ไหม โต๊ะนี้นั่งได้ทั้งที่อยู่คนละเมือง ล็อกอินด้วยบัญชี Google ที่มุมขวาบน ตัวละครของเจ้าจะตามไปทุกเครื่อง', 'login'],
     ['explain', 'ชีทของเจ้าเป็นของเจ้าคนเดียว GM กับเพื่อนร่วมโต๊ะจะเห็นก็ต่อเมื่อเจ้าหยิบตัวละครลงบอร์ดในห้องนั้น ปุ่ม "ออนไลน์" บอกว่าใครอยู่ที่ไหน'],
-    ['explain', 'GM สร้างห้องแล้วส่งลิงก์ให้ ผู้เล่นกด "วางตัวละครลงบอร์ด" รูปจากชีทจะไปอยู่บนหมาก GM เลือกสถานที่ สุ่มแผนที่ เพิ่ม NPC ที่ซ่อนไว้ก่อน เริ่มการต่อสู้ แล้วทุกคนเดินหมากของตัวเอง'],
-    ['smile', 'ทุกการทอยในห้องเด้งเป็นลูกเต๋าใหญ่กลางจอของทุกคน และทอยได้ทีละคน ระหว่างที่เต๋าของใครยังหมุนอยู่ คนอื่นต้องรอ แชตมีคำสั่ง /r 2d6+2 สำหรับทอยเอง /adv /dis และ /gm สำหรับข้อความลับถึง GM'],
-    ['shush', 'ถ้า GM ย้ายเครื่อง ให้ใช้รหัส GM หกตัวของห้องเพื่อกลับมาเป็น GM อย่าให้ผู้เล่นเห็นรหัสนั้น เราเห็นบาปที่คนเคยทำมามากพอจะรู้ว่าอะไรเกิดขึ้นเมื่อผู้เล่นได้รหัส GM'],
+    ['explain', 'GM สร้างห้องแล้วส่งลิงก์ให้ ผู้เล่นกด "วางตัวละครลงบอร์ด" รูปจากชีทจะไปอยู่บนหมาก GM เลือกสถานที่ สุ่มแผนที่ เพิ่ม NPC ที่ซ่อนไว้ก่อน เริ่มการต่อสู้ แล้วทุกคนเดินหมากของตัวเอง', 'roomflow'],
+    ['smile', 'ทุกการทอยในห้องเด้งเป็นลูกเต๋าใหญ่กลางจอของทุกคน และทอยได้ทีละคน ระหว่างที่เต๋าของใครยังหมุนอยู่ คนอื่นต้องรอ แชตมีคำสั่ง /r 2d6+2 สำหรับทอยเอง /adv /dis และ /gm สำหรับข้อความลับถึง GM', 'dicepop'],
+    ['shush', 'ถ้า GM ย้ายเครื่อง ให้ใช้รหัส GM หกตัวของห้องเพื่อกลับมาเป็น GM อย่าให้ผู้เล่นเห็นรหัสนั้น เราเห็นบาปที่คนเคยทำมามากพอจะรู้ว่าอะไรเกิดขึ้นเมื่อผู้เล่นได้รหัส GM', 'gmkey'],
   ], tryLabel:'ไปโต๊ะเล่น', tryHash:'#table' },
   { id:'end', nav:'ส่งท้าย', title:'เท่านี้ก็พอให้เจ้านั่งลงที่โต๊ะได้แล้ว', scene:'study', lines:[
     ['smile', 'เท่านี้ก็พอให้เจ้านั่งลงที่โต๊ะได้แล้ว ที่เหลือเรียนจากการเล่น ไม่ใช่จากเรา'],
-    ['explain', 'กฎย่อทั้งหมดอยู่ในหน้า "กฎย่อ" และศัพท์ทุกคำที่ขีดเส้นประกดดูได้ทุกที่ในเว็บ ตอนสร้างตัวละคร เราจะยืนอยู่ข้างเจ้าด้วย คอยบ่น คอยแซว และคอยบอกว่าอะไรเข้ากับอะไร'],
-    ['smile', 'จงเฉลิมฉลองเมื่อเริ่มสิ่งใหม่ และจดจำเรื่องราวที่เกิดบนโต๊ะไว้เล่าต่อ นั่นคือสิ่งที่เราขอ'],
+    ['explain', 'กฎย่อทั้งหมดอยู่ในหน้า "กฎย่อ" และศัพท์ทุกคำที่ขีดเส้นประกดดูได้ทุกที่ในเว็บ ตอนสร้างตัวละคร เราจะยืนอยู่ข้างเจ้าด้วย คอยบ่น คอยแซว และคอยบอกว่าอะไรเข้ากับอะไร', 'rulespage'],
+    ['smile', 'จงเฉลิมฉลองเมื่อเริ่มสิ่งใหม่ และจดจำเรื่องราวที่เกิดบนโต๊ะไว้เล่าต่อ นั่นคือสิ่งที่เราขอ', null],
     ['smile', 'ขอให้สายเลือดของเจ้าสืบสานไปนานชั่วกัลป์ ลูกรัก'],
   ], tryLabel:'สร้างตัวละครตัวแรก', tryHash:'#wizard', tryNew:true },
 ];
@@ -2877,7 +2997,8 @@ function renderTutorial(){
       h('button',{class:'small ghost',onclick:(e)=>{ e.stopPropagation(); finishChapter(); },text:'ข้ามบท'})));
   const box = h('div',{class:'vn-box'}, nameEl, textEl, h('div',{class:'vn-foot'}, counter, nextEl), choices);
   const log = h('div',{class:'vn-log hidden'});
-  stage.append(h('div',{class:'vn-bg'}), h('div',{class:'vn-fog'}), top, h('div',{class:'vn-sprite'}, sprite), box, log);
+  const figHost = h('div',{class:'vn-fighost'});
+  stage.append(h('div',{class:'vn-bg'}), h('div',{class:'vn-fog'}), top, h('div',{class:'vn-sprite'}, sprite), figHost, box, log);
   root.append(stage);
   root.append(h('p',{class:'dim vn-hint',text:'คลิกที่ฉาก หรือกด Space / Enter / → เพื่อพูดต่อ · คลิกระหว่างที่ตัวอักษรกำลังขึ้นเพื่อแสดงทั้งบรรทัด · ความคืบหน้าถูกจำไว้ในเครื่องนี้'}));
 
@@ -2890,7 +3011,7 @@ function renderTutorial(){
     if (!log.classList.contains('hidden')){ log.classList.add('hidden'); return; }
     clear(log);
     log.append(h('div',{class:'row',style:'justify-content:space-between'}, h('b',{text:'บทนี้ทั้งบท'}), h('button',{class:'small ghost',onclick:(e)=>{ e.stopPropagation(); log.classList.add('hidden'); },text:'ปิด'})));
-    L.lines.forEach(([m,t],i)=> log.append(h('div',{class:'vn-logline'+(i===Tutor.ln?' cur':''), onclick:(e)=>{ e.stopPropagation(); Tutor.ln = i; tutorSave(); showLine(); log.classList.add('hidden'); }}, h('img',{src:nemSrc(m),alt:''}), h('div',null, T(t)))));
+    L.lines.forEach(([m,t,f],i)=> log.append(h('div',{class:'vn-logline'+(i===Tutor.ln?' cur':''), onclick:(e)=>{ e.stopPropagation(); Tutor.ln = i; tutorSave(); showLine(); log.classList.add('hidden'); }}, h('img',{src:nemSrc(m),alt:''}), h('div',null, T(t)))));
     log.classList.remove('hidden');
   }
   function armAuto(){ if (!Tutor.auto) return; if (Tutor.timer) clearTimeout(Tutor.timer); const len = L.lines[Tutor.ln][1].length; Tutor.timer = setTimeout(()=>{ Tutor.timer=null; if (Tutor.auto) advance(); }, 1400 + Math.min(4000, len*22)); }
@@ -2905,8 +3026,11 @@ function renderTutorial(){
     Tutor.typing = setInterval(()=>{ i += 2; span.textContent = text.slice(0, i); if (i >= text.length) finish(); }, 18);
     textEl._finish = finish;
   }
+  function figFor(ln){ for (let i=ln;i>=0;i--){ const f = L.lines[i][2]; if (f !== undefined) return f; } return null; }
+  function showFig(ln){ const spec = figFor(ln); const key = JSON.stringify(spec||null); if (figHost.dataset.key === key) return; figHost.dataset.key = key; clear(figHost); const node = vnFigure(spec); if (node) figHost.append(node); stage.classList.toggle('has-fig', !!node); }
   function showLine(){
     const [mood, text] = L.lines[Tutor.ln];
+    showFig(Tutor.ln);
     Tutor.done = false;
     choices.classList.add('hidden');
     sprite.src = nemSrc(mood); stage.className = 'vn scene-'+(L.scene||'study')+' mood-'+mood;
@@ -2923,7 +3047,7 @@ function renderTutorial(){
     if (Tutor.ln > 0) choices.append(h('button',{class:'small ghost',onclick:(e)=>{ e.stopPropagation(); Tutor.ln=0; tutorSave(); showLine(); },text:'ฟังบทนี้อีกครั้ง'}));
     choices.classList.remove('hidden');
   }
-  function finishChapter(){ Tutor.ln = L.lines.length-1; tutorSave(); const [mood, text] = L.lines[Tutor.ln]; sprite.src = nemSrc(mood); counter.textContent = `${Tutor.ln+1} / ${L.lines.length}`; tutorStopTimers(); clear(textEl); textEl.append(T(text)); showChoices(); }
+  function finishChapter(){ Tutor.ln = L.lines.length-1; tutorSave(); const [mood, text] = L.lines[Tutor.ln]; sprite.src = nemSrc(mood); showFig(Tutor.ln); counter.textContent = `${Tutor.ln+1} / ${L.lines.length}`; tutorStopTimers(); clear(textEl); textEl.append(T(text)); showChoices(); }
   function advance(){
     if (Tutor.typing){ textEl._finish && textEl._finish(); return; }
     if (Tutor.done){ if (Tutor.ch < LESSONS.length-1) setLesson(Tutor.ch+1, 0); return; } // จบบท: คลิก/Space ไปบทถัดไป (บทสุดท้ายใช้ปุ่ม)
