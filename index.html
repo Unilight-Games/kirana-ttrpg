@@ -971,19 +971,45 @@ function statStyle(s){ return `--sc:${STAT_COLORS[s]||'var(--mana)'}`; }
 const GLOSSARY = DATA.glossary || {};
 const GL_TERMS = Object.keys(GLOSSARY).sort((a,b)=>b.length-a.length);
 const GL_RE = GL_TERMS.length ? new RegExp('(' + GL_TERMS.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|') + ')(?![A-Za-z])', 'g') : null;
+/* ชื่อเฉพาะที่ห้ามขีดเส้นศัพท์ข้างใน (ชื่อสกิล Proficiency Trait พื้นหลัง ชุด ฯลฯ) เช่น "Yantra Master" ไม่ใช่ Master ระดับทักษะ */
+const PROTECTED_NAMES = (()=>{
+  const names = new Set();
+  const add = (n)=>{ if (!n) return; n = String(n).replace(/^\(|\)$/g,'').trim(); if (n && /[A-Za-z]/.test(n)) names.add(n); };
+  for (const sk of DATA.skills||[]) add(sk.nameEn);
+  for (const k of DATA.knowledge||[]){ for (const L of Object.values(k.levels||{})) for (const p of L.proficiencies||[]) add(p.name.replace(/\s*-\s*[^)]*\)?$/,'')); }
+  for (const kin of DATA.kins||[]){ for (const list of ['traits','benefits','hindrances']) for (const x of kin[list]||[]) add(x.nameEn); for (const list of ['childhood','specialChildhood','adulthood','specialAdulthood']) for (const b of kin[list]||[]) add(b.nameEn); for (const sk of kin.starterSkills||[]) add(sk.name.replace(/\(.*$/,'')); }
+  for (const st of (DATA.sets && DATA.sets.sets)||[]) add(st.nameEn);
+  // เก็บเฉพาะชื่อที่มีคำศัพท์อยู่ข้างใน (ชื่ออื่นไม่ต้องป้องกัน) และยาวก่อน
+  const out = [...names].filter(n => { if (!GL_RE) return false; GL_RE.lastIndex = 0; return GL_RE.test(n) && !GLOSSARY[n]; }).sort((a,b)=>b.length-a.length);
+  return out;
+})();
+const PROTECT_RE = PROTECTED_NAMES.length ? new RegExp('(' + PROTECTED_NAMES.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|') + ')(?![A-Za-z])', 'g') : null;
+function protectedSpans(s){ const spans = []; if (!PROTECT_RE) return spans; PROTECT_RE.lastIndex = 0; let m; while ((m = PROTECT_RE.exec(s))){ const prev = s[m.index-1]; if (prev && /[A-Za-z0-9]/.test(prev)) continue; spans.push([m.index, m.index + m[0].length]); } return spans; }
+/* คำศัพท์คำเดียวที่ชิดกับคำอังกฤษตัวใหญ่ที่ไม่ใช่ศัพท์ (เช่น "Yantra Master", "Martial Skill") ถือเป็นส่วนของชื่อ ไม่ขีด */
+function partOfName(s, start, end, term){
+  if (term.includes(' ')) return false;
+  const before = s.slice(0, start).match(/([A-Z][A-Za-z'\-]*)\s$/); const after = s.slice(end).match(/^\s([A-Z][A-Za-z'\-]*)/);
+  const isTerm = (w)=> !!GLOSSARY[w] || STATS.includes(w);
+  if (before && !isTerm(before[1])) return true;
+  if (after && !isTerm(after[1])) return true;
+  return false;
+}
 function termify(text){
   const frag = document.createDocumentFragment();
   if (text == null) return frag;
   const s = String(text);
   if (!GL_RE){ frag.append(s); return frag; }
+  const prot = protectedSpans(s);
   let last = 0; GL_RE.lastIndex = 0; let m; let count = 0;
   while ((m = GL_RE.exec(s)) && count < 60){
-    const start = m.index; const term = m[1];
+    const start = m.index; const term = m[1]; const end = start + term.length;
     // avoid matching inside a latin word (e.g. "Cast" inside "Forecast")
     const prev = s[start-1]; if (prev && /[A-Za-z0-9]/.test(prev)) { continue; }
+    if (prot.some(([a,b]) => start < b && end > a)) continue;
+    if (partOfName(s, start, end, term)) continue;
     if (start > last) frag.append(s.slice(last, start));
     frag.append(h('span', {class:'term', tabindex:0, role:'button', dataset:{term}, onclick:(e)=>{ showTerm(term, e.currentTarget); }, onkeydown:(e)=>{ if (e.key==='Enter'||e.key===' '){ e.preventDefault(); showTerm(term, e.currentTarget); } }}, term));
-    last = start + term.length; count++;
+    last = end; count++;
   }
   if (last < s.length) frag.append(s.slice(last));
   return frag;
@@ -1074,6 +1100,18 @@ function autoFillExtra(c, archId){
   }
 }
 
+/* ---- Proficiency ที่มีตัวเลือกย่อย (ความเชื่อ): รายการที่ชื่อขึ้นต้นด้วย "(" ต่อท้าย Proficiency ก่อนหน้า ---- */
+function profGroups(L){ const out = []; for (const p of (L && L.proficiencies) || []){ if (p.name.startsWith('(') && out.length) out[out.length-1].subs.push(p); else out.push({prof:p, subs:[]}); } return out; }
+function faithKey(name){ const m = String(name||'').match(/-\s*([^)]+)\)?\s*$/); return m ? m[1].trim().replace(/([ั-ฺ็-๎])\1+/g,'$1') : null; }
+function faithShort(name){ return String(name||'').replace(/^\(|\)$/g,'').trim(); }
+function charFaith(c, exceptKey){ for (const [k,sl] of Object.entries(c.kslots||{})) if (k!==exceptKey && sl && sl.faith) return faithKey(sl.faith); return null; }
+function profGroupOf(kid, profName){ const k = KNOW[kid]; if (!k) return null; for (const L of Object.values(k.levels||{})){ const g = profGroups(L).find(x=>x.prof.name===profName); if (g) return g; } return null; }
+function slotIncomplete(sl){ if (!sl || !sl.id || !sl.prof) return true; const g = profGroupOf(sl.id, sl.prof); return !!(g && g.subs.length && !sl.faith); }
+function profLabel(sl){ return sl.prof + (sl.faith ? ' · ' + faithShort(sl.faith) : ''); }
+function profTexts(kid, sl){ const g = profGroupOf(kid, sl.prof); const sub = g && sl.faith ? g.subs.find(x=>x.name===sl.faith) : null; return { text: g ? g.prof.text : '', faithText: sub ? sub.text : '' }; }
+/* ชีทรุ่นก่อน: เลือกความเชื่อในวงเล็บเป็น Proficiency ตรง ๆ → แปลงเป็น Proficiency แม่ + faith */
+function migrateFaithSlots(c){ let changed=false; for (const sl of Object.values(c.kslots||{})){ if (!sl || !sl.id || !sl.prof || !sl.prof.startsWith('(')) continue; const k = KNOW[sl.id]; if (!k) continue; for (const L of Object.values(k.levels||{})){ const g = profGroups(L).find(x=>x.subs.some(f=>f.name===sl.prof)); if (g){ sl.faith = sl.prof; sl.prof = g.prof.name; changed=true; break; } } } return changed; }
+
 /* ===== Login gate (Firebase mode) + developer page ===== */
 function loginGate(A, auth){
   return new Promise(resolve => {
@@ -1163,7 +1201,7 @@ function wizSave(){ W.char.step = W.step; Store.upsert(W.char); }
 function renderWizard(){
   const root = clear($('#v-create'));
   if (!W.char) { root.append(h('div',{class:'card'}, h('h2',{text:'สร้างตัวละครใหม่'}), h('p',{class:'dim',text:'เดินทีละขั้น ทุกตัวเลือกบอกว่าได้อะไร แผงด้านขวาสรุปค่าปัจจุบันตลอดทาง'}), h('button',{class:'primary',onclick:()=>startWizard(null),text:'เริ่มสร้างตัวละคร'}))); return; }
-  const c = W.char, d = compute(c);
+  const c = W.char; migrateFaithSlots(c); const d = compute(c);
   const steps = h('div',{class:'steps'}, STEP_DEFS.map((s,i)=>h('button',{class: i===W.step?'cur':(stepDone(i)?'done':''), onclick:()=>{W.step=i; renderWizard();}, text:`${i+1}. ${s.key==='kin'?'วงศา':s.key==='bg'?'พื้นหลัง':s.key==='pers'?'บุคลิก':s.key==='extra'?'Extra':s.key==='talent'?'พรสวรรค์':s.key==='calc'?'คำนวณ':s.key==='details'?'รายละเอียด':'ชุดเริ่มต้น'}`})));
   const def = STEP_DEFS[W.step];
   const head = h('div',{class:'stephead'}, h('div',null, h('h2',{text:def.title}), h('p',null, T(def.blurb))), h('div',{class:'row'}, h('button',{class:'small ghost',onclick:()=>{wizSave(); toast('บันทึกร่างแล้ว');},text:'บันทึกร่าง'}), h('button',{class:'small ghost',onclick:()=>{ if (confirm('ล้างตัวละครนี้และเริ่มใหม่?')) { startWizard(null);} },text:'เริ่มใหม่'})));
@@ -1191,12 +1229,12 @@ function stepBlocker(i){ const c=W.char, d=compute(c);
   if (i===4){ const t = DATA.talents.find(x=>x.key===c.talent); const kin = KIN[c.kin];
     for (let j=0;j<t.steps.length;j++){ const st=t.steps[j]; const key=`talent-${j}`;
       if (st.kind==='skills' && ((c.skillSlots||{})[key]||[]).length < st.count) return `ขั้น ${j+1} ของ Talent: เลือกทักษะให้ครบ ${st.count}`;
-      if (st.kind==='knowledge'){ const keys = st.count>1 ? Array.from({length:st.count},(_,q)=>`${key}-${q}`) : [key]; for (const kk of keys){ const sl=(c.kslots||{})[kk]; if (!sl || !sl.id || !sl.prof) return `ขั้น ${j+1} ของ Talent: เลือกความรู้และ Proficiency ให้ครบ`; } }
+      if (st.kind==='knowledge'){ const keys = st.count>1 ? Array.from({length:st.count},(_,q)=>`${key}-${q}`) : [key]; for (const kk of keys){ const sl=(c.kslots||{})[kk]; if (slotIncomplete(sl)) return `ขั้น ${j+1} ของ Talent: เลือกความรู้ Proficiency (และความเชื่อ) ให้ครบ`; } }
       if (st.kind==='choice' && !(c.talentPicks||{})[key]) return `ขั้น ${j+1} ของ Talent: เลือก 1 อย่าง`;
       if (st.kind==='grant' && st.altPools && (kin.traits.some(x=>x.nameEn==='Nimble Grace') || kin.starterSkills.some(x=>x.name.includes('Nimble Grace'))) && ((c.skillSlots||{})[key]||[]).length<1) return `ขั้น ${j+1} ของ Talent: เลือก Tactical & General Skill แทน Nimble Grace`;
     }
-    const fr=(c.kslots||{}).free; if (!fr || !fr.id || !fr.prof) return 'อัปเกรด Knowledge 1 ระดับ และเลือก Proficiency (ขั้น 5 ของไฟล์แกน)';
-    for (let g=0; g<kin.knowledgeGrants.length; g++){ const sl=(c.kslots||{})[`kin-${g}`]; if (!sl || !sl.id || !sl.prof) return `ของจากวงศา (${kin.knowledgeGrants[g].source}): เลือกความรู้และ Proficiency`; }
+    const fr=(c.kslots||{}).free; if (slotIncomplete(fr)) return 'อัปเกรด Knowledge 1 ระดับ และเลือก Proficiency (ขั้น 5 ของไฟล์แกน)';
+    for (let g=0; g<kin.knowledgeGrants.length; g++){ const sl=(c.kslots||{})[`kin-${g}`]; if (slotIncomplete(sl)) return `ของจากวงศา (${kin.knowledgeGrants[g].source}): เลือกความรู้และ Proficiency`; }
     if (kin.adaptationChoice && !c.adaptation) return 'เลือก Adaptation 1 อย่าง (Cross-Cultural Adaptation)';
   }
   if (i===6 && !c.name.trim()) return 'ตั้งชื่อตัวละครก่อน';
@@ -1460,7 +1498,7 @@ function knowledgePicker(c, slotKey, opts, title){
   const slot = c.kslots[slotKey] || (c.kslots[slotKey] = {id:null, prof:null});
   if (opts.fixed) slot.id = opts.fixed;
   const box = h('div',{class:'card',style:'margin-top:10px'});
-  box.append(h('h4',null, title, ' ', h('span',{class:'tag '+(slot.id && slot.prof ? 'ok':'warn'), text: slot.id ? (slot.prof ? `${KNOW[slot.id].nameEn} · ${slot.prof}` : 'เลือก Proficiency') : 'ยังไม่เลือก'})));
+  box.append(h('h4',null, title, ' ', h('span',{class:'tag '+(!slotIncomplete(slot) ? 'ok':'warn'), text: slot.id ? (slot.prof ? `${KNOW[slot.id].nameEn} · ${profLabel(slot)}` + (slotIncomplete(slot) ? ' (เลือกความเชื่อ)' : '') : 'เลือก Proficiency') : 'ยังไม่เลือก'})));
   // levels without this slot
   const others = Object.entries(c.kslots).filter(([k])=>k!==slotKey).map(([,v])=>v);
   const lvBefore = Object.fromEntries(DATA.knowledge.map(k=>[k.id,0]));
@@ -1480,7 +1518,14 @@ function knowledgePicker(c, slotKey, opts, title){
     if (L && L.proficiencies.length){
       box.append(h('div',{class:'dim',style:'margin-top:6px;font-size:13px',text: (L.profLabel||'เลือก Proficiency') + ' 1 อย่าง'}));
       const usedProfs = new Set(others.filter(s=>s && s.id===slot.id && s.prof).map(s=>s.prof));
-      box.append(h('div',{class:'grid',style:'margin-top:6px'}, L.proficiencies.map(p=>{ const taken = usedProfs.has(p.name) && slot.prof!==p.name; return h('div',{class:'sk'+(slot.prof===p.name?' sel':'')+(taken?' disabled':''), onclick:()=>{ if (taken){ toast('Proficiency นี้เลือกไปแล้วในช่องอื่น'); return; } slot.prof=p.name; renderWizard();}}, h('div',{class:'h'}, h('b',{text:p.name}), taken? tag('เลือกแล้ว','warn'):null), h('div',{class:'eff'}, T(p.text))); })));
+      const groups = profGroups(L);
+      box.append(h('div',{class:'grid',style:'margin-top:6px'}, groups.map(g=>{ const p = g.prof; const taken = usedProfs.has(p.name) && slot.prof!==p.name; return h('div',{class:'sk'+(slot.prof===p.name?' sel':'')+(taken?' disabled':''), onclick:()=>{ if (taken){ toast('Proficiency นี้เลือกไปแล้วในช่องอื่น'); return; } if (slot.prof!==p.name){ slot.prof=p.name; slot.faith=null; } renderWizard();}}, h('div',{class:'h'}, h('b',{text:p.name}), g.subs.length ? tag(`เลือกความเชื่อ 1 จาก ${g.subs.length}`,'prop') : null, taken? tag('เลือกแล้ว','warn'):null), h('div',{class:'eff'}, T(p.text))); })));
+      const sel = groups.find(g=>g.prof.name===slot.prof);
+      if (sel && sel.subs.length){
+        const have = charFaith(c, slotKey);
+        box.append(h('div',{class:'infobox',style:'margin-top:8px'}, h('b',{text:`${slot.prof}: เลือกความเชื่อ 1 อย่าง`}), have ? h('div',{class:'dim',style:'font-size:12.5px',text:`ตัวละครนี้นับถือ "${have}" อยู่แล้ว เลือกได้เฉพาะความเชื่อเดียวกัน`}) : null,
+          h('div',{class:'grid',style:'margin-top:6px'}, sel.subs.map(f=>{ const key = faithKey(f.name); const blocked = !!(have && key && have!==key); return h('div',{class:'sk'+(slot.faith===f.name?' sel':'')+(blocked?' disabled':''), onclick:()=>{ if (blocked){ toast('ต้องเป็นความเชื่อเดียวกับที่ตัวละครมีอยู่'); return; } slot.faith = f.name; renderWizard(); }}, h('div',{class:'h'}, h('b',{text:faithShort(f.name)})), h('div',{class:'eff'}, T(f.text))); }))));
+      } else slot.faith = null;
     } else if (L) { slot.prof = slot.prof || '(ระดับนี้ไม่มี Proficiency ให้เลือก)'; }
   }
   return box;
@@ -1970,6 +2015,7 @@ function autoEquip(c){
   c.equipAuto = true;
 }
 function ensureSheetState(c, d){
+  migrateFaithSlots(c);
   c.current = Object.assign({hp:d.hp, mp:d.mp, sanity:d.sanity, temp:0, ap:3, ip:0, money:15, tough:{}}, c.current||{});
   for (const [k] of DATA.meta.bodyParts) if (c.current.tough[k]==null) c.current.tough[k] = d.toughness;
   c.armor = c.armor || {}; c.equip = c.equip || {}; c.details = c.details || {};
@@ -2035,7 +2081,7 @@ function renderSheet(id){
   const hinds = kin.hindrances.map(x=>({name:`${x.name} (${x.nameEn})`, text:x.text}));
   if (c.evolver && c.evolver.kin && c.evolver.hindrance){ const ek=KIN[c.evolver.kin]; const hd=ek.hindrances.find(x=>x.nameEn===c.evolver.hindrance); if (hd) hinds.push({name:`${hd.name} (${hd.nameEn})`, text:hd.text}); }
   const profs = [];
-  for (const k of DATA.knowledge){ for (const sl of Object.values(c.kslots||{})){ if (sl && sl.id===k.id && sl.prof && !sl.prof.startsWith('(')){ let text=''; for (const L of Object.values(k.levels)){ const f=L.proficiencies.find(x=>x.name===sl.prof); if (f) text=f.text; } profs.push({name:`${sl.prof} (${k.nameEn})`, text}); } } }
+  for (const k of DATA.knowledge){ for (const sl of Object.values(c.kslots||{})){ if (sl && sl.id===k.id && sl.prof && !sl.prof.startsWith('(')){ const pt = profTexts(k.id, sl); profs.push({name:`${profLabel(sl)} (${k.nameEn})`, text: pt.text + (pt.faithText ? ` · ${faithShort(sl.faith)}: ${pt.faithText}` : '')}); } } }
   if (c.adaptation) profs.push({name:'Adaptation: '+c.adaptation, text:'ได้ Advantage ในการทอยป้องกันผลจากสภาพแวดล้อมแบบนี้'});
   const col = (title, items, cls, key) => h('div',{class:'box',dataset:{k:key}}, h('h4',null, T(title)), items.length ? items.map(it=>h('div',{style:'margin:6px 0;font-size:13px'}, h('div',null, tag(it.name, cls), it.src? h('span',{class:'muted',style:'font-size:11px',text:' '+it.src}):null), h('div',{class:'desc',style:'font-size:12px'}, T(it.text)))) : h('div',{class:'muted',text:'-'}));
   mid.append(h('div',{class:'grid three'}, col('Trait', traits, 'ok', 'trait'), col('Hindrance', hinds, 'neg', 'hind'), col('Proficiency Trait', profs, 'prop', 'prof')));
@@ -2328,10 +2374,11 @@ function openIpShop(c, onChange){
         const gate = h('input',{type:'checkbox'}); let disc = '';
         const row = h('div',{class:'iprow'}, h('div',{class:'ipmain'}, h('b',{text:k.nameEn}), h('span',{class:'dim',text:` ${k.nameTh} · ${k.stats.join('/')} · Lv${lv}`}), cost==null? h('div',{class:'dim',style:'font-size:12px',text:'ระดับสูงสุดแล้ว'}) : h('div',{class:'desc',style:'font-size:12px'}, `Lv${lv+1}: `, T(L.text||''))),
           cost==null? null : h('div',{class:'ipact'}, h('label',{class:'dim',style:'font-size:11px'}, gate, ' GM ยืนยันผ่านประตูระดับ'), discRow(k.id, v=>{ disc=v; }), h('button',{class:'small primary',onclick:()=>{ if (!gate.checked){ toast('ต้องให้ GM ยืนยันว่าผ่านประตูระดับก่อน'); return; } const fin = costWith(cost, disc); if (ip() < fin){ toast(`IP ไม่พอ (ต้องการ ${fin})`); return; }
-            const profs = (L.proficiencies||[]).filter(p=>!Object.values(c.kslots||{}).some(sl=>sl&&sl.prof===p.name));
-            const finish = (prof)=>{ c.kslots = c.kslots||{}; c.kslots['ip'+uid()] = {id:k.id, prof: prof? prof.name : null}; if (disc) c.ipDiscUsed[k.id] = true; spend(`${k.nameEn} Lv${lv} → Lv${lv+1}${prof? ' ('+prof.name+')':''}`, fin, 'knowledge', disc? {disc} : null); };
-            if (!profs.length){ finish(null); return; }
-            clear(body); body.append(h('h4',{text:`${k.nameEn} Lv${lv+1}: เลือก Proficiency 1 อย่าง`}), h('div',{class:'ipgrid'}, profs.map(p=>h('div',{class:'ipcard knowledge'}, h('div',{class:'ribbon',text:'Proficiency'}), h('h4',{text:p.name}), h('div',{class:'body cardtext'}, T(p.text||'')), h('button',{class:'primary small',onclick:()=>finish(p),text:'เลือก'})))), h('button',{class:'small ghost',style:'margin-top:8px',onclick:render,text:'← ยกเลิก'}));
+            const groups = profGroups(L).filter(g=>!Object.values(c.kslots||{}).some(sl=>sl&&sl.prof===g.prof.name));
+            const finish = (prof, faith)=>{ c.kslots = c.kslots||{}; c.kslots['ip'+uid()] = {id:k.id, prof: prof? prof.name : null, faith: faith ? faith.name : null}; if (disc) c.ipDiscUsed[k.id] = true; spend(`${k.nameEn} Lv${lv} → Lv${lv+1}${prof? ' ('+prof.name+(faith? ' · '+faithShort(faith.name):'')+')':''}`, fin, 'knowledge', disc? {disc} : null); };
+            if (!groups.length){ finish(null); return; }
+            const pickFaith = (g)=>{ const have = charFaith(c); clear(body); body.append(h('h4',{text:`${g.prof.name}: เลือกความเชื่อ 1 อย่าง`}), have ? h('div',{class:'dim',style:'font-size:12.5px',text:`ตัวละครนี้นับถือ "${have}" อยู่แล้ว เลือกได้เฉพาะความเชื่อเดียวกัน`}) : null, h('div',{class:'ipgrid'}, g.subs.map(f=>{ const blocked = !!(have && faithKey(f.name) && have!==faithKey(f.name)); return h('div',{class:'ipcard knowledge'+(blocked?' disabled':'')}, h('div',{class:'ribbon',text:'ความเชื่อ'}), h('h4',{text:faithShort(f.name)}), h('div',{class:'body cardtext'}, T(f.text||'')), h('button',{class:'primary small',disabled:blocked,onclick:()=>finish(g.prof, f),text:'เลือก'})); })), h('button',{class:'small ghost',style:'margin-top:8px',onclick:render,text:'← ยกเลิก'})); };
+            clear(body); body.append(h('h4',{text:`${k.nameEn} Lv${lv+1}: เลือก Proficiency 1 อย่าง`}), h('div',{class:'ipgrid'}, groups.map(g=>h('div',{class:'ipcard knowledge'}, h('div',{class:'ribbon',text:'Proficiency'}), h('h4',{text:g.prof.name}), g.subs.length ? h('div',{class:'dim',style:'font-size:12px',text:`เลือกความเชื่อ 1 จาก ${g.subs.length} ต่อ`}) : null, h('div',{class:'body cardtext'}, T(g.prof.text||'')), h('button',{class:'primary small',onclick:()=>{ if (g.subs.length) pickFaith(g); else finish(g.prof, null); },text:'เลือก'})))), h('button',{class:'small ghost',style:'margin-top:8px',onclick:render,text:'← ยกเลิก'}));
           },text:`ซื้อ ${cost} IP`})));
         body.append(row); }
     } else if (IpUI.tab==='skill'){
