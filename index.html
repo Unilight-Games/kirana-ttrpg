@@ -2926,7 +2926,7 @@ function renderTutorial(){
   function finishChapter(){ Tutor.ln = L.lines.length-1; tutorSave(); const [mood, text] = L.lines[Tutor.ln]; sprite.src = nemSrc(mood); counter.textContent = `${Tutor.ln+1} / ${L.lines.length}`; tutorStopTimers(); clear(textEl); textEl.append(T(text)); showChoices(); }
   function advance(){
     if (Tutor.typing){ textEl._finish && textEl._finish(); return; }
-    if (Tutor.done) return;
+    if (Tutor.done){ if (Tutor.ch < LESSONS.length-1) setLesson(Tutor.ch+1, 0); return; } // จบบท: คลิก/Space ไปบทถัดไป (บทสุดท้ายใช้ปุ่ม)
     if (Tutor.ln < L.lines.length-1){ Tutor.ln++; tutorSave(); showLine(); }
   }
   function back(){ tutorStopTimers(); if (Tutor.ln > 0){ Tutor.ln--; tutorSave(); showLine(); } else if (Tutor.ch > 0){ setLesson(Tutor.ch-1, LESSONS[Tutor.ch-1].lines.length-1); } }
