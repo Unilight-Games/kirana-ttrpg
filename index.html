@@ -397,6 +397,9 @@ body.roll-locked .dicepanel{opacity:.75}
 .hud-hint{font-size:12px;margin:8px 0 0}
 /* คัมภีร์ */
 .hud-win.book{width:720px}
+.hud-win.dice{width:520px}
+.hud-dice{padding:0}.hud-dice h3{display:none}.hud-dice .log{max-height:220px;overflow:auto}
+.hud-btn .badge.gold{background:var(--gold);color:#1a1300;font-weight:700}
 .book{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:300px;border-radius:10px;overflow:hidden;border:1px solid #4a3f24;background:linear-gradient(90deg,#1a1710 0,#221d14 48%,#0f0d09 50%,#211c13 52%,#1a1710 100%)}
 .book .page{padding:12px 14px;overflow:auto;max-height:60vh}
 .book .toc{border-right:1px solid #3d341d}
@@ -1733,11 +1736,12 @@ function renderSheet(id){
   const kt = h('table',{class:'t'});
   for (const k of DATA.knowledge){ const n = Object.values(c.kslots||{}).filter(s=>s&&s.id===k.id&&s.prof&&!s.prof.startsWith('(')).length; kt.append(h('tr',null, h('td',null, h('b',{text:k.nameEn}), h('span',{class:'dim',style:'font-size:11px',text:` (${k.stats.join('/')})`})), h('td',{class:'num',text:'Lv'+kl[k.id]}), h('td',{class:'num',text:'+'+n}))); }
   kb.append(h('div',{class:'tablewrap'}, kt)); right.append(kb);
-  const dp = dicePanel(c, (e)=>{ if (Table.roomId) Table.postRoll(e, c); }, {guard: Table.roomId ? (run,label)=>Table.guardedRoll(c.name, run, label) : null}); dp.dataset.k = 'dice'; dp.classList.add('box'); right.append(dp);
+  // แผงทอยเต๋าอยู่ใน HUD (ปุ่มลอยข้างจอ) ไม่กินพื้นที่ชีท และเปิดค้างไว้ได้ขณะเลื่อนดูชีท
+  const diceOpts = {onRoll: (e)=>{ if (Table.roomId) Table.postRoll(e, c); }, guard: Table.roomId ? (run,label)=>Table.guardedRoll(c.name, run, label) : null};
   const cs = h('div',{class:'cs'});
   // จัดกรอบลงคอลัมน์เท่ากัน 3 ช่อง (2 บนจอกลาง, 1 บนมือถือ) แบบเรียงให้คอลัมน์สูงใกล้เคียงกัน ไม่ทิ้งช่องว่าง
   const all = [...left.children, ...mid.children, ...right.children].flatMap(el => el.classList.contains('grid') ? [...el.children] : [el]);
-  const ORDER = ['id','portrait','status','res','traits','pers','tough','combat','trait','hind','prof','know','dice','notes'];
+  const ORDER = ['id','portrait','status','res','traits','pers','tough','combat','trait','hind','prof','know','notes'];
   const order = all.slice().sort((a,b)=>ORDER.indexOf(a.dataset.k) - ORDER.indexOf(b.dataset.k));
   // ปุ่มจัดวางกรอบเอง (ย้าย/ย่อขยายทุกกรอบ บันทึกต่อเบราว์เซอร์)
   const lay = loadLayout();
@@ -1745,7 +1749,7 @@ function renderSheet(id){
   root.append(cs);
   packColumns(cs, order);
   if (lay.free && window.innerWidth > 760) applyFreeLayout(cs, lay);
-  renderHUD(c, d, {save, rerender, txt, grow});
+  renderHUD(c, d, {save, rerender, txt, grow, dice: diceOpts});
   if (readOnly) lockForm(root);
 }
 function lockForm(root){ for (const el of root.querySelectorAll('input,textarea,select')) el.disabled = true; for (const b of root.querySelectorAll('button')) { if (!b.classList.contains('rollbtn') && !/กลับ|JSON|ปิด|ซ่อน|คัมภีร์|กระเป๋า|ถุงย่าม|Advantage|Disadvantage|ปกติ/.test(b.textContent) && !b.closest('.hud-head,.hud-dock,.modeBtns')) b.disabled = true; } }
@@ -1812,6 +1816,7 @@ const HUD_ICONS = {
   bag: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M14 18h20l3 22H11z" fill="rgba(0,0,0,.25)"/><path d="M17 18v-3a7 7 0 0 1 14 0v3"/><path d="M11 24h26"/><path d="M19 30h10"/><circle cx="24" cy="34" r="1.6" fill="currentColor"/></svg>',
   book: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M10 10h13a4 4 0 0 1 4 4v24a4 4 0 0 0-4-4H10z" fill="rgba(0,0,0,.25)"/><path d="M38 10H25a4 4 0 0 0-4 4v24a4 4 0 0 1 4-4h13z" fill="rgba(0,0,0,.25)"/><path d="M15 17h6M15 22h6M27 17h6M27 22h6"/><path d="M24 14v24"/></svg>',
   pouch: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M16 20c-6 6-6 20 8 20s14-14 8-20z" fill="rgba(0,0,0,.25)"/><path d="M16 20c2-4 6-6 8-6s6 2 8 6"/><path d="M18 14l-2-5M30 14l2-5M24 13V8"/><path d="M15 20h18"/></svg>',
+  dice: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><rect x="9" y="9" width="30" height="30" rx="6" fill="rgba(0,0,0,.25)"/><circle cx="17" cy="17" r="2.4" fill="currentColor"/><circle cx="31" cy="17" r="2.4" fill="currentColor"/><circle cx="24" cy="24" r="2.4" fill="currentColor"/><circle cx="17" cy="31" r="2.4" fill="currentColor"/><circle cx="31" cy="31" r="2.4" fill="currentColor"/></svg>',
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   grip: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
 };
@@ -1839,6 +1844,7 @@ function renderHUD(c, d, ctx){
   mk('bag', 'bag', 'กระเป๋า', `${totalW.toFixed(1)}/${d.capacity}`, over?'neg':'');
   mk('book', 'book', 'คัมภีร์', sks.length);
   mk('pouch', 'pouch', 'ถุงย่าม', eqCount);
+  if (ctx.dice) mk('dice', 'dice', 'ทอยเต๋า', RollLog.entries.length ? RollLog.entries[0].total : null, 'gold');
   if (HUD.pos){ dock.style.left = HUD.pos.x+'px'; dock.style.top = HUD.pos.y+'px'; dock.style.right='auto'; }
   root.append(dock);
   makeDraggable(dock, dock, (p)=>{ HUD.pos = p; HUD.persist(); });
@@ -1847,8 +1853,9 @@ function renderHUD(c, d, ctx){
   if (!HUD.open) return;
   // ---- window ----
   const win = h('div',{class:'hud-win '+HUD.open});
-  const title = {bag:'กระเป๋าสัมภาระ', book:'คัมภีร์ทักษะ', pouch:'ถุงย่าม · ของสวมใส่'}[HUD.open];
-  const head = h('div',{class:'hud-head'}, svgEl({bag:'bag',book:'book',pouch:'pouch'}[HUD.open]), h('b',{text:title}), h('span',{class:'dim hud-sub'}), h('button',{class:'hud-x',title:'ปิด',onclick:()=>{ HUD.open=null; HUD.persist(); renderHUD(c, d, ctx); }}, svgEl('close')));
+  if (HUD.open==='dice' && !ctx.dice){ HUD.open=null; HUD.persist(); return; }
+  const title = {bag:'กระเป๋าสัมภาระ', book:'คัมภีร์ทักษะ', pouch:'ถุงย่าม · ของสวมใส่', dice:'ทอยเต๋า'}[HUD.open];
+  const head = h('div',{class:'hud-head'}, svgEl({bag:'bag',book:'book',pouch:'pouch',dice:'dice'}[HUD.open]), h('b',{text:title}), h('span',{class:'dim hud-sub'}), h('button',{class:'hud-x',title:'ปิด',onclick:()=>{ HUD.open=null; HUD.persist(); renderHUD(c, d, ctx); }}, svgEl('close')));
   const body = h('div',{class:'hud-body'});
   win.append(head, body);
   const wp = HUD.winPos[HUD.open]; if (wp){ win.style.left = wp.x+'px'; win.style.top = wp.y+'px'; win.style.right='auto'; if (wp.w) win.style.width = wp.w+'px'; if (wp.h) win.style.height = wp.h+'px'; }
@@ -1860,6 +1867,7 @@ function renderHUD(c, d, ctx){
   const refresh = ()=>{ save(); rerender(); };
   if (HUD.open==='bag') renderBagWin(c, d, body, head, {save, rerender, txt, grow, refresh, bagW, eqW, totalW, over});
   else if (HUD.open==='book') renderBookWin(c, d, body, head, sks);
+  else if (HUD.open==='dice'){ head.querySelector('.hud-sub').textContent = Table.roomId ? 'ผลทอยเด้งเข้าห้องที่เปิดอยู่' : 'ทอยส่วนตัว (ไม่ได้อยู่ในห้อง)'; const panel = dicePanel(c, (e)=>{ ctx.dice.onRoll(e); const btn = root.querySelector('.hud-btn[title="ทอยเต๋า"]'); if (btn){ let bd = btn.querySelector('.badge'); if (!bd){ bd = h('span',{class:'badge gold'}); btn.append(bd); } bd.textContent = String(e.total); } }, {guard: ctx.dice.guard}); panel.classList.remove('card'); panel.classList.add('hud-dice'); body.append(panel); }
   else renderPouchWin(c, d, body, head, {save, rerender, txt, grow, refresh, eqW});
   if (SheetUI.readOnly){ for (const el of win.querySelectorAll('input,textarea,select')) el.disabled = true; for (const b of win.querySelectorAll('.hud-body button')) b.disabled = true; }
   requestAnimationFrame(()=>{ const r = win.getBoundingClientRect(); if (r.right > window.innerWidth+2 || r.bottom > window.innerHeight+2 || r.left < 0){ delete HUD.winPos[HUD.open]; win.style.left=''; win.style.top=''; win.style.right=''; } });
