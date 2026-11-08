@@ -1480,6 +1480,9 @@ function stepExtra(body, c, d){
 function nextModAt(v){ let n=0; const m=modOf(v); while (modOf(v+n)===m && n<30) n++; return n; }
 
 /* ---------- Step 5: Talent + knowledge + skills ---------- */
+/* ลำดับช่องความรู้ตามที่ปรากฏบนหน้า: Talent (talent-*) → ฟรี (free) → ของวงศา (kin-*) → ซื้อด้วย IP (ip*) แล้วเรียงตามชื่อ เลือกช่องล่างไม่กระทบช่องบน */
+function slotGroup(key){ return key.startsWith('talent') ? 0 : key==='free' ? 1 : key.startsWith('kin-') ? 2 : 3; } // เรียงตามลำดับที่ปรากฏบนหน้า: Talent → ฟรี → ของวงศา → IP
+function slotBefore(a, b){ const ga = slotGroup(a), gb = slotGroup(b); if (ga !== gb) return ga < gb; return a.localeCompare(b, undefined, {numeric:true}) < 0; }
 function knowledgeLevels(c){
   const lv = Object.fromEntries(DATA.knowledge.map(k=>[k.id,0]));
   for (const slot of Object.values(c.kslots||{})) if (slot && slot.id) lv[slot.id] = Math.min(3, lv[slot.id]+1);
@@ -1557,10 +1560,11 @@ function knowledgePicker(c, slotKey, opts, title){
   if (opts.fixed) slot.id = opts.fixed;
   const box = h('div',{class:'card',style:'margin-top:10px'});
   box.append(h('h4',null, title, ' ', h('span',{class:'tag '+(!slotIncomplete(slot) ? 'ok':'warn'), text: slot.id ? (slot.prof ? `${KNOW[slot.id].nameEn} · ${profLabel(slot)}` + (slotIncomplete(slot) ? ' (เลือกความเชื่อ)' : '') : 'เลือก Proficiency') : 'ยังไม่เลือก'})));
-  // levels without this slot
+  // ระดับ "ก่อนช่องนี้" นับเฉพาะช่องที่มาก่อนตามลำดับคงที่ (Talent → ฟรี → ของวงศา → IP ตามลำดับบนหน้า) ไม่งั้นสองช่องที่เลือกความรู้เดียวกันจะนับกันเองแล้วเด้งไประดับถัดไปทั้งคู่ ทำให้ Proficiency ที่เลือกไว้หายไฮไลต์
   const others = Object.entries(c.kslots).filter(([k])=>k!==slotKey).map(([,v])=>v);
+  const before = Object.entries(c.kslots).filter(([k])=>k!==slotKey && slotBefore(k, slotKey)).map(([,v])=>v);
   const lvBefore = Object.fromEntries(DATA.knowledge.map(k=>[k.id,0]));
-  for (const s of others) if (s && s.id) lvBefore[s.id]++;
+  for (const s of before) if (s && s.id) lvBefore[s.id]++;
   if (!opts.fixed){
     const btns = DATA.knowledge.filter(k => (!opts.from || opts.from.includes(k.id)) && !(opts.exclude||[]).includes(k.id)).map(k=>{
       const before = lvBefore[k.id]; const after = before+1;
@@ -1572,6 +1576,8 @@ function knowledgePicker(c, slotKey, opts, title){
   if (slot.id){
     const k = KNOW[slot.id]; const newLv = Math.min(3, lvBefore[slot.id]+1);
     const L = k.levels[String(newLv)];
+    // ถ้าช่องก่อนหน้าเปลี่ยนจนระดับของช่องนี้ขยับ Proficiency เดิมอาจไม่อยู่ในระดับใหม่ → ล้างให้เลือกใหม่ (ไม่ปล่อยให้ค้างแบบมองไม่เห็น)
+    if (slot.prof && !slot.prof.startsWith('(') && L && L.proficiencies.length && !L.proficiencies.some(p=>p.name===slot.prof)){ slot.prof = null; slot.faith = null; }
     box.append(h('div',{class:'infobox'}, h('b',{text:`${k.nameEn} ${k.nameTh} · ค่าพลังกำกับ ${k.stats.join(', ')} · ระดับ ${newLv}`}), h('div',{class:'desc'}, T(L && L.text ? L.text : ''))));
     if (L && L.proficiencies.length){
       box.append(h('div',{class:'dim',style:'margin-top:6px;font-size:13px',text: (L.profLabel||'เลือก Proficiency') + ' 1 อย่าง'}));
