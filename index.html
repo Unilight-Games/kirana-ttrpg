@@ -1733,7 +1733,7 @@ function renderSheet(id){
   const kt = h('table',{class:'t'});
   for (const k of DATA.knowledge){ const n = Object.values(c.kslots||{}).filter(s=>s&&s.id===k.id&&s.prof&&!s.prof.startsWith('(')).length; kt.append(h('tr',null, h('td',null, h('b',{text:k.nameEn}), h('span',{class:'dim',style:'font-size:11px',text:` (${k.stats.join('/')})`})), h('td',{class:'num',text:'Lv'+kl[k.id]}), h('td',{class:'num',text:'+'+n}))); }
   kb.append(h('div',{class:'tablewrap'}, kt)); right.append(kb);
-  const dp = dicePanel(c, (e)=>{ if (Table.roomId) Table.postRoll(e, c); }, {guard: Table.roomId ? (run,label)=>Table.guardedRoll(c.name, run, label) : null}); dp.dataset.k = 'dice'; right.append(dp);
+  const dp = dicePanel(c, (e)=>{ if (Table.roomId) Table.postRoll(e, c); }, {guard: Table.roomId ? (run,label)=>Table.guardedRoll(c.name, run, label) : null}); dp.dataset.k = 'dice'; dp.classList.add('box'); right.append(dp);
   const cs = h('div',{class:'cs'});
   // จัดกรอบลงคอลัมน์เท่ากัน 3 ช่อง (2 บนจอกลาง, 1 บนมือถือ) แบบเรียงให้คอลัมน์สูงใกล้เคียงกัน ไม่ทิ้งช่องว่าง
   const all = [...left.children, ...mid.children, ...right.children].flatMap(el => el.classList.contains('grid') ? [...el.children] : [el]);
