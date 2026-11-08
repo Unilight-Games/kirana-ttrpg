@@ -59,6 +59,8 @@ service cloud.firestore {
       match /chars/{doc} { allow read, write: if canEnter(rid); }
       match /meta/{doc} { allow read, write: if canEnter(rid); }
       match /presence/{doc} { allow read, write: if canEnter(rid); }
+      // ไอเทมที่ GM มอบให้ (เจ้าของรับเข้ากระเป๋าแล้วลบ)
+      match /gifts/{doc} { allow read, write: if canEnter(rid); }
     }
   }
 }
