@@ -944,15 +944,18 @@ function roll2d6(mode='normal'){
 function parseRollCommand(text){
   let s = String(text||'').trim(); if (!s) s = '2d6';
   s = s.replace(/\s*([+-])\s*(?=\d)/g, '$1'); // "2d6 + 3" → "2d6+3"
-  const out = {n:2, sides:6, keep:null, mod:0, mode:'normal', dc:null, label:'', raw:s, kirana:true};
+  const out = {n:2, sides:6, keep:null, mod:0, mode:'normal', dc:null, label:'', raw:s, kirana:true, kind:null, diceGiven:false};
   const rest = []; let diceSeen = false, dcNext = false;
   for (const tk of s.split(/\s+/)){
     const low = tk.toLowerCase();
     const m = low.match(/^(\d*)d(\d+)(?:(kh|kl|h|l)(\d+))?((?:[+-]\d+)*)$/);
-    if (m && !diceSeen){ diceSeen = true; out.n = m[1] ? parseInt(m[1],10) : 1; out.sides = parseInt(m[2],10); if (m[3]) out.keep = {type: (m[3]==='kl'||m[3]==='l') ? 'l' : 'h', count: parseInt(m[4],10)}; if (m[5]) for (const mm of m[5].match(/[+-]\d+/g)||[]) out.mod += parseInt(mm,10); continue; }
+    if (m && !diceSeen){ diceSeen = true; out.diceGiven = true; out.n = m[1] ? parseInt(m[1],10) : 1; out.sides = parseInt(m[2],10); if (m[3]) out.keep = {type: (m[3]==='kl'||m[3]==='l') ? 'l' : 'h', count: parseInt(m[4],10)}; if (m[5]) for (const mm of m[5].match(/[+-]\d+/g)||[]) out.mod += parseInt(mm,10); continue; }
     if (/^[+-]\d+$/.test(low)){ out.mod += parseInt(low,10); continue; }
     if (/^\d+$/.test(low) && dcNext){ out.dc = parseInt(low,10); dcNext = false; continue; }
+    if (/^\d+$/.test(low) && out.kind && !diceSeen){ out.n = parseInt(low,10); out.diceGiven = true; diceSeen = true; continue; } // "parry 4" = ทอย 4 ลูกเลือก 2
     if (/^\d+$/.test(low) && !diceSeen && !rest.length){ out.mod += parseInt(low,10); continue; } // "/r 3" = 2d6+3 แบบเดิม
+    if (low==='parry' || low==='ปัด' || low==='พาร์รี่'){ out.kind = 'parry'; continue; }
+    if (low==='evade' || low==='หลบ'){ out.kind = 'evade'; continue; }
     if (low==='adv' || low==='advantage' || low==='ได้เปรียบ'){ out.mode = 'adv'; continue; }
     if (low==='dis' || low==='disadvantage' || low==='เสียเปรียบ'){ out.mode = 'dis'; continue; }
     const dm = low.match(/^dc(\d+)$/); if (dm){ out.dc = parseInt(dm[1],10); continue; }
@@ -962,8 +965,9 @@ function parseRollCommand(text){
   out.label = rest.join(' ');
   out.n = Math.max(1, Math.min(40, out.n||1)); out.sides = Math.max(2, Math.min(1000, out.sides||6));
   if (out.keep) out.keep.count = Math.max(1, Math.min(out.n, out.keep.count));
-  out.kirana = out.sides===6 && !out.keep && (out.n===2 || out.n===3);
-  if (out.kirana && out.n===3 && out.mode==='normal') out.mode = 'adv'; // 3d6 เฉย ๆ = Advantage เหมือนเดิม
+  if (out.kind){ out.sides = 6; out.keep = null; out.kirana = true; } // Parry/Evade ใช้ d6 ของระบบเสมอ (ทอยหลายลูกแล้วเลือกเอง 2)
+  else out.kirana = out.sides===6 && !out.keep && (out.n===2 || out.n===3);
+  if (out.kirana && !out.kind && out.n===3 && out.mode==='normal') out.mode = 'adv'; // 3d6 เฉย ๆ = Advantage เหมือนเดิม
   out.expr = `${out.n}d${out.sides}${out.keep ? 'k'+out.keep.type+out.keep.count : ''}${out.mod ? signed(out.mod) : ''}${out.mode!=='normal' ? (out.mode==='adv' ? ' Advantage' : ' Disadvantage') : ''}`;
   return out;
 }
@@ -983,6 +987,9 @@ const ROLL_HELP = [
   ['/r 2d6 dc 10 ชื่อการทอย', 'ใส่ DC ให้ตัดสินสำเร็จ/ล้มเหลว คำที่เหลือเป็นชื่อการทอย'],
   ['/r 1d20 · /r 4d8+2 · /r 1d100', 'เต๋าอื่นทอยตรง ๆ แล้วรวม (ไม่ใช้กฎคริติคอลของระบบ)'],
   ['/r 4d6kh3 · /r 2d20kl1', 'เก็บลูกสูงสุด (kh) หรือต่ำสุด (kl) ตามจำนวนที่ระบุ'],
+  ['/r parry · /r parry dc 9', 'Parry: ทอย 2 + Parry Dice ของตัวละครที่เลือก (Advantage +1 ลูก Disadvantage = 2d6 เปล่า) เลือกเอง 2 ลูก dc = ผลโจมตีของอีกฝ่าย'],
+  ['/r parry 4 dc 9 · /parry 4', 'ระบุจำนวนลูกเอง (เช่น NPC ถือโล่) ทอย 4 ลูกเลือก 2 แล้วเทียบกับผลโจมตี 9'],
+  ['/r evade · /r evade adv dc 9', 'Evade: 2d6 + Reflex ของตัวละครที่เลือก · Advantage = 3d6 เลือกเอง 2 ลูก'],
   ['/gm r 3d6 dis', 'ทอยลับ: ผลเห็นเฉพาะ GM (ใช้ /gm นำหน้าได้ทุกคำสั่ง รวมข้อความ)'],
   ['/adv · /dis', 'นำหน้าคำสั่งทอยเพื่อบอกโหมด เช่น /dis r 2d6+1'],
 ];
@@ -3305,7 +3312,7 @@ function renderTableInner(){
   const chatBox = h('div',{class:'card chat',style:'margin-top:12px'}, h('h3',{class:'row',style:'justify-content:space-between'}, h('span',{text:'แชตและบันทึกการทอยของโต๊ะ'}), h('button',{class:'small ghost rollbtn',title:'เปิดหน้าต่างทอยเต๋า (แท็บ 🎲 มุมจอ)',onclick:()=>{ TWin.dice = true; TWin.persist(); renderTwins(r, gm); },text:'🎲 ทอยเต๋า'})), h('div',{class:'log',id:'chatlog'}));
   const who = h('select',{id:'chat-who'}, h('option',{value:'',text: gm?'GM'+(Store.displayName?' ('+Store.displayName+')':'') : (Store.displayName||'ผู้เล่น')}), myChars.map(c=>h('option',{value:c.id,text:c.name})));
   if (Table.chatWho && myChars.some(c=>c.id===Table.chatWho)) who.value = Table.chatWho; who.onchange = ()=>{ Table.chatWho = who.value; };
-  const inp = h('input',{placeholder:'พิมพ์ข้อความ หรือ /r 2d6+3 · /r 3d6 dis · /r 1d20 · /gm r … (ลับ) · /help',style:'flex:1;min-width:160px'});
+  const inp = h('input',{placeholder:'พิมพ์ข้อความ หรือ /r 2d6+3 · /r 3d6 dis · /parry 4 dc 9 · /gm r … (ลับ) · /help',style:'flex:1;min-width:160px'});
   const send = ()=>{ const txt = inp.value.trim(); if(!txt) return; inp.value=''; const c = Store.get(who.value); const name = c? c.name : (gm?'GM':(Store.displayName||'ผู้เล่น')); handleChatInput(txt, name, c, gm); };
   inp.onkeydown = (e)=>{ if (e.key==='Enter' && !e.isComposing){ e.preventDefault(); send(); } };
   chatBox.append(h('div',{class:'row'}, who, inp, h('button',{class:'primary small',onclick:send,text:'ส่ง'})));
@@ -3418,7 +3425,7 @@ function diceBody(r, gm){
   const quick = h('div',{class:'row'}, h('button',{class:'small rollbtn',onclick:()=>qroll('2d6','check'),text:'2d6'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Attack Roll','attack'),text:'Attack (CV)'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Luck Saving Throw','luck'),text:'Luck'}),
     ...(gm? [h('button',{class:'small ghost rollbtn',onclick:()=>{ Table.guardedRoll('GM', ()=>{ const e=doRoll({label:'ทอยลับของ GM'}); Table.post({kind:'roll',who:'GM',text:e.label,roll:{dice:e.r.dice,kept:e.r.kept,keptIdx:e.r.keptIdx,sum:e.r.sum,crit:e.r.crit,double:e.r.double,mode:e.mode},mod:0,pm:0,total:e.total,judge:e.judge,gmOnly:true}); diceBadge(e.total); }, 'ทอยลับ'); },text:'ทอยลับ (GM)'})] : []));
   // ช่องคำสั่งทอย (ผู้ใช้ขอ 9 พ.ย. 2026): พิมพ์ 3d6 dis · 2d6+3 · 1d20 · 4d6kh3 · dc10 แล้ว Enter · GM ติ๊ก "ลับ" ได้
-  const cmd = h('input',{placeholder:'คำสั่งทอย เช่น 3d6 dis · 2d6+3 · 1d20 · 4d6kh3 · dc 10 ชื่อการทอย',style:'flex:1;min-width:220px'});
+  const cmd = h('input',{placeholder:'คำสั่งทอย เช่น 3d6 dis · 2d6+3 · parry 4 dc 9 · evade adv · 1d20 · dc 10 ชื่อการทอย',style:'flex:1;min-width:220px'});
   const secret = gm ? h('input',{type:'checkbox',title:'ผลทอยเห็นเฉพาะ GM'}) : null;
   const runCmd = ()=>{ const txt = cmd.value.trim(); if (!txt) return; runRollCommand(txt, whoName(), selChar(), !!(secret && secret.checked), 'normal'); cmd.value=''; cmd.focus(); };
   cmd.onkeydown = (e)=>{ if (e.key==='Enter' && !e.isComposing){ e.preventDefault(); runCmd(); } };
@@ -3707,6 +3714,24 @@ function runRollCommand(expr, name, c, gmOnly, mode0){
   const p = parseRollCommand(expr); if (mode0 && mode0!=='normal' && p.mode==='normal'){ p.mode = mode0; p.expr = p.expr.replace(/ (Advantage|Disadvantage)$/,'') + (p.mode==='adv' ? ' Advantage' : ' Disadvantage'); }
   const text = p.label ? `${p.label} (${p.expr})` : p.expr;
   const post = (e)=>{ Table.post({kind:'roll',who:name,text:e.text,roll:e.roll,mod:e.mod,pm:0,total:e.total,judge:e.judge,dc:e.dc,gmOnly:!!gmOnly}); if (typeof diceBadge==='function') diceBadge(e.total); };
+  const rollOf = (e)=>({dice:e.r.dice,kept:e.r.kept,keptIdx:e.r.keptIdx,sum:e.r.sum,crit:e.r.crit,double:e.r.double,mode:e.mode,chosen:!!e.r.chosen});
+  if (p.kind){ // Parry / Evade (ผู้ใช้ขอ 9 พ.ย. 2026): ทอยหลายลูกแล้วเลือกเอง 2 ลูก ใช้ได้ทั้งผู้เล่น (ตามชีท) และ GM (ระบุจำนวนลูกเอง)
+    let d = null; try { d = c ? compute(c) : null; } catch(e){}
+    let n = 2, mod = p.mod, note = '';
+    if (p.kind==='parry'){ if (p.diceGiven) n = p.n; else if (p.mode==='dis') { n = 2; note = 'Disadvantage: 2d6 ไม่ใช้ Parry Dice'; } else n = 2 + (d ? d.parryDice : 0) + (p.mode==='adv' ? 1 : 0); }
+    else { if (d) mod += d.reflex; n = p.diceGiven ? p.n : (p.mode==='adv' ? 3 : 2); if (d) note = `Reflex ${signed(d.reflex)}`; }
+    n = Math.max(2, Math.min(12, n));
+    const kindName = p.kind==='parry' ? 'Parry' : 'Evade';
+    const detail = [n > 2 ? `${n}d6 เลือก 2` : '2d6', note, p.mod ? signed(p.mod) : '', p.mode==='adv' ? 'Advantage' : (p.mode==='dis' ? 'Disadvantage' : '')].filter(Boolean).join(' ');
+    const label = (p.label ? p.label + ' · ' : '') + `${kindName} (${detail})`;
+    const mode = (p.kind==='parry' && p.mode==='dis') ? 'normal' : p.mode;
+    Table.guardedRoll(name, ()=>{
+      const fin = (r)=>{ const e = doRoll({label, mod, c, dc:p.dc, mode, kind:p.kind, r}); post({text:e.label, roll:rollOf(e), mod:e.mod, total:e.total, judge:e.judge, dc:p.dc}); };
+      if (n > 2) return rollChoose(n, mode, `${kindName}: ทอย ${n}d6 เลือก 2 ลูก${p.dc!=null ? ` (โจมตีมา ${p.dc})` : ''}`).then(fin);
+      fin(null);
+    }, label);
+    return;
+  }
   if (p.kirana){
     Table.guardedRoll(name, ()=>{ const e = doRoll({label:text, mod:p.mod, c, mode:p.mode, dc:p.dc}); post({text:e.label, roll:{dice:e.r.dice,kept:e.r.kept,keptIdx:e.r.keptIdx,sum:e.r.sum,crit:e.r.crit,double:e.r.double,mode:e.mode}, mod:e.mod, total:e.total, judge:e.judge, dc:p.dc}); }, text);
   } else {
@@ -3722,6 +3747,7 @@ function handleChatInput(txt, name, c, gm){
     if (cmd==='/gm' || cmd==='/gmr'){ gmOnly=true; if (cmd==='/gmr'){ runRollCommand(toks.join(' '), name, c, true, mode); return; } if (toks.length && /^r(oll)?$/i.test(toks[0])){ toks.shift(); runRollCommand(toks.join(' '), name, c, true, mode); return; } }
     else if (cmd==='/adv') mode='adv'; else if (cmd==='/dis') mode='dis';
     else if (cmd==='/r' || cmd==='/roll'){ runRollCommand(toks.join(' '), name, c, gmOnly, mode); return; }
+    else if (cmd==='/parry' || cmd==='/evade'){ runRollCommand(cmd.slice(1) + ' ' + toks.join(' '), name, c, gmOnly, mode); return; }
     else if (cmd==='/help' || cmd==='/?'){ rollHelpModal(); return; }
     else { toks.unshift(cmd); break; }
   }
@@ -3740,7 +3766,7 @@ function renderChatOnly(){
     const time = new Date(m.ts||0).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
     if (m.kind==='roll' && m.roll){
       const r = {dice:m.roll.dice||[], kept:m.roll.kept||[], keptIdx:m.roll.keptIdx||[], sum:m.roll.sum, crit:m.roll.crit, double:m.roll.double, mode:m.roll.mode||'normal'};
-      log.append(h('div',{class:'e'}, h('div',{class:'row',style:'gap:6px'}, h('span',{class:'who',text:m.who||''}), h('b',{text:m.text||''}), r.mode!=='normal'? tag(r.mode==='adv'?'Advantage':'Disadvantage', r.mode==='adv'?'ok':'neg'):null, m.roll.chosen? tag('เลือกลูกเอง','prop'):null, m.roll.sides && m.roll.sides!==6 ? tag('d'+m.roll.sides,'prop') : null, m.dc!=null? tag('DC '+m.dc):null, m.gmOnly? h('span',{class:'gm',text:'ลับ'}):null, h('span',{class:'dim',style:'font-size:11px;margin-left:auto',text:time})),
+      log.append(h('div',{class:'e'}, h('div',{class:'row',style:'gap:6px'}, h('span',{class:'who',text:m.who||''}), h('b',{text:m.text||''}), r.mode!=='normal'? tag(r.mode==='adv'?'Advantage':'Disadvantage', r.mode==='adv'?'ok':'neg'):null, m.roll.chosen? tag('เลือกลูกเอง','prop'):null, m.roll.sides && m.roll.sides!==6 ? tag('d'+m.roll.sides,'prop') : null, m.dc!=null? tag(/^(.*· )?(Parry|Evade) \(/.test(m.text||'') ? 'โจมตีมา '+m.dc : 'DC '+m.dc):null, m.gmOnly? h('span',{class:'gm',text:'ลับ'}):null, h('span',{class:'dim',style:'font-size:11px;margin-left:auto',text:time})),
         h('div',{class:'row',style:'gap:8px;margin-top:2px'}, renderDice(r), h('span',{class:'dim num',text:r.kept.join('+') + (m.mod? ` ${signed(m.mod)}`:'') + (m.pm? ` ${m.persSide} ${signed(m.pm)}`:'')}), h('b',{class:'num',text:'= '+m.total}), m.judge? h('span',{class:m.judge.cls||'',text:m.judge.text||''}):null)));
     } else if (m.kind==='sys') log.append(h('div',{class:'e dim',style:'font-size:12px'}, m.gmOnly? h('span',{class:'gm',text:'ลับ '}):null, h('span',{text:m.text||''}), h('span',{class:'dim',style:'font-size:11px;float:right',text:time})));
     else log.append(h('div',{class:'e'}, h('span',{class:'who',text:(m.who||'')+': '}), h('span',{text:m.text||''}), m.gmOnly? h('span',{class:'gm',text:' (ลับ)'}):null, h('span',{class:'dim',style:'font-size:11px;float:right',text:time})));
