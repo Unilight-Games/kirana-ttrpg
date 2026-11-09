@@ -939,6 +939,53 @@ function roll2d6(mode='normal'){
   const dbl = kept[0]===kept[1];
   return {dice, kept, keptIdx, sum, crit, double: dbl, mode};
 }
+/* ===== คำสั่งทอยอิสระ (ผู้ใช้ขอ 9 พ.ย. 2026): "2d6+3" · "3d6 dis" · "1d20" · "4d6kh3 -1" · "dc10" · คำที่เหลือเป็นชื่อการทอย
+ * 2d6 และ 3d6 (adv/dis) ใช้กฎของระบบ (คริติคอล [6,6]/[1,1] ออกคู่ Perfect) เต๋าอื่นทอยตรง ๆ แล้วรวม · adv/dis กับเต๋าอื่น = ตัดลูกต่ำสุด/สูงสุดออกหนึ่งลูก */
+function parseRollCommand(text){
+  let s = String(text||'').trim(); if (!s) s = '2d6';
+  s = s.replace(/\s*([+-])\s*(?=\d)/g, '$1'); // "2d6 + 3" → "2d6+3"
+  const out = {n:2, sides:6, keep:null, mod:0, mode:'normal', dc:null, label:'', raw:s, kirana:true};
+  const rest = []; let diceSeen = false, dcNext = false;
+  for (const tk of s.split(/\s+/)){
+    const low = tk.toLowerCase();
+    const m = low.match(/^(\d*)d(\d+)(?:(kh|kl|h|l)(\d+))?((?:[+-]\d+)*)$/);
+    if (m && !diceSeen){ diceSeen = true; out.n = m[1] ? parseInt(m[1],10) : 1; out.sides = parseInt(m[2],10); if (m[3]) out.keep = {type: (m[3]==='kl'||m[3]==='l') ? 'l' : 'h', count: parseInt(m[4],10)}; if (m[5]) for (const mm of m[5].match(/[+-]\d+/g)||[]) out.mod += parseInt(mm,10); continue; }
+    if (/^[+-]\d+$/.test(low)){ out.mod += parseInt(low,10); continue; }
+    if (/^\d+$/.test(low) && dcNext){ out.dc = parseInt(low,10); dcNext = false; continue; }
+    if (/^\d+$/.test(low) && !diceSeen && !rest.length){ out.mod += parseInt(low,10); continue; } // "/r 3" = 2d6+3 แบบเดิม
+    if (low==='adv' || low==='advantage' || low==='ได้เปรียบ'){ out.mode = 'adv'; continue; }
+    if (low==='dis' || low==='disadvantage' || low==='เสียเปรียบ'){ out.mode = 'dis'; continue; }
+    const dm = low.match(/^dc(\d+)$/); if (dm){ out.dc = parseInt(dm[1],10); continue; }
+    if (low==='dc'){ dcNext = true; continue; }
+    rest.push(tk);
+  }
+  out.label = rest.join(' ');
+  out.n = Math.max(1, Math.min(40, out.n||1)); out.sides = Math.max(2, Math.min(1000, out.sides||6));
+  if (out.keep) out.keep.count = Math.max(1, Math.min(out.n, out.keep.count));
+  out.kirana = out.sides===6 && !out.keep && (out.n===2 || out.n===3);
+  if (out.kirana && out.n===3 && out.mode==='normal') out.mode = 'adv'; // 3d6 เฉย ๆ = Advantage เหมือนเดิม
+  out.expr = `${out.n}d${out.sides}${out.keep ? 'k'+out.keep.type+out.keep.count : ''}${out.mod ? signed(out.mod) : ''}${out.mode!=='normal' ? (out.mode==='adv' ? ' Advantage' : ' Disadvantage') : ''}`;
+  return out;
+}
+function rollDiceExpr(p){
+  const dice = Array.from({length:p.n}, ()=> 1 + Math.floor(Math.random()*p.sides));
+  let keepCount = p.n, type = 'h';
+  if (p.keep){ keepCount = p.keep.count; type = p.keep.type; }
+  else if (p.mode==='adv' && p.n>1){ keepCount = p.n-1; type = 'h'; }
+  else if (p.mode==='dis' && p.n>1){ keepCount = p.n-1; type = 'l'; }
+  const kept = [...dice].sort((a,b)=> type==='h' ? b-a : a-b).slice(0, keepCount);
+  const keptIdx = []; const pool = kept.slice(); dice.forEach((d,i)=>{ const j = pool.indexOf(d); if (j>=0){ pool.splice(j,1); keptIdx.push(i); } });
+  return {dice, kept, keptIdx, sum: kept.reduce((a,b)=>a+b,0), crit:null, double:false, mode: p.keep ? 'normal' : p.mode, sides: p.sides};
+}
+const ROLL_HELP = [
+  ['/r 2d6+3', 'ทอย 2d6 ของระบบ บวก 3 (คริติคอล [6,6] [1,1] และออกคู่ตัดสินตามกฎ)'],
+  ['/r 3d6 dis', 'Disadvantage: ทอย 3 ลูกเก็บ 2 ลูกต่ำสุด · "3d6 adv" หรือ "3d6" เฉย ๆ = Advantage'],
+  ['/r 2d6 dc 10 ชื่อการทอย', 'ใส่ DC ให้ตัดสินสำเร็จ/ล้มเหลว คำที่เหลือเป็นชื่อการทอย'],
+  ['/r 1d20 · /r 4d8+2 · /r 1d100', 'เต๋าอื่นทอยตรง ๆ แล้วรวม (ไม่ใช้กฎคริติคอลของระบบ)'],
+  ['/r 4d6kh3 · /r 2d20kl1', 'เก็บลูกสูงสุด (kh) หรือต่ำสุด (kl) ตามจำนวนที่ระบุ'],
+  ['/gm r 3d6 dis', 'ทอยลับ: ผลเห็นเฉพาะ GM (ใช้ /gm นำหน้าได้ทุกคำสั่ง รวมข้อความ)'],
+  ['/adv · /dis', 'นำหน้าคำสั่งทอยเพื่อบอกโหมด เช่น /dis r 2d6+1'],
+];
 /* ตัดสินผลเฉพาะเมื่อระบุ DC: ถึง DC = สำเร็จ, [6,6]/[1,1] ตัดสินทันที · ไม่ระบุ DC = ไม่บอกสำเร็จ/ล้มเหลว (อาจเป็นทอย Parry หรือทอยที่ GM ตัดสินเอง) บอกแค่ว่าออกคู่ */
 function judge(total, r, dc){
   if (dc != null){
@@ -3032,7 +3079,7 @@ const DiceShow = {
       h('div',{class:'dice-row'}, dieEls), h('div',{class:'dice-total',text:''}), h('div',{class:'dice-judge',text:''}));
     o.append(box);
     // หมุนหน้าเต๋าสุ่มสักพักแล้วหยุดทีละลูก
-    let tick = 0; const spin = setInterval(()=>{ tick++; dieEls.forEach((el,i)=>{ if (tick < 10 + i*4) el.firstChild.textContent = 1 + Math.floor(Math.random()*6); else { el.firstChild.textContent = dice[i]; el.classList.remove('tumble'); } }); if (tick >= 10 + dice.length*4){ clearInterval(spin); settle(); } }, 70);
+    let tick = 0; const spin = setInterval(()=>{ tick++; dieEls.forEach((el,i)=>{ if (tick < 10 + i*4) el.firstChild.textContent = 1 + Math.floor(Math.random()*(r.sides||6)); else { el.firstChild.textContent = dice[i]; el.classList.remove('tumble'); } }); if (tick >= 10 + dice.length*4){ clearInterval(spin); settle(); } }, 70);
     const settle = ()=>{ const tot = box.querySelector('.dice-total'); const parts = [`${(r.kept||[]).join('+')}`]; if (m.mod) parts.push(signed(m.mod)); if (m.pm) parts.push(`${m.persSide||''} ${signed(m.pm)}`); tot.textContent = parts.join(' ') + ' = ' + m.total; tot.classList.add('show'); const j = box.querySelector('.dice-judge'); if (m.judge){ j.textContent = m.judge.text||''; j.className = 'dice-judge show ' + (m.judge.cls||''); } if (m.dc!=null) j.textContent += ` (DC ${m.dc})`; if (r.crit==='success' || r.double) box.classList.add('crit'); };
     this.timer = setTimeout(()=>{ o.classList.add('hidden'); clear(o); this.cur=null; this.next(); }, ROLL_SHOW_MS);
   }
@@ -3258,7 +3305,7 @@ function renderTableInner(){
   const chatBox = h('div',{class:'card chat',style:'margin-top:12px'}, h('h3',{class:'row',style:'justify-content:space-between'}, h('span',{text:'แชตและบันทึกการทอยของโต๊ะ'}), h('button',{class:'small ghost rollbtn',title:'เปิดหน้าต่างทอยเต๋า (แท็บ 🎲 มุมจอ)',onclick:()=>{ TWin.dice = true; TWin.persist(); renderTwins(r, gm); },text:'🎲 ทอยเต๋า'})), h('div',{class:'log',id:'chatlog'}));
   const who = h('select',{id:'chat-who'}, h('option',{value:'',text: gm?'GM'+(Store.displayName?' ('+Store.displayName+')':'') : (Store.displayName||'ผู้เล่น')}), myChars.map(c=>h('option',{value:c.id,text:c.name})));
   if (Table.chatWho && myChars.some(c=>c.id===Table.chatWho)) who.value = Table.chatWho; who.onchange = ()=>{ Table.chatWho = who.value; };
-  const inp = h('input',{placeholder:'พิมพ์ข้อความ หรือ /r 2d6+2 · /adv · /dis · /gm (ลับ)',style:'flex:1;min-width:160px'});
+  const inp = h('input',{placeholder:'พิมพ์ข้อความ หรือ /r 2d6+3 · /r 3d6 dis · /r 1d20 · /gm r … (ลับ) · /help',style:'flex:1;min-width:160px'});
   const send = ()=>{ const txt = inp.value.trim(); if(!txt) return; inp.value=''; const c = Store.get(who.value); const name = c? c.name : (gm?'GM':(Store.displayName||'ผู้เล่น')); handleChatInput(txt, name, c, gm); };
   inp.onkeydown = (e)=>{ if (e.key==='Enter' && !e.isComposing){ e.preventDefault(); send(); } };
   chatBox.append(h('div',{class:'row'}, who, inp, h('button',{class:'primary small',onclick:send,text:'ส่ง'})));
@@ -3370,7 +3417,13 @@ function diceBody(r, gm){
   const qroll = (label, kind)=>{ const c=selChar(); if (kind==='attack' && c){ const blk = Table.attackBlocked(c); if (blk){ toast(blk); return; } } Table.guardedRoll(whoName(), ()=>onRoll(doRoll({label, kind, c}), c), label); };
   const quick = h('div',{class:'row'}, h('button',{class:'small rollbtn',onclick:()=>qroll('2d6','check'),text:'2d6'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Attack Roll','attack'),text:'Attack (CV)'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Luck Saving Throw','luck'),text:'Luck'}),
     ...(gm? [h('button',{class:'small ghost rollbtn',onclick:()=>{ Table.guardedRoll('GM', ()=>{ const e=doRoll({label:'ทอยลับของ GM'}); Table.post({kind:'roll',who:'GM',text:e.label,roll:{dice:e.r.dice,kept:e.r.kept,keptIdx:e.r.keptIdx,sum:e.r.sum,crit:e.r.crit,double:e.r.double,mode:e.mode},mod:0,pm:0,total:e.total,judge:e.judge,gmOnly:true}); diceBadge(e.total); }, 'ทอยลับ'); },text:'ทอยลับ (GM)'})] : []));
-  box.append(h('div',{class:'row',style:'margin-bottom:6px;align-items:center'}, h('span',{class:'dim',style:'font-size:12px',text:'ทอยในนาม'}), who), quick, h('div',{class:'lockbanner hidden',dataset:{lock:'1'}}));
+  // ช่องคำสั่งทอย (ผู้ใช้ขอ 9 พ.ย. 2026): พิมพ์ 3d6 dis · 2d6+3 · 1d20 · 4d6kh3 · dc10 แล้ว Enter · GM ติ๊ก "ลับ" ได้
+  const cmd = h('input',{placeholder:'คำสั่งทอย เช่น 3d6 dis · 2d6+3 · 1d20 · 4d6kh3 · dc 10 ชื่อการทอย',style:'flex:1;min-width:220px'});
+  const secret = gm ? h('input',{type:'checkbox',title:'ผลทอยเห็นเฉพาะ GM'}) : null;
+  const runCmd = ()=>{ const txt = cmd.value.trim(); if (!txt) return; runRollCommand(txt, whoName(), selChar(), !!(secret && secret.checked), 'normal'); cmd.value=''; cmd.focus(); };
+  cmd.onkeydown = (e)=>{ if (e.key==='Enter' && !e.isComposing){ e.preventDefault(); runCmd(); } };
+  const cmdRow = h('div',{class:'row dicecmd',style:'margin-top:6px'}, cmd, h('button',{class:'small primary',onclick:runCmd,text:'ทอย'}), secret ? h('label',{class:'fld chk',title:'ผลทอยเห็นเฉพาะ GM'}, secret, h('span',{text:'ลับ'})) : null, h('button',{class:'small ghost',title:'คำสั่งที่ใช้ได้',onclick:rollHelpModal,text:'?'}));
+  box.append(h('div',{class:'row',style:'margin-bottom:6px;align-items:center'}, h('span',{class:'dim',style:'font-size:12px',text:'ทอยในนาม'}), who), quick, cmdRow, h('div',{class:'lockbanner hidden',dataset:{lock:'1'}}));
   const panelHost = h('div',{style:'margin-top:8px'});
   const drawPanel = ()=>{ clear(panelHost); const c = selChar(); if (!c){ panelHost.append(h('p',{class:'dim',style:'font-size:12px;margin:0',text:'เลือกตัวละครด้านบนเพื่อเปิดแผงทอย Stat Check / Saving Throw / ความรู้ ผลทอยเด้งให้ทุกคนในห้องเห็น'})); return; } const p = dicePanel(c, (e)=>onRoll(e, c), {guard:(run,label)=>Table.guardedRoll(c.name, run, label), noLog:true}); p.classList.remove('card'); p.classList.add('hud-dice'); panelHost.append(p); };
   who.addEventListener('change', ()=>{ Table.diceWho = who.value; drawPanel(); }); drawPanel();
@@ -3649,15 +3702,31 @@ function clockEl(cl, r, gm){
   for (let i=0;i<cl.seg;i++){ const a0 = -Math.PI/2 + i*2*Math.PI/cl.seg, a1 = a0 + 2*Math.PI/cl.seg; const p = document.createElementNS('http://www.w3.org/2000/svg','path'); const x0=cx+R*Math.cos(a0), y0=cy+R*Math.sin(a0), x1=cx+R*Math.cos(a1), y1=cy+R*Math.sin(a1); p.setAttribute('d',`M${cx},${cy} L${x0},${y0} A${R},${R} 0 0 1 ${x1},${y1} Z`); p.setAttribute('fill', i<cl.fill? 'var(--blood)':'var(--ink)'); p.setAttribute('stroke','var(--line-2)'); p.setAttribute('stroke-width','1'); if (gm){ p.style.cursor='pointer'; p.addEventListener('click',()=>{ cl.fill = (i<cl.fill)? i : i+1; Table.save(); }); } svg.append(p); }
   return h('div',{class:'clock',style:'text-align:center;font-size:12px'}, svg, h('div',{text:`${cl.name} ${cl.fill}/${cl.seg}`}), gm? h('button',{class:'small ghost',onclick:()=>{ r.clocks=r.clocks.filter(x=>x.id!==cl.id); Table.save(); },text:'ลบ'}):null);
 }
+/* ทอยตามคำสั่ง (ใช้ทั้งจากแชต /r และช่องคำสั่งในหน้าต่างทอยเต๋า) */
+function runRollCommand(expr, name, c, gmOnly, mode0){
+  const p = parseRollCommand(expr); if (mode0 && mode0!=='normal' && p.mode==='normal'){ p.mode = mode0; p.expr = p.expr.replace(/ (Advantage|Disadvantage)$/,'') + (p.mode==='adv' ? ' Advantage' : ' Disadvantage'); }
+  const text = p.label ? `${p.label} (${p.expr})` : p.expr;
+  const post = (e)=>{ Table.post({kind:'roll',who:name,text:e.text,roll:e.roll,mod:e.mod,pm:0,total:e.total,judge:e.judge,dc:e.dc,gmOnly:!!gmOnly}); if (typeof diceBadge==='function') diceBadge(e.total); };
+  if (p.kirana){
+    Table.guardedRoll(name, ()=>{ const e = doRoll({label:text, mod:p.mod, c, mode:p.mode, dc:p.dc}); post({text:e.label, roll:{dice:e.r.dice,kept:e.r.kept,keptIdx:e.r.keptIdx,sum:e.r.sum,crit:e.r.crit,double:e.r.double,mode:e.mode}, mod:e.mod, total:e.total, judge:e.judge, dc:p.dc}); }, text);
+  } else {
+    Table.guardedRoll(name, ()=>{ const r = rollDiceExpr(p); const total = r.sum + p.mod; const judge = p.dc!=null ? (total >= p.dc ? {cls:'res-full', text:`สำเร็จ (ถึง DC ${p.dc})`} : {cls:'res-fail', text:`ล้มเหลว (DC ${p.dc})`}) : {cls:'', text:''}; post({text, roll:r, mod:p.mod, total, judge, dc:p.dc}); }, text);
+  }
+}
+function rollHelpModal(){ modal(h('div',null, h('h3',{text:'คำสั่งทอยเต๋า'}), h('p',{class:'desc',style:'margin:4px 0 10px',text:'พิมพ์ในช่องแชต (นำหน้าด้วย /r) หรือในช่องคำสั่งของหน้าต่างทอยเต๋า (ไม่ต้องมี /r) ผลทอยเด้งให้ทุกคนในห้องเห็นเหมือนปุ่มทอย'}), h('table',{class:'t'}, h('tbody',null, ROLL_HELP.map(([k,v])=>h('tr',null, h('td',null, h('code',{text:k})), h('td',{text:v}))))))); }
 function handleChatInput(txt, name, c, gm){
   let gmOnly=false, mode='normal', rest=txt;
   const toks = rest.split(/\s+/);
   while (toks.length && toks[0].startsWith('/')){
     const cmd = toks.shift().toLowerCase();
-    if (cmd==='/gm' || cmd==='/gmr') gmOnly=true; else if (cmd==='/adv') mode='adv'; else if (cmd==='/dis') mode='dis'; else if (cmd==='/r' || cmd==='/roll'){ const expr = toks.join(' ') || '2d6'; const m = expr.match(/^(\d*)d6\s*([+-]\s*\d+)?\s*(.*)$/i); let mod = 0, label = expr; if (m){ mod = m[2]? parseInt(m[2].replace(/\s/g,''),10):0; label = (m[3]||'').trim() || expr; if (m[1] && +m[1]===3) mode = mode==='normal'?'adv':mode; } else { const n = parseInt(expr,10); if (!isNaN(n)) mod=n; }
-      Table.guardedRoll(name, ()=>{ const e = doRoll({label, mod, c, mode}); e.who = name; Table.post({kind:'roll',who:name,text:e.label,roll:{dice:e.r.dice,kept:e.r.kept,keptIdx:e.r.keptIdx,sum:e.r.sum,crit:e.r.crit,double:e.r.double,mode:e.mode},mod:e.mod,pm:0,total:e.total,judge:e.judge,dc:null,gmOnly}); }, label); return; }
+    if (cmd==='/gm' || cmd==='/gmr'){ gmOnly=true; if (cmd==='/gmr'){ runRollCommand(toks.join(' '), name, c, true, mode); return; } if (toks.length && /^r(oll)?$/i.test(toks[0])){ toks.shift(); runRollCommand(toks.join(' '), name, c, true, mode); return; } }
+    else if (cmd==='/adv') mode='adv'; else if (cmd==='/dis') mode='dis';
+    else if (cmd==='/r' || cmd==='/roll'){ runRollCommand(toks.join(' '), name, c, gmOnly, mode); return; }
+    else if (cmd==='/help' || cmd==='/?'){ rollHelpModal(); return; }
     else { toks.unshift(cmd); break; }
   }
+  // "/adv r 2d6" หรือ "/dis r ..." : คำถัดไปเป็น r
+  if (mode!=='normal' && toks.length && /^r(oll)?$/i.test(toks[0])){ toks.shift(); runRollCommand(toks.join(' '), name, c, gmOnly, mode); return; }
   rest = toks.join(' ');
   if (!rest) return;
   Table.post({kind:'say', who:name, text:rest, gmOnly});
@@ -3671,8 +3740,8 @@ function renderChatOnly(){
     const time = new Date(m.ts||0).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
     if (m.kind==='roll' && m.roll){
       const r = {dice:m.roll.dice||[], kept:m.roll.kept||[], keptIdx:m.roll.keptIdx||[], sum:m.roll.sum, crit:m.roll.crit, double:m.roll.double, mode:m.roll.mode||'normal'};
-      log.append(h('div',{class:'e'}, h('div',{class:'row',style:'gap:6px'}, h('span',{class:'who',text:m.who||''}), h('b',{text:m.text||''}), r.mode!=='normal'? tag(r.mode==='adv'?'Advantage':'Disadvantage', r.mode==='adv'?'ok':'neg'):null, m.roll.chosen? tag('เลือกลูกเอง','prop'):null, m.dc!=null? tag('DC '+m.dc):null, m.gmOnly? h('span',{class:'gm',text:'ลับ'}):null, h('span',{class:'dim',style:'font-size:11px;margin-left:auto',text:time})),
-        h('div',{class:'row',style:'gap:8px;margin-top:2px'}, renderDice(r), h('span',{class:'dim num',text:`${r.kept[0]}+${r.kept[1]}` + (m.mod? ` ${signed(m.mod)}`:'') + (m.pm? ` ${m.persSide} ${signed(m.pm)}`:'')}), h('b',{class:'num',text:'= '+m.total}), m.judge? h('span',{class:m.judge.cls||'',text:m.judge.text||''}):null)));
+      log.append(h('div',{class:'e'}, h('div',{class:'row',style:'gap:6px'}, h('span',{class:'who',text:m.who||''}), h('b',{text:m.text||''}), r.mode!=='normal'? tag(r.mode==='adv'?'Advantage':'Disadvantage', r.mode==='adv'?'ok':'neg'):null, m.roll.chosen? tag('เลือกลูกเอง','prop'):null, m.roll.sides && m.roll.sides!==6 ? tag('d'+m.roll.sides,'prop') : null, m.dc!=null? tag('DC '+m.dc):null, m.gmOnly? h('span',{class:'gm',text:'ลับ'}):null, h('span',{class:'dim',style:'font-size:11px;margin-left:auto',text:time})),
+        h('div',{class:'row',style:'gap:8px;margin-top:2px'}, renderDice(r), h('span',{class:'dim num',text:r.kept.join('+') + (m.mod? ` ${signed(m.mod)}`:'') + (m.pm? ` ${m.persSide} ${signed(m.pm)}`:'')}), h('b',{class:'num',text:'= '+m.total}), m.judge? h('span',{class:m.judge.cls||'',text:m.judge.text||''}):null)));
     } else if (m.kind==='sys') log.append(h('div',{class:'e dim',style:'font-size:12px'}, m.gmOnly? h('span',{class:'gm',text:'ลับ '}):null, h('span',{text:m.text||''}), h('span',{class:'dim',style:'font-size:11px;float:right',text:time})));
     else log.append(h('div',{class:'e'}, h('span',{class:'who',text:(m.who||'')+': '}), h('span',{text:m.text||''}), m.gmOnly? h('span',{class:'gm',text:' (ลับ)'}):null, h('span',{class:'dim',style:'font-size:11px;float:right',text:time})));
   }
@@ -4147,7 +4216,7 @@ const LESSONS = [
     ['surprise', 'รู้ไหม โต๊ะนี้นั่งได้ทั้งที่อยู่คนละเมือง เข้าสู่ระบบด้วยบัญชี Google ที่มุมขวาบน ตัวละครของเจ้าจะตามไปทุกเครื่อง', 'login'],
     ['explain', 'ชีทของเจ้าเป็นของเจ้าคนเดียว GM กับเพื่อนร่วมโต๊ะจะเห็นก็ต่อเมื่อเจ้าหยิบตัวละครลงบอร์ดในห้องนั้น และเจ้าเลือกได้ว่าจะให้เขาเห็นทั้งชีท หรือเห็นแค่ค่าหลัก ส่วนปุ่ม "ออนไลน์" บอกว่าใครอยู่ตรงไหน'],
     ['explain', 'GM สร้างห้องแล้วส่งลิงก์มา ผู้เล่นกด "วางตัวละครลงบอร์ด" รูปจากชีทจะไปอยู่บนหมาก GM เลือกสถานที่ สุ่มแผนที่หรือโหลดจากคลัง เพิ่ม NPC ซ่อนไว้ ตั้งแสงของฉาก แปะสถานะให้ใครก็ได้ แล้วเริ่มการต่อสู้ ทุกคนเดินหมากของตัวเอง', 'roomflow'],
-    ['smile', 'ทุกการทอยในห้องเด้งเป็นลูกเต๋าใหญ่กลางจอของทุกคน และทอยได้ทีละคน ระหว่างที่เต๋าของใครยังหมุนอยู่ คนอื่นก็รอหน่อย ปุ่มทอยอยู่ที่แท็บลูกเต๋ามุมขวาล่าง ลากไปวางตรงไหนก็ได้ ส่วนแชตกับบันทึกการทอยอยู่ใต้แผนที่ พิมพ์ /r 2d6+2 เพื่อทอยเอง /adv กับ /dis ก็มี และ /gm ไว้กระซิบถึง GM', 'dicepop'],
+    ['smile', 'ทุกการทอยในห้องเด้งเป็นลูกเต๋าใหญ่กลางจอของทุกคน และทอยได้ทีละคน ระหว่างที่เต๋าของใครยังหมุนอยู่ คนอื่นก็รอหน่อย ปุ่มทอยอยู่ที่แท็บลูกเต๋ามุมขวาล่าง ลากไปวางตรงไหนก็ได้ ส่วนแชตกับบันทึกการทอยอยู่ใต้แผนที่ พิมพ์ /r 2d6+3 หรือ /r 3d6 dis เพื่อทอยเอง เต๋าแบบอื่นอย่าง 1d20 ก็ทอยได้ และ /gm ไว้กระซิบถึง GM พิมพ์ /help ถ้าอยากเห็นคำสั่งทั้งหมด', 'dicepop'],
     ['shush', 'ถ้า GM ย้ายเครื่อง ใช้รหัส GM หกตัวของห้องกลับมาเป็น GM ได้ อย่าให้ผู้เล่นเห็นรหัสนั้นเชียว เราเห็นบาปของคนมามากพอจะรู้ว่าเกิดอะไรขึ้น เมื่อผู้เล่นได้รหัส GM', 'gmkey'],
   ], tryLabel:'ไปโต๊ะเล่น', tryHash:'#table' },
   { id:'end', nav:'ส่งท้าย', title:'เท่านี้ก็พอให้เจ้านั่งลงที่โต๊ะได้แล้ว', scene:'study', lines:[
