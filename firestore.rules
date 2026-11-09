@@ -62,5 +62,11 @@ service cloud.firestore {
       // ไอเทมที่ GM มอบให้ (เจ้าของรับเข้ากระเป๋าแล้วลบ)
       match /gifts/{doc} { allow read, write: if canEnter(rid); }
     }
+    // คลังแผนที่ (v1.5): ส่วนตัวของเจ้าของ จนกว่าจะ published = true แล้วทุกคนที่ล็อกอินอ่านได้ (เก็บสำเนาเป็นเอกสารใหม่ของตัวเอง)
+    match /maps/{id} {
+      allow read: if signedIn() && (isDev() || resource.data.published == true || resource.data.ownerId == request.auth.uid);
+      allow create: if signedIn() && (isDev() || request.resource.data.ownerId == request.auth.uid);
+      allow update, delete: if signedIn() && (isDev() || resource.data.ownerId == request.auth.uid);
+    }
   }
 }
