@@ -826,6 +826,8 @@ body.paper #hud .hud-win .hud-x:hover{border-color:var(--blood);color:var(--bloo
 .online+.uibtn{margin-left:0}
 @media (max-width:600px){.uibtn{margin-left:auto}}
 .uiset button.on{border-color:var(--gold);color:var(--gold)}
+button.danger{color:var(--blood-2)}button.danger:hover{border-color:var(--blood-2);color:var(--blood-2)}
+body.paper #v-sheet button.danger{color:var(--blood)}
 </style>
 </head>
 <body class="bg-study">
@@ -963,6 +965,34 @@ function roomCopyOf(copy){
     current: { hp: cur.hp, mp: cur.mp, sanity: cur.sanity, temp: cur.temp, tough: cur.tough || {} }, armor: copy.armor || {}, details: { appearance: (copy.details||{}).appearance || '', signature: (copy.details||{}).signature || '' } };
 }
 /* ลบลิงก์ห้องที่ค้าง: ห้องถูกลบ หรือหมากของตัวละครถูกเอาออกไปแล้วขณะเราไม่อยู่ */
+/* ถังขยะในเครื่อง: เก็บตัวละครที่ถูกลบ/ถูกตัดออกตามเซิร์ฟเวอร์ไว้ 10 ตัวล่าสุด เผื่อกู้คืน (ผู้พัฒนากู้ได้จากคอนโซล: JSON.parse(localStorage['kirana.chars.trash'])) */
+function stashTrash(list){ try { const t = JSON.parse(localStorage.getItem('kirana.chars.trash')||'[]'); for (const c of list) t.unshift({at: Date.now(), char: c}); localStorage.setItem('kirana.chars.trash', JSON.stringify(t.slice(0,10))); } catch(e){} }
+/* ถอนหมากของตัวละครออกจากบอร์ดห้อง (เมื่อเจ้าของลบตัวละคร) อ่านห้องแล้วเขียนเฉพาะ tokens/enc */
+async function removeTokensOf(rid, charId){
+  if (!Store.db) return; const ref = Store.db.doc('rooms/'+rid); const r = docData(await ref.get()); if (!r || !(r.tokens||[]).some(t=>t.charId===charId)) return;
+  const ids = r.tokens.filter(t=>t.charId===charId).map(t=>t.id);
+  const tokens = r.tokens.filter(t=>t.charId!==charId).map(t=> ids.includes(t.inside) ? Object.assign({}, t, {inside:null}) : t);
+  const enc = r.enc ? Object.assign({}, r.enc, {order: (r.enc.order||[]).filter(x=>!ids.includes(x))}) : null;
+  const patch = {tokens, updatedAt: Date.now()}; if (enc){ if (enc.turnIdx >= enc.order.length) enc.turnIdx = 0; patch.enc = enc; }
+  await ref.update(patch);
+}
+/* รวมรายการตัวละครจากเซิร์ฟเวอร์เข้ากับของในเครื่อง (เรียกทุกครั้งที่ snapshot มา; แยกเป็นฟังก์ชันให้ทดสอบได้) */
+function applyCharsSnapshot(snap){
+  const docs = snapDocs(snap);
+  let changed=false; const ids = new Set();
+  for (const d of docs){ if(!d || !d.id) continue; ids.add(d.id); d.synced = true; const i=Store.chars.findIndex(x=>x.id===d.id); if(i<0){ Store.chars.push(d); changed=true; } else { Store.chars[i].synced = true; if ((d.updatedAt||0) > (Store.chars[i].updatedAt||0)){ Store.chars[i]=d; changed=true; } } }
+  // เซิร์ฟเวอร์ยืนยันรายการแล้ว: ตัวละครที่เคยบันทึกขึ้นเว็บ (มี ownerId) แต่ไม่อยู่ในรายการ = ถูกลบจากเครื่องอื่นหรือโดยผู้พัฒนา ต้องหายจากเครื่องนี้ด้วย
+  // (เดิมเครื่องที่ยังถือสำเนาจะเซฟกลับขึ้นไปใหม่ ทำให้ดูเหมือนลบไม่ได้) สำเนาเก็บไว้ใน kirana.chars.trash เผื่อกู้
+  if (snap && snap.fromCache === false){
+    const gone = Store.chars.filter(c => c.ownerId && !ids.has(c.id) && (Store.isDevUid || c.ownerId === Store.me));
+    if (gone.length){ stashTrash(gone); Store.chars = Store.chars.filter(c => !gone.includes(c)); changed = true;
+      toast(`ซิงก์: ${gone.map(c=>c.name||'ตัวละคร').join(', ')} ถูกลบไปแล้วจากเครื่องอื่น`);
+      const m = location.hash.match(/^#sheet-([a-z0-9]+)$/); if (m && gone.some(c=>c.id===m[1])) location.hash = '#chars'; }
+  }
+  if (changed){ saveLocal(Store.chars); Store.notify(); }
+  if (!Store._pruned){ Store._pruned = true; setTimeout(()=>pruneRoomLinks().catch(()=>{}), 1500); }
+  return {changed, count: Store.chars.length};
+}
 async function pruneRoomLinks(){
   if (!Store.db || Store.backend!=='firebase') return;
   const seen = {};
@@ -1054,7 +1084,7 @@ const Store = {
   listeners: new Set(),
   notify(){ for (const f of this.listeners) try{ f(); }catch(e){ console.error(e);} },
   upsert(c){ c.updatedAt = Date.now(); const i=this.chars.findIndex(x=>x.id===c.id); if(i>=0) this.chars[i]=c; else this.chars.push(c); saveLocal(this.chars); this.notify();
-    if (this.db && this.me && this.canWrite!==false){ const copy = JSON.parse(JSON.stringify(c)); copy.ownerId = copy.ownerId || this.me; if (!c.ownerId) c.ownerId = copy.ownerId; copy.ownerName = this.displayName||copy.ownerName||''; this.db.doc('chars/'+c.id).set(copy).catch(e=>console.warn('db set', e));
+    if (this.db && this.me && this.canWrite!==false){ const copy = JSON.parse(JSON.stringify(c)); copy.ownerId = copy.ownerId || this.me; if (!c.ownerId) c.ownerId = copy.ownerId; copy.ownerName = this.displayName||copy.ownerName||''; this.db.doc('chars/'+c.id).set(copy).then(()=>{ c.synced = true; }).catch(e=>{ console.warn('db set', e); toast('บันทึกตัวละครขึ้นเว็บไม่สำเร็จ ('+(e && e.code || e)+')'); });
       const roomCopy = roomCopyOf(copy); for (const rid of c.roomIds||[]) this.db.doc(`rooms/${rid}/chars/${c.id}`).set(roomCopy).catch(()=>{}); } },
   /* ตัวละครอยู่ในแคมเปญ (ถูกวางลงบอร์ดห้องใดห้องหนึ่ง) → ล็อกไม่ให้กลับไปแก้ในวิซาร์ด */
   inCampaign(c){ return !!(c && (c.roomIds||[]).length); },
@@ -1062,7 +1092,11 @@ const Store = {
   shareToRoom(c, rid){ c.roomIds = [...new Set([...(c.roomIds||[]), rid])]; this.upsert(c); },
   /* ถอนตัวละครออกจากห้อง: เลิกซิงก์และลบสำเนาในห้อง */
   unshareFromRoom(c, rid){ if (!c) return; c.roomIds = (c.roomIds||[]).filter(x=>x!==rid); if (this.isMine(c)) this.upsert(c); if (this.db) this.db.doc(`rooms/${rid}/chars/${c.id}`).delete().catch(()=>{}); },
-  remove(id){ const c = this.get(id); this.chars = this.chars.filter(x=>x.id!==id); saveLocal(this.chars); this.notify(); if (this.db){ this.db.doc('chars/'+id).delete().catch(()=>{}); for (const rid of (c&&c.roomIds)||[]) this.db.doc(`rooms/${rid}/chars/${id}`).delete().catch(()=>{}); } },
+  /* ลบตัวละคร: ลบในเครื่อง ลบบนเว็บ ลบสำเนาในห้อง และถอนหมากออกจากบอร์ดของห้องที่อยู่ (ล้มเหลวบนเว็บจะบอก ไม่เงียบ) */
+  remove(id){ const c = this.get(id); this.chars = this.chars.filter(x=>x.id!==id); saveLocal(this.chars); this.notify(); if (c) stashTrash([c]);
+    if (!this.db && typeof loadLocalRooms==='function'){ const rooms = loadLocalRooms(); let touched=false; for (const r of rooms){ if ((r.tokens||[]).some(t=>t.charId===id)){ const ids = r.tokens.filter(t=>t.charId===id).map(t=>t.id); r.tokens = r.tokens.filter(t=>t.charId!==id).map(t=> ids.includes(t.inside) ? Object.assign({}, t, {inside:null}) : t); if (r.enc) r.enc.order = (r.enc.order||[]).filter(x=>!ids.includes(x)); touched=true; } } if (touched){ saveLocalRooms(rooms); if (typeof Table!=='undefined' && Table.room && rooms.some(r=>r.id===Table.room.id)) Table.room = rooms.find(r=>r.id===Table.room.id); } }
+    if (this.db){ this.db.doc('chars/'+id).delete().catch(e=>{ console.warn('delete char', e); toast('ลบบนเว็บไม่สำเร็จ ('+(e && e.code || e)+') ตัวละครอาจกลับมาเมื่อซิงก์'); });
+      for (const rid of (c&&c.roomIds)||[]){ this.db.doc(`rooms/${rid}/chars/${id}`).delete().catch(()=>{}); removeTokensOf(rid, id).catch(()=>{}); } } },
   get(id){ return this.chars.find(x=>x.id===id) || (typeof Table!=='undefined' && Table.roomChars.find(x=>x.id===id)) || null; },
   isMine(c){ return !c.ownerId || !this.me || c.ownerId===this.me; },
   canEdit(c){ return this.isMine(c) || this.isDevUid; },
@@ -1083,13 +1117,7 @@ async function initCapabilities(){
     try {
       // ตัวละครของฉันเท่านั้น (ผู้พัฒนาเห็นทั้งหมด) — ชีทของคนอื่นเห็นได้ผ่านสำเนาในห้องที่เขาหยิบตัวละครมาเล่น
       const q = (Store.backend==='firebase' && !Store.isDevUid) ? Store.db.collection('chars').where('ownerId','==',Store.me) : Store.db.collection('chars');
-      q.onSnapshot(snap => {
-        const docs = snapDocs(snap);
-        let changed=false;
-        for (const d of docs){ if(!d || !d.id) continue; const i=Store.chars.findIndex(x=>x.id===d.id); if(i<0){ Store.chars.push(d); changed=true; } else if ((d.updatedAt||0) > (Store.chars[i].updatedAt||0)){ Store.chars[i]=d; changed=true; } }
-        if (changed){ saveLocal(Store.chars); Store.notify(); }
-        if (!Store._pruned){ Store._pruned = true; setTimeout(()=>pruneRoomLinks().catch(()=>{}), 1500); }
-      }, err => console.warn('chars snapshot', err));
+      q.onSnapshot(snap => applyCharsSnapshot(snap), err => console.warn('chars snapshot', err));
     } catch(e){ console.warn(e); }
   }
   updateOnline();
@@ -1112,7 +1140,7 @@ async function initFirebase(cfg){
     orderBy: (f, d) => coll(path, [...cons, F.orderBy(f, d||'asc')]), limit: n => coll(path, [...cons, F.limit(n)]), where: (a, op, v) => coll(path, [...cons, F.where(a, op, v)]),
     doc: id => docRef(path + '/' + id),
     get: async () => ({ docs: (await F.getDocs(cons.length ? F.query(F.collection(fdb, path), ...cons) : F.collection(fdb, path))).docs.map(wrapDoc) }),
-    onSnapshot: (ok, err) => F.onSnapshot(cons.length ? F.query(F.collection(fdb, path), ...cons) : F.collection(fdb, path), s => ok({ docs: s.docs.map(wrapDoc) }), err) });
+    onSnapshot: (ok, err) => F.onSnapshot(cons.length ? F.query(F.collection(fdb, path), ...cons) : F.collection(fdb, path), s => ok({ docs: s.docs.map(wrapDoc), fromCache: !!(s.metadata && s.metadata.fromCache), pending: !!(s.metadata && s.metadata.hasPendingWrites) }), err) });
   const db = { doc: docRef, collection: coll };
   // ---- login gate: config/site = {requireLogin, devUids, devIps} ----
   let site = null;
@@ -2134,7 +2162,7 @@ function renderChars(){
       h('h3',{style:'margin:0'}, c.name||'(ยังไม่ตั้งชื่อ)', h('span',{class:'en',text: kin? kin.name : 'ร่าง'})),
       h('div',{class:'gives'}, c.done? tag('พร้อมเล่น','ok') : tag(`ร่าง ขั้น ${(c.step||0)+1}/8`,'warn'), c.starterSet? tag(c.starterSet,'prop'):null, c.talent? tag('Talent '+c.talent):null, Store.inCampaign(c)? tag('อยู่ในแคมเปญ','neg'):null),
       kin? h('div',{class:'statgrid'}, STATS.map(s=>h('div',{class:'statbox'}, h('div',{class:'k',text:s}), h('div',{class:'v num',text:d.raw[s]}), h('div',{class:'m num',text:signed(d.mod[s])})))) : null,
-      h('div',{class:'row',style:'margin-top:8px'}, c.done? h('button',{class:'primary small',onclick:()=>{location.hash='#sheet-'+c.id;},text:'เปิดชีท'}):null, (c.done && Store.inCampaign(c) && !Store.isDevUid) ? h('button',{class:'small',disabled:true,title:'ตัวละครอยู่ในแคมเปญแล้ว ค่าพื้นฐานล็อก เติบโตผ่าน IP และแก้รายละเอียดได้ในชีท',text:'🔒 อยู่ในแคมเปญ'}) : h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#wizard'; },text:c.done?'แก้ไขในวิซาร์ด':'ทำต่อ'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}), h('button',{class:'small ghost',onclick:()=>{ if(confirm(`ลบ ${c.name||'ตัวละครนี้'}?`)) Store.remove(c.id); renderChars(); },text:'ลบ'}), !Store.isMine(c) && Store.isDevUid ? h('button',{class:'small ghost',title:'ย้ายตัวละครนี้มาเป็นของบัญชีผู้พัฒนา',onclick:()=>{ if(!confirm(`อ้างสิทธิ์ ${c.name} มาเป็นของคุณ?`)) return; c.ownerId = Store.me; Store.upsert(c); renderChars(); },text:'อ้างสิทธิ์'}) : null),
+      h('div',{class:'row',style:'margin-top:8px'}, c.done? h('button',{class:'primary small',onclick:()=>{location.hash='#sheet-'+c.id;},text:'เปิดชีท'}):null, (c.done && Store.inCampaign(c) && !Store.isDevUid) ? h('button',{class:'small',disabled:true,title:'ตัวละครอยู่ในแคมเปญแล้ว ค่าพื้นฐานล็อก เติบโตผ่าน IP และแก้รายละเอียดได้ในชีท',text:'🔒 อยู่ในแคมเปญ'}) : h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#wizard'; },text:c.done?'แก้ไขในวิซาร์ด':'ทำต่อ'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}), h('button',{class:'small ghost danger',onclick:()=>{ if(confirm(`ลบ ${c.name||'ตัวละครนี้'} ถาวร?${Store.inCampaign(c) ? ' สำเนาในห้องและหมากบนบอร์ดจะถูกถอนออกด้วย' : ''}`)){ Store.remove(c.id); toast('ลบตัวละครแล้ว'); } renderChars(); },text:'ลบ'}), !Store.isMine(c) && Store.isDevUid ? h('button',{class:'small ghost',title:'ย้ายตัวละครนี้มาเป็นของบัญชีผู้พัฒนา',onclick:()=>{ if(!confirm(`อ้างสิทธิ์ ${c.name} มาเป็นของคุณ?`)) return; c.ownerId = Store.me; Store.upsert(c); renderChars(); },text:'อ้างสิทธิ์'}) : null),
       !Store.isMine(c) ? h('div',{class:'dim',style:'font-size:12px;margin-top:4px',text:'เจ้าของ: '+(c.ownerName||c.ownerId||'?')}) : null));
   };
   function drawLists(){
@@ -2155,7 +2183,7 @@ function exportChar(c){
 }
 function importChar(){
   const ta = h('textarea',{style:'min-height:240px;font-family:monospace;font-size:12px',placeholder:'วาง JSON ของตัวละครที่นี่'});
-  modal(h('div',null, h('h3',{text:'นำเข้าตัวละคร'}), ta, h('div',{class:'row',style:'margin-top:8px'}, h('button',{class:'primary',onclick:()=>{ try{ const c=JSON.parse(ta.value); if(!c || !c.id || !('kin' in c)) throw new Error('bad'); if (Store.get(c.id)) c.id = uid(); c.ownerId = Store.me||null; Store.upsert(c); modal(null); renderChars(); toast('นำเข้าแล้ว'); } catch(e){ toast('อ่าน JSON ไม่ได้'); } },text:'นำเข้า'}))));
+  modal(h('div',null, h('h3',{text:'นำเข้าตัวละคร'}), ta, h('div',{class:'row',style:'margin-top:8px'}, h('button',{class:'primary',onclick:()=>{ try{ const c=JSON.parse(ta.value); if(!c || !c.id || !('kin' in c)) throw new Error('bad'); const restoringMine = !!(Store.me && c.ownerId === Store.me) && !Store.get(c.id); if (!restoringMine) c.id = uid(); /* สำเนาของคนอื่นต้องได้ id ใหม่ ไม่งั้นชนกับเอกสารของเจ้าของเดิมบนเว็บ */ c.ownerId = Store.me||null; delete c.synced; c.roomIds = restoringMine ? (c.roomIds||[]) : []; Store.upsert(c); modal(null); renderChars(); toast('นำเข้าแล้ว'); } catch(e){ toast('อ่าน JSON ไม่ได้'); } },text:'นำเข้า'}))));
 }
 
 /* ---- Dice panel (ใช้ร่วมกันทั้งชีทและโต๊ะ) ---- */
@@ -2362,7 +2390,7 @@ function renderSheet(id){
   left.append(tb);
   // ===== middle =====
   const mid = h('div');
-  const idb = h('div',{class:'box',dataset:{k:'id'}}, h('div',{class:'row',style:'justify-content:space-between'}, h('h2',{text:c.name}), h('div',{class:'row'}, readOnly? null : (Store.inCampaign(c) && !Store.isDevUid) ? h('span',{class:'tag',title:'ตัวละครอยู่ในแคมเปญแล้ว ค่าพื้นฐานจากวิซาร์ดล็อก เติบโตผ่าน IP และแก้รายละเอียดในชีทได้',text:'🔒 อยู่ในแคมเปญ'}) : h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#wizard'; },text:'แก้ไขในวิซาร์ด'}), readOnly? null : shareModeSel(c, save), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}))));
+  const idb = h('div',{class:'box',dataset:{k:'id'}}, h('div',{class:'row',style:'justify-content:space-between'}, h('h2',{text:c.name}), h('div',{class:'row'}, readOnly? null : (Store.inCampaign(c) && !Store.isDevUid) ? h('span',{class:'tag',title:'ตัวละครอยู่ในแคมเปญแล้ว ค่าพื้นฐานจากวิซาร์ดล็อก เติบโตผ่าน IP และแก้รายละเอียดในชีทได้',text:'🔒 อยู่ในแคมเปญ'}) : h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#wizard'; },text:'แก้ไขในวิซาร์ด'}), readOnly? null : shareModeSel(c, save), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}), readOnly? null : h('button',{class:'small ghost danger',title:'ลบตัวละครนี้ออกจากบัญชีและจากทุกห้องที่อยู่',onclick:()=>{ if (!confirm(`ลบ ${c.name||'ตัวละครนี้'} ถาวร? สำเนาในห้องและหมากบนบอร์ดจะถูกถอนออกด้วย`)) return; Store.remove(c.id); toast('ลบตัวละครแล้ว'); location.hash = '#chars'; },text:'ลบตัวละคร'}))));
   const ig = h('div',{class:'idgrid',style:'margin-top:8px'});
   const kv = (k, v) => ig.append(h('span',{class:'k',text:k}), typeof v === 'string' ? h('span',{text:v}) : v);
   kv('Age อายุ', txt(det,'age')); kv('Gender เพศ', txt(det,'gender')); kv('Job อาชีพ', txt(det,'job', c.starterSet||'')); kv('Size ขนาด', d.size); kv('Height/Weight', txt(det,'height')); kv('Speed ความเร็ว', kin.speed); kv('Kin วงศา', kin.name);
