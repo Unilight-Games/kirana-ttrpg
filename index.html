@@ -779,6 +779,25 @@ function renderDice(r){
 }
 
 /* ---- Character model & computation ---- */
+/* สำเนาที่ส่งเข้าห้อง: โหมด "full" = ทั้งชีท · โหมด "min" = เฉพาะค่าที่หมากและ GM ต้องใช้ (ชื่อ รูป วงศา HP Sanity สถานะ) */
+function roomCopyOf(copy){
+  if ((copy.shareMode||'full') !== 'min') return copy;
+  const cur = copy.current || {};
+  return { id: copy.id, name: copy.name, kin: copy.kin, size: copy.size, portrait: copy.portrait||null, ownerId: copy.ownerId, ownerName: copy.ownerName, shareMode: 'min', done: true, updatedAt: copy.updatedAt,
+    current: { hp: cur.hp, mp: cur.mp, sanity: cur.sanity, temp: cur.temp, tough: cur.tough || {} }, armor: copy.armor || {}, details: { appearance: (copy.details||{}).appearance || '', signature: (copy.details||{}).signature || '' } };
+}
+/* ลบลิงก์ห้องที่ค้าง: ห้องถูกลบ หรือหมากของตัวละครถูกเอาออกไปแล้วขณะเราไม่อยู่ */
+async function pruneRoomLinks(){
+  if (!Store.db || Store.backend!=='firebase') return;
+  const seen = {};
+  for (const c of Store.chars){ if (!Store.isMine(c) || !(c.roomIds||[]).length) continue;
+    for (const rid of [...c.roomIds]){
+      try { if (!(rid in seen)) seen[rid] = docData(await Store.db.doc('rooms/'+rid).get()); } catch(e){ seen[rid] = undefined; }
+      const room = seen[rid]; if (room === undefined) continue; // อ่านไม่ได้ (ห้องล็อกและเราไม่ใช่สมาชิก) ปล่อยไว้
+      if (!room || !(room.tokens||[]).some(t=>t.charId===c.id)) Store.unshareFromRoom(c, rid);
+    }
+  }
+}
 function newChar(){
   return { id: uid(), name:'', kin:null, size:null, childhood:null, adulthood:null, evolver:{kin:null, pick:null, hindrance:null},
     personality:{}, extra:{}, choiceStats:[], talent:null, talentPicks:{}, knowledge:{}, prof:{}, skills:[], grants:[],
@@ -809,8 +828,8 @@ function compute(c){
   const extraUsed = Object.values(c.extra||{}).reduce((a,b)=>a+(b||0),0);
   const size = c.size || (kin ? kin.sizes[0] : 'Medium');
   let capMult = {Small:3, Medium:3, Large:4, Huge:5}[size] || 3;
-  let capNote = size==='Small' ? 'ไฟล์แกนไม่ระบุ Small ใช้ตัวคูณของ Medium' : '';
-  if (kin && kin.id==='handerlaw-dwarves') { capMult = 4; capNote = 'Powerful Build: นับขนาดใหญ่ขึ้นหนึ่งขั้นเรื่องการแบก (Small→Medium คือ ×3 ตามไฟล์แกน แต่ Trait บอกให้ใหญ่ขึ้นหนึ่งขั้น จึงใช้ ×4 ติดป้ายเสนอ)'; }
+  let capNote = size==='Small' ? 'Small ใช้ตัวคูณเดียวกับ Medium' : '';
+  if (kin && kin.id==='handerlaw-dwarves') { capMult = 4; capNote = 'Powerful Build: นับขนาดใหญ่ขึ้นหนึ่งขั้นเรื่องการแบก จึงใช้ ×4'; }
   const toughSizeBonus = {Large:1, Huge:2}[size] || 0; // ชีท Duck Family (AX2) และกฎ Bestiary: Large +1, Huge +2
   const tough = Math.floor((raw.VIT + raw.STR)/10) + 1 + toughSizeBonus;
   const d = {
@@ -821,7 +840,7 @@ function compute(c){
     toughness: tough, toughSizeBonus,
     passivePer: 7 + mod.PER,
     capacity: raw.STR * capMult, capMult, capNote,
-    // (เสนอ) ค่าพลังรอง: ไฟล์แกน V.2 ไม่มีตาราง ใช้สูตรฝั่ง Bestiary + ข้อเสนอ 6 ก.ย. 2026
+    // ค่าพลังรอง (Ability Stats) ตามตารางค่าสถานะศักยภาพที่ล็อก 9 พ.ย. 2026
     fortitude: mod.VIT, will: mod.PER, reflex: Math.floor(mod.AGI/2)+1, sight: Math.floor(mod.PER/2)+1,
     might: Math.floor(mod.STR/2)+1, initiative: mod.PER, parryDice: Math.max(0, (c.current && c.current.parryBonus) || 0), combatDice: '2d6',
     speed: kin ? kin.speed : '',
@@ -860,7 +879,9 @@ const Store = {
   notify(){ for (const f of this.listeners) try{ f(); }catch(e){ console.error(e);} },
   upsert(c){ c.updatedAt = Date.now(); const i=this.chars.findIndex(x=>x.id===c.id); if(i>=0) this.chars[i]=c; else this.chars.push(c); saveLocal(this.chars); this.notify();
     if (this.db && this.me && this.canWrite!==false){ const copy = JSON.parse(JSON.stringify(c)); copy.ownerId = copy.ownerId || this.me; if (!c.ownerId) c.ownerId = copy.ownerId; copy.ownerName = this.displayName||copy.ownerName||''; this.db.doc('chars/'+c.id).set(copy).catch(e=>console.warn('db set', e));
-      for (const rid of c.roomIds||[]) this.db.doc(`rooms/${rid}/chars/${c.id}`).set(copy).catch(()=>{}); } },
+      const roomCopy = roomCopyOf(copy); for (const rid of c.roomIds||[]) this.db.doc(`rooms/${rid}/chars/${c.id}`).set(roomCopy).catch(()=>{}); } },
+  /* ตัวละครอยู่ในแคมเปญ (ถูกวางลงบอร์ดห้องใดห้องหนึ่ง) → ล็อกไม่ให้กลับไปแก้ในวิซาร์ด */
+  inCampaign(c){ return !!(c && (c.roomIds||[]).length); },
   /* แชร์สำเนาชีทเข้าห้อง: GM และผู้เล่นในห้องเห็นได้เฉพาะตัวละครที่ถูกหยิบมาเล่นในแคมเปญนี้ */
   shareToRoom(c, rid){ c.roomIds = [...new Set([...(c.roomIds||[]), rid])]; this.upsert(c); },
   /* ถอนตัวละครออกจากห้อง: เลิกซิงก์และลบสำเนาในห้อง */
@@ -891,6 +912,7 @@ async function initCapabilities(){
         let changed=false;
         for (const d of docs){ if(!d || !d.id) continue; const i=Store.chars.findIndex(x=>x.id===d.id); if(i<0){ Store.chars.push(d); changed=true; } else if ((d.updatedAt||0) > (Store.chars[i].updatedAt||0)){ Store.chars[i]=d; changed=true; } }
         if (changed){ saveLocal(Store.chars); Store.notify(); }
+        if (!Store._pruned){ Store._pruned = true; setTimeout(()=>pruneRoomLinks().catch(()=>{}), 1500); }
       }, err => console.warn('chars snapshot', err));
     } catch(e){ console.warn(e); }
   }
@@ -1167,6 +1189,9 @@ function chosenSetItems(c, set){ const picks = c.starterPicks || {}; const out =
 function traitNeedsPick(text){ return /เลือก[^.\n]{0,60}?(1|หนึ่ง|๑)\s*(กลุ่ม|ประเภท|อย่าง|ชนิด|ภาษา|สาย|ค่า|แบบ|ทาง|ตัว|เผ่า|สำนัก|วงศา|เป้าหมาย|ธาตุ)/.test(String(text||'')) || /เลือก(ประเภท|กลุ่ม|เป้าหมาย|ธาตุ|ภาษา|สัตว์|อาวุธ)[^.\n]{0,40}(1|หนึ่ง)/.test(String(text||'')); }
 function traitPickInput(c, key, placeholder, onChange){ c.traitPicks = c.traitPicks || {}; const inp = h('input',{value:c.traitPicks[key]||'', placeholder: placeholder||'ระบุทางเลือกที่เลือก', oninput:(e)=>{ c.traitPicks[key] = e.target.value; if (onChange) onChange(); }}); return h('div',{class:'traitpick'}, h('span',{class:'tag prop',text:'ทางเลือก'}), inp); }
 
+/* ---- Knowledge Check (คำตัดสิน 9 พ.ย. 2026): 2d6 + ระดับความรู้ + Mod ค่าพลังกำกับ (ตัวที่สูงกว่าในคู่) + บุคลิกภาพถ้าเข้าบริบท ---- */
+function knowledgeBonus(c, d, k){ const lv = (knowledgeLevels(c)[k.id]||0); let stat = k.stats[0], mod = d.mod[stat]; for (const st of k.stats) if (d.mod[st] > mod){ stat = st; mod = d.mod[st]; } return { lv, stat, mod, total: lv + mod }; }
+
 /* ===== Login gate (Firebase mode) + developer page ===== */
 function loginGate(A, auth){
   return new Promise(resolve => {
@@ -1240,7 +1265,7 @@ const STEP_DEFS = [
   {key:'pers', title:'3. กำหนดบุคลิกภาพ (Personality)', blurb:'แจกค่า 3, 2, 2, 1, 1, 0 ให้ 6 คู่ เลือกฝั่งที่เป็นบวก ฝั่งตรงข้ามติดลบเท่ากันทันที ใช้บวกการทอยเมื่อการกระทำสอดคล้องกับบุคลิก'},
   {key:'extra', title:'4. ใช้แต้ม Extra', blurb:'ใส่แต้ม Extra ลง Raw Stats เพื่อยกค่าพลังหลัก Mod = (ค่าพลัง / 2) - 5 ปัดลง (สูงสุด +5)'},
   {key:'talent', title:'5. พรสวรรค์ ความรู้ และทักษะ', blurb:'เลือก Talent 1 อย่างตามค่าพลังหลักที่สูงสุด (หรือ Educated) จากนั้นอัปเกรด Knowledge 1 ระดับ และรับของจากวงศา'},
-  {key:'calc', title:'6. ค่าพลังหลักและค่าพลังรอง', blurb:'คำนวณให้อัตโนมัติ ค่าที่ติดป้าย (เสนอ) คือสูตรที่ไฟล์แกนยังไม่ได้ล็อก'},
+  {key:'calc', title:'6. ค่าพลังหลักและค่าพลังรอง', blurb:'คำนวณให้อัตโนมัติตามตารางค่าสถานะศักยภาพในไฟล์แกน (ล็อก 9 พ.ย. 2026)'},
   {key:'details', title:'7. รายละเอียดตัวละคร', blurb:'ชื่อ บุคลิก เรื่องราว รูปลักษณ์ และเอกลักษณ์ (Signature Look) ที่ตกลงกับ GM'},
   {key:'set', title:'8. ชุดเริ่มต้น (Starter Set)', blurb:'เลือก 1 ชุดจาก 17 ชุดให้เข้ากับพื้นหลัง ทุกคนได้ชุดยังชีพและเงิน 15 เกรฟเท่ากัน'},
 ];
@@ -1652,25 +1677,25 @@ function stepCalc(body, c, d){
   for (const s of STATS) row(`${s} (Raw / Mod)`, `${d.raw[s]} / ${signed(d.mod[s])}`, `${KIN[c.kin].raw[s]} จากวงศา ${d.from[s].join(', ')} · Mod = (ค่า/2) - 5 ปัดลง`);
   row('Max HP', d.hp, '10 + VIT Mod + STR Mod');
   row('Max MP', d.mp, '10 + INF Mod + INT Mod (ไฟล์แกนบรรทัด 161 พิมพ์หัวข้อว่า Max HP ซ้ำ อ่านเป็น MP)');
-  row('Toughness (แยกตามอวัยวะ 6 ส่วน)', d.toughness, '((Raw VIT + Raw STR) / 10) + 1 ปัดลง' + (d.toughSizeBonus? ` + ${d.toughSizeBonus} จากขนาด ${d.size} (ตามชีท Duck Family และกฎ Bestiary)` : '') + ' ใช้กับ ศีรษะ ลำตัว แขน 2 ขา 2 แยกกัน (ruling P-01)', !!d.toughSizeBonus);
+  row('Toughness (แยกตามอวัยวะ 6 ส่วน)', d.toughness, '((Raw VIT + Raw STR) / 10) + 1 ปัดลง' + (d.toughSizeBonus? ` + ${d.toughSizeBonus} จากขนาด ${d.size}` : '') + ' ใช้กับ ศีรษะ ลำตัว แขน 2 ขา 2 แยกกัน · คงที่ตลอดชีวิต ยกได้ด้วยอุปกรณ์เท่านั้น');
   row('Max Sanity', d.sanity, '5 + INF Mod');
   row('Passive PER', d.passivePer, '7 + PER Mod ใช้เป็น DC ให้คนอื่นทอยซ่อนจากคุณ');
-  row('Capacity (แบกได้)', `${d.capacity} กก.`, `STR × ${d.capMult} (${d.size})` + (d.capNote? ' · '+d.capNote : ''), !!d.capNote);
+  row('Capacity (แบกได้)', `${d.capacity} กก.`, `STR × ${d.capMult} (${d.size})` + (d.capNote? ' · '+d.capNote : ''));
   row('Speed', '', d.speed + ' (ตามวงศา; ไฟล์แกน: Run = Speed + AGI Mod ต่อวินาที)');
-  row('Initiative', signed(d.initiative), 'PER Mod (สูตรฝั่ง Bestiary) ทอย 2d6 + Initiative', true);
-  row('Reflex', signed(d.reflex), '(AGI Mod / 2) + 1 ปัดลง (สูตรฝั่ง Bestiary)', true);
-  row('Might', signed(d.might), '(STR Mod / 2) + 1 ปัดลง (สูตรฝั่ง Bestiary) บวกความเสียหายประชิด Perfect Strike คูณ 2', true);
-  row('Sight', signed(d.sight), '(PER Mod / 2) + 1 ปัดลง สมมาตรกับ Might ใช้กับ Focus (Precise) และ Range', true);
-  row('VIT Saving Throw', signed(d.fortitude), 'ทอยป้องกันทางกาย = 2d6 + VIT Mod', true);
-  row('PER Saving Throw', signed(d.will), 'ทอยป้องกันทางใจ = 2d6 + PER Mod', true);
-  row('Parry Dice', d.parryDice, 'เริ่ม 0 โล่และของบางชิ้นให้ +1 = ทอยเต๋าเพิ่มตอน Parry แล้วเลือกเอง 2 ลูก', true);
+  row('Initiative', signed(d.initiative), 'PER Mod ทอย 2d6 + Initiative');
+  row('Reflex', signed(d.reflex), '(AGI Mod / 2) + 1 ปัดลง');
+  row('Might', signed(d.might), '(STR Mod / 2) + 1 ปัดลง บวกความเสียหายประชิด Perfect Strike คูณ 2');
+  row('Sight', signed(d.sight), '(PER Mod / 2) + 1 ปัดลง ใช้กับ Focus (Precise) และ Range');
+  row('VIT Saving Throw', signed(d.fortitude), 'ทอยป้องกันทางกาย = 2d6 + VIT Mod');
+  row('PER Saving Throw', signed(d.will), 'ทอยป้องกันทางใจ = 2d6 + PER Mod');
+  row('Parry Dice', d.parryDice, 'เริ่ม 0 โล่และของบางชิ้นให้ +1 = ทอยเต๋าเพิ่มตอน Parry แล้วเลือกเอง 2 ลูก');
   row('Combat Dice', d.combatDice, 'ปกติ 2d6 เลือก 2 ลูกเป็น CV เลขเหมือนกัน = Perfect Strike');
   body.append(h('div',{class:'tablewrap'}, tb));
   const kl = knowledgeLevels(c);
   const kt = h('table',{class:'t',style:'margin-top:14px'}, h('thead',null, h('tr',null, h('th',{text:'Knowledge'}), h('th',{text:'ระดับ'}), h('th',{text:'Proficiency'}), h('th',{text:'ทอย'}))));
-  for (const k of DATA.knowledge){ const profs = Object.values(c.kslots||{}).filter(s=>s&&s.id===k.id&&s.prof&&!s.prof.startsWith('(')).map(s=>s.prof); kt.append(h('tr',null, h('td',{text:`${k.nameEn} ${k.nameTh}`}), h('td',{class:'num',text:kl[k.id]}), h('td',{text:profs.join(', ')||'—'}), h('td',{class:'dim',text:`2d6 + ${profs.length} (จำนวน Proficiency)`}))); }
+  for (const k of DATA.knowledge){ const profs = Object.values(c.kslots||{}).filter(s=>s&&s.id===k.id&&s.prof&&!s.prof.startsWith('(')).map(s=>profLabel(s)); const kb2 = knowledgeBonus(c, d, k); kt.append(h('tr',null, h('td',{text:`${k.nameEn} ${k.nameTh}`}), h('td',{class:'num',text:kl[k.id]}), h('td',{text:profs.join(', ')||'—'}), h('td',{class:'dim num',text:`2d6 ${signed(kb2.total)} (Lv ${kb2.lv} + ${kb2.stat} ${signed(kb2.mod)})`}))); }
   body.append(h('h3',{style:'margin-top:16px',text:'ความรู้ 13 สาขา'}), h('div',{class:'tablewrap'}, kt));
-  body.append(h('p',{class:'dim',style:'font-size:13px;margin-top:10px',text:'Knowledge Check = 2d6 + Knowledge Proficiency (จำนวน Proficiency Trait) ตามไฟล์แกน V.2 บรรทัด 125-126 ค่าพลังกำกับในวงเล็บเป็นข้อมูลจากไฟล์ Talent สำหรับใช้พิจารณา Cross-Stats'}));
+  body.append(h('p',{class:'dim',style:'font-size:13px;margin-top:10px',text:'Knowledge Check = 2d6 + ระดับความรู้ + Mod ของค่าพลังกำกับ (เลือกตัวที่เข้ากับวิธีที่ใช้ ถ้าไม่ชัดใช้ตัวที่สูงกว่า) + บุคลิกภาพถ้าเข้าบริบท (คำตัดสิน 9 พ.ย. 2026) Proficiency Trait คือความสามารถพิเศษของระดับนั้น ไม่ได้บวกเลขทอย'}));
 }
 
 /* ---------- Step 7: details ---------- */
@@ -1917,7 +1942,7 @@ function renderChars(){
     return h('div',{class:'card'}, h('h3',null, c.name||'(ยังไม่ตั้งชื่อ)', h('span',{class:'en',text: kin? kin.name : 'ร่าง'})),
       h('div',{class:'gives'}, c.done? tag('พร้อมเล่น','ok') : tag(`ร่าง ขั้น ${(c.step||0)+1}/8`,'warn'), c.starterSet? tag(c.starterSet,'prop'):null, c.talent? tag('Talent '+c.talent):null),
       kin? h('div',{class:'statgrid'}, STATS.map(s=>h('div',{class:'statbox'}, h('div',{class:'k',text:s}), h('div',{class:'v num',text:d.raw[s]}), h('div',{class:'m num',text:signed(d.mod[s])})))) : null,
-      h('div',{class:'row',style:'margin-top:8px'}, c.done? h('button',{class:'primary small',onclick:()=>{location.hash='#sheet-'+c.id;},text:'เปิดชีท'}):null, h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#wizard'; },text:c.done?'แก้ไขในวิซาร์ด':'ทำต่อ'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}), h('button',{class:'small ghost',onclick:()=>{ if(confirm(`ลบ ${c.name||'ตัวละครนี้'}?`)) Store.remove(c.id); renderChars(); },text:'ลบ'}), !Store.isMine(c) && Store.isDevUid ? h('button',{class:'small ghost',title:'ย้ายตัวละครนี้มาเป็นของบัญชีผู้พัฒนา',onclick:()=>{ if(!confirm(`อ้างสิทธิ์ ${c.name} มาเป็นของคุณ?`)) return; c.ownerId = Store.me; Store.upsert(c); renderChars(); },text:'อ้างสิทธิ์'}) : null),
+      h('div',{class:'row',style:'margin-top:8px'}, c.done? h('button',{class:'primary small',onclick:()=>{location.hash='#sheet-'+c.id;},text:'เปิดชีท'}):null, (c.done && Store.inCampaign(c) && !Store.isDevUid) ? h('button',{class:'small',disabled:true,title:'ตัวละครอยู่ในแคมเปญแล้ว ค่าพื้นฐานล็อก เติบโตผ่าน IP และแก้รายละเอียดได้ในชีท',text:'🔒 อยู่ในแคมเปญ'}) : h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#wizard'; },text:c.done?'แก้ไขในวิซาร์ด':'ทำต่อ'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}), h('button',{class:'small ghost',onclick:()=>{ if(confirm(`ลบ ${c.name||'ตัวละครนี้'}?`)) Store.remove(c.id); renderChars(); },text:'ลบ'}), !Store.isMine(c) && Store.isDevUid ? h('button',{class:'small ghost',title:'ย้ายตัวละครนี้มาเป็นของบัญชีผู้พัฒนา',onclick:()=>{ if(!confirm(`อ้างสิทธิ์ ${c.name} มาเป็นของคุณ?`)) return; c.ownerId = Store.me; Store.upsert(c); renderChars(); },text:'อ้างสิทธิ์'}) : null),
       !Store.isMine(c) ? h('div',{class:'dim',style:'font-size:12px;margin-top:4px',text:'เจ้าของ: '+(c.ownerName||c.ownerId||'?')}) : null);
   }));
   if (!mine.length && !others.length) root.append(h('div',{class:'card',text:'ยังไม่มีตัวละคร เริ่มจากปุ่มสร้างตัวละครใหม่'}));
@@ -1996,7 +2021,7 @@ function dicePanel(c, onRoll, opts={}){ // opts.guard(run) = ด่านล็�
     box.append(h('div',{class:'row',style:'margin-bottom:6px'}, STATS.map(s=>h('button',{class:'small rollbtn',onclick:()=>fire(`${s} Check`, d.mod[s]), text:`${s} ${signed(d.mod[s])}`}))));
     box.append(h('div',{class:'row',style:'margin-bottom:6px'}, h('button',{class:'small rollbtn',onclick:()=>fire('Initiative', d.initiative),text:`Initiative ${signed(d.initiative)}`}), h('button',{class:'small rollbtn',onclick:()=>fire('Attack Roll (Combat Dice)', 0, 'attack'),text:'Attack 2d6 (CV)'}), h('button',{class:'small rollbtn',onclick:()=>fire('Parry', 0, 'parry'),text:`Parry ${2+d.parryDice}d6`}), h('button',{class:'small rollbtn',onclick:()=>fire('Evade (Reflex)', d.reflex, 'evade'),text:`Evade ${signed(d.reflex)}`}), h('button',{class:'small rollbtn',onclick:()=>fire('VIT Saving Throw', d.fortitude),text:`VIT ST ${signed(d.fortitude)}`}), h('button',{class:'small rollbtn',onclick:()=>fire('PER Saving Throw', d.will),text:`PER ST ${signed(d.will)}`}), h('button',{class:'small rollbtn',onclick:()=>fire('Luck Saving Throw', 0, 'luck'),text:'Luck (8+)'})));
     const kl = knowledgeLevels(c);
-    box.append(h('div',{class:'row',style:'margin-bottom:6px'}, DATA.knowledge.map(k=>{ const profs = Object.values(c.kslots||{}).filter(s=>s&&s.id===k.id&&s.prof&&!s.prof.startsWith('(')).length; return h('button',{class:'small ghost rollbtn',onclick:()=>fire(`${k.nameEn} Check`, profs),text:`${k.nameEn} +${profs}`}); })));
+    box.append(h('div',{class:'row',style:'margin-bottom:6px'}, DATA.knowledge.map(k=>{ const kb2 = knowledgeBonus(c, d, k); return h('button',{class:'small ghost rollbtn',title:`Lv ${kb2.lv} + ${kb2.stat} Mod ${signed(kb2.mod)}`,onclick:()=>fire(`${k.nameEn} Check (Lv${kb2.lv} + ${kb2.stat})`, kb2.total),text:`${k.nameEn} ${signed(kb2.total)}`}); })));
   } else {
     box.append(h('div',{class:'row',style:'margin-bottom:6px'}, h('button',{class:'small rollbtn',onclick:()=>fire('2d6',0),text:'ทอย 2d6'}), h('button',{class:'small rollbtn',onclick:()=>fire('Luck Saving Throw',0,'luck'),text:'Luck (8+)'}), h('button',{class:'small rollbtn',onclick:()=>fire('Attack Roll',0,'attack'),text:'Attack 2d6'})));
   }
@@ -2108,6 +2133,7 @@ function renderSheet(id){
   const c = Store.get(id);
   if (!c){ root.append(h('div',{class:'card'}, h('p',{text:'ไม่พบตัวละครนี้ในบัญชีของคุณ'}), h('p',{class:'dim',style:'font-size:13px',text:'ชีทของผู้เล่นคนอื่นเปิดได้เฉพาะจากห้องที่เขาหยิบตัวละครลงบอร์ด (กดปุ่ม "ชีท" ที่หมาก)'}), h('button',{style:'margin-top:8px',onclick:()=>{ location.hash = Table.roomId ? '#room-'+Table.roomId : '#chars'; },text:'← กลับ'}))); HUD.hide(); return; }
   const readOnly = !Store.canEdit(c); SheetUI.readOnly = readOnly;
+  if (readOnly && c.shareMode==='min'){ if (Table.roomId) root.append(h('div',{class:'roombar'}, h('button',{class:'primary small',onclick:()=>{ location.hash='#room-'+Table.roomId; },text:'← กลับโต๊ะเล่น'}), h('span',{class:'dim',style:'font-size:13px',text:`ชีทย่อของ ${c.ownerName||'ผู้เล่นคนอื่น'}`}))); root.append(renderMinSheet(c)); HUD.hide(); return; }
   let d = compute(c); const kin = KIN[c.kin];
   ensureSheetState(c, d); d = compute(c); // สวมของอัตโนมัติอาจเปลี่ยน Parry Dice
   const cur = c.current; const det = c.details;
@@ -2136,7 +2162,7 @@ function renderSheet(id){
   left.append(tb);
   // ===== middle =====
   const mid = h('div');
-  const idb = h('div',{class:'box',dataset:{k:'id'}}, h('div',{class:'row',style:'justify-content:space-between'}, h('h2',{text:c.name}), h('div',{class:'row'}, readOnly? null : h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#wizard'; },text:'แก้ไขในวิซาร์ด'}), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}))));
+  const idb = h('div',{class:'box',dataset:{k:'id'}}, h('div',{class:'row',style:'justify-content:space-between'}, h('h2',{text:c.name}), h('div',{class:'row'}, readOnly? null : (Store.inCampaign(c) && !Store.isDevUid) ? h('span',{class:'tag',title:'ตัวละครอยู่ในแคมเปญแล้ว ค่าพื้นฐานจากวิซาร์ดล็อก เติบโตผ่าน IP และแก้รายละเอียดในชีทได้',text:'🔒 อยู่ในแคมเปญ'}) : h('button',{class:'small',onclick:()=>{ startWizard(c); location.hash='#wizard'; },text:'แก้ไขในวิซาร์ด'}), readOnly? null : shareModeSel(c, save), h('button',{class:'small ghost',onclick:()=>exportChar(c),text:'ส่งออก JSON'}))));
   const ig = h('div',{class:'idgrid',style:'margin-top:8px'});
   const kv = (k, v) => ig.append(h('span',{class:'k',text:k}), typeof v === 'string' ? h('span',{text:v}) : v);
   kv('Age อายุ', txt(det,'age')); kv('Gender เพศ', txt(det,'gender')); kv('Job อาชีพ', txt(det,'job', c.starterSet||'')); kv('Size ขนาด', d.size); kv('Height/Weight', txt(det,'height')); kv('Speed ความเร็ว', kin.speed); kv('Kin วงศา', kin.name);
@@ -2173,14 +2199,14 @@ function renderSheet(id){
   const pg2 = h('div',{class:'ptable'});
   for (const ax of DATA.meta.personality){ const p=c.personality[ax.id]; const l = (!p||p.value==null)?0:(p.side==='left'?p.value:-p.value); pg2.append(h('span',{class:'lw'}, ax.left, h('span',{class:'dim',text:` (${ax.leftTh})`})), h('span',{class:'v',style:'color:#f08c2e',text:signed(l)}), h('span',{class:'dim',text:'/'}), h('span',{class:'v',style:'color:#58b7ff',text:signed(-l)}), h('span',{class:'rc'}, ax.right, h('span',{class:'dim',text:` (${ax.rightTh})`}))); }
   pb.append(pg2); right.append(pb);
-  const cm = h('div',{class:'box',dataset:{k:'combat'}}, h('h4',null, 'Combat Mod. ', tag('เสนอ','prop')));
+  const cm = h('div',{class:'box',dataset:{k:'combat'}}, h('h4',null, 'Combat Mod.'));
   cm.append(h('div',{class:'gives'}, h('span',{class:'tag sc sc-AGI stat'}, T('Reflex'), ` ${signed(d.reflex)}`), h('span',{class:'tag sc sc-STR stat'}, T('Might'), ` ${signed(d.might)}`), h('span',{class:'tag sc sc-PER stat'}, T('Sight'), ` ${signed(d.sight)}`), h('span',{class:'tag sc sc-PER stat'}, T('Initiative'), ` ${signed(d.initiative)}`), h('span',{class:'tag sc sc-VIT stat'}, 'VIT ST', ` ${signed(d.fortitude)}`), h('span',{class:'tag sc sc-PER stat'}, 'PER ST', ` ${signed(d.will)}`), h('span',{class:'tag',title:'เต๋าเพิ่มตอน Parry (โล่ +1) แก้ตัวเลขได้'}, T('Parry Dice'), ' ', h('input',{type:'number',min:0,max:4,value:d.parryDice,style:'width:44px;padding:0 4px;font-size:12px',onchange:(e)=>{ cur.parryBonus=Math.max(0,+e.target.value||0); save(); rerender(); }})), h('span',{class:'tag'}, T('Passive PER'), ` ${d.passivePer}`), h('span',{class:'tag'}, T('Capacity'), ` ${d.capacity} กก.`)));
   cm.append(h('div',{class:'kicker',style:'margin-top:8px',text:'แป้นอาวุธ'}), weaponBoard(c, d, (k)=>{ HUD.open='pouch'; HUD.sel.pouch=k; HUD.persist && HUD.persist(); rerender(); }, null));
   right.append(cm);
   const kl = knowledgeLevels(c);
-  const kb = h('div',{class:'box',dataset:{k:'know'}}, h('h4',null, T('Knowledge'), ' (2d6 + Proficiency)'));
+  const kb = h('div',{class:'box',dataset:{k:'know'}}, h('h4',null, T('Knowledge'), ' ', h('span',{class:'dim',style:'font-size:11px;font-weight:400;font-family:var(--font-body)',text:'2d6 + Lv + Mod ค่าพลังกำกับ'})));
   const kt = h('table',{class:'t'});
-  for (const k of DATA.knowledge){ const n = Object.values(c.kslots||{}).filter(s=>s&&s.id===k.id&&s.prof&&!s.prof.startsWith('(')).length; kt.append(h('tr',null, h('td',null, h('b',{text:k.nameEn}), h('span',{class:'dim',style:'font-size:11px',text:` (${k.stats.join('/')})`})), h('td',{class:'num',text:'Lv'+kl[k.id]}), h('td',{class:'num',text:'+'+n}))); }
+  for (const k of DATA.knowledge){ const kb2 = knowledgeBonus(c, d, k); kt.append(h('tr',null, h('td',null, h('b',{text:k.nameEn}), h('span',{class:'dim',style:'font-size:11px',text:` (${k.stats.join('/')})`})), h('td',{class:'num',text:'Lv'+kb2.lv}), h('td',{class:'num',title:`ระดับ ${kb2.lv} + ${kb2.stat} Mod ${signed(kb2.mod)}`,text:signed(kb2.total)}))); }
   kb.append(h('div',{class:'tablewrap'}, kt)); right.append(kb);
   // แผงทอยเต๋าอยู่ใน HUD (ปุ่มลอยข้างจอ) ไม่กินพื้นที่ชีท และเปิดค้างไว้ได้ขณะเลื่อนดูชีท
   const diceOpts = {onRoll: (e)=>{ if (Table.roomId) Table.postRoll(e, c); }, guard: Table.roomId ? (run,label)=>Table.guardedRoll(c.name, run, label) : null};
@@ -2247,6 +2273,29 @@ function packColumns(cs, boxes){
     for (const b of [...cols[T].children].slice(1)){ const hb = hOf.get(b)||0; const gap = Math.abs(diff - 2*hb); if (hb < diff && gap < bestGap){ bestGap = gap; best = b; } }
     if (!best) break; const hb = hOf.get(best); cols[S].append(best); tot[T] -= hb; tot[S] += hb;
   }
+}
+
+/* ตัวเลือกว่าจะแชร์อะไรให้ห้อง */
+function shareModeSel(c, save){
+  const sel = h('select',{title:'สิ่งที่ GM และเพื่อนร่วมห้องเห็นเมื่อวางตัวละครลงบอร์ด',onchange:(e)=>{ c.shareMode = e.target.value; save(); toast(c.shareMode==='min' ? 'ห้องจะเห็นเฉพาะค่าหลัก (ชื่อ รูป วงศา HP Sanity เกราะ)' : 'ห้องจะเห็นชีทเต็ม (อ่านอย่างเดียว)'); }},
+    h('option',{value:'full',text:'แชร์ให้ห้อง: ชีทเต็ม'}), h('option',{value:'min',text:'แชร์ให้ห้อง: เฉพาะค่าหลัก'}));
+  sel.value = c.shareMode || 'full';
+  return sel;
+}
+/* ชีทแบบย่อที่คนอื่นในห้องเห็น เมื่อเจ้าของเลือกแชร์เฉพาะค่าหลัก */
+function renderMinSheet(c){
+  const kin = c.kin ? KIN[c.kin] : null; const cur = c.current || {};
+  const box = h('div',{class:'card minsheet'});
+  box.append(h('div',{class:'row',style:'gap:14px;align-items:flex-start'},
+    c.portrait ? h('img',{src:c.portrait,alt:c.name,style:'width:120px;height:160px;object-fit:cover;border-radius:8px;border:1px solid var(--line-2)'}) : null,
+    h('div',null, h('h2',{text:c.name||'(ไม่มีชื่อ)'}), h('div',{class:'dim',text:(kin? kin.name : '') + (c.size? ' · '+c.size : '') + (c.ownerName? ' · ผู้เล่น '+c.ownerName : '')}),
+      h('div',{class:'gives',style:'margin-top:8px'}, tag(`HP ${cur.hp??'?'}`,'neg'), tag(`MP ${cur.mp??'?'}`,'stat'), tag(`Sanity ${cur.sanity??'?'}`,'prop'), cur.temp? tag(`Temp HP ${cur.temp}`) : null),
+      h('div',{class:'dim',style:'font-size:12.5px;margin-top:6px',text:'เจ้าของเลือกแชร์เฉพาะค่าหลัก ค่าพลัง ทักษะ กระเป๋า และเรื่องราวไม่เปิดเผย'}))));
+  const tb = h('table',{class:'t',style:'margin-top:10px'}, h('thead',null, h('tr',null, h('th',{text:'อวัยวะ'}), h('th',{text:'Toughness'}), h('th',{text:'เกราะ A/B'}))));
+  for (const [k,label] of DATA.meta.bodyParts) tb.append(h('tr',null, h('td',{text:label}), h('td',{class:'num',text:(cur.tough||{})[k]??'-'}), h('td',{class:'num',text:(c.armor||{})[k]||'-'})));
+  box.append(h('div',{class:'tablewrap'}, tb));
+  const det = c.details||{}; if (det.appearance) box.append(h('p',{class:'desc',style:'margin-top:8px'}, h('b',{text:'รูปลักษณ์: '}), det.appearance)); if (det.signature) box.append(h('p',{class:'desc'}, h('b',{text:'เอกลักษณ์: '}), det.signature));
+  return box;
 }
 
 /* ===== HUD แบบเกม: ปุ่มลอยข้างจอ (กระเป๋า / คัมภีร์สกิล / ถุงย่ามของสวมใส่) ลากย้ายได้ เปิดเป็นหน้าต่างลอย ===== */
@@ -3071,7 +3120,7 @@ const FIGS = {
   stats(){ return h('div',null, figTitle('ค่าพลังหกค่า (ตัวอย่างค่าดิบ)'), h('div',{class:'fig-stats'}, statBox('STR',12), statBox('AGI',8), statBox('VIT',10), statBox('PER',14), statBox('INF',9), statBox('INT',11)), figNote('Mod = ค่าดิบ ÷ 2 − 5 ปัดลง · 9 กับ 11 ได้ Mod เท่ากับ 8 กับ 10')); },
   modtable(){ const rows=[8,9,10,11,12,13,14,16,18,20]; return h('div',null, figTitle('ค่าดิบ → Mod'), h('div',{class:'fig-modrow'}, rows.map(v=>h('div',{class:'fig-mod'+(v%2?' odd':'')}, h('div',{class:'num',text:v}), h('div',{class:'num m',text:signed(modOf(v))})))), figNote('ช่องสีจางคือเลขคี่ ให้ Mod เท่ากับเลขคู่ก่อนหน้า แต้ม Extra จึงควรหยุดที่เลขคู่')); },
   derived(){ return h('div',null, figTitle('ค่าพลังรอง'), h('table',{class:'fig-table'}, [['HP','10 + VIT Mod + STR Mod'],['MP','10 + INF Mod + INT Mod'],['Sanity','5 + INF Mod'],['Passive PER','7 + PER Mod'],['Toughness / อวัยวะ','(VIT ดิบ + STR ดิบ) ÷ 10 + 1'],['แบกได้','STR × 3 กก. (Large ×4, Huge ×5)']].map(([k,v])=>h('tr',null, h('td',null, T(k)), h('td',{class:'dim',text:v}))))); },
-  proposed(){ return h('div',null, figTitle('ค่าที่ติดป้าย (เสนอ)'), h('div',{class:'fig-chips'}, ['Reflex = AGI Mod ÷ 2 + 1','Might = STR Mod ÷ 2 + 1','Sight = PER Mod ÷ 2 + 1','Initiative = PER Mod','VIT Saving Throw = VIT Mod','PER Saving Throw = PER Mod'].map(t=>h('span',{class:'tag prop',text:t}))), figNote('ไฟล์แกนยังไม่ล็อกสูตรเหล่านี้ เว็บใช้สูตรฝั่ง Bestiary ไปก่อน')); },
+  proposed(){ return h('div',null, figTitle('ค่าสถานะศักยภาพ (Ability Stats)'), h('div',{class:'fig-chips'}, ['Initiative = PER Mod','Reflex = AGI Mod ÷ 2 + 1','Might = STR Mod ÷ 2 + 1','Sight = PER Mod ÷ 2 + 1','VIT Saving Throw = VIT Mod','PER Saving Throw = PER Mod','Parry Dice เริ่ม 0 (+1 ต่อโล่)'].map(t=>h('span',{class:'tag stat',text:t}))), figNote('ปัดเศษลง · Toughness ตามขนาด Large +1 Huge +2 · แบกได้ STR × 3 (Large ×4 Huge ×5 Small เท่า Medium)')); },
   persaxes(p){ const vals = p.vals || [[ 'left',3],['right',2],['left',2],['left',1],['right',1],[null,0]]; return h('div',null, figTitle('หกคู่ตรงข้าม แจก 3 · 2 · 2 · 1 · 1 · 0'), h('div',{class:'fig-axes'}, DATA.meta.personality.map((ax,i)=>{ const [side,v]=vals[i]; const warm = v===0||!side ? .5 : side==='left' ? .5+v/6 : .5-v/6; return h('div',{class:'fig-axis'}, h('span',{class:'l'+(side==='left'&&v?' on':''),text:`${ax.leftTh} ${side==='left'&&v?signed(v):side==='right'&&v?signed(-v):'0'}`}), h('div',{class:'pbar'}, h('div',{class:'warm',style:`width:${warm*100}%`}), h('div',{class:'cool',style:`width:${(1-warm)*100}%`})), h('span',{class:'r'+(side==='right'&&v?' on':''),text:`${side==='right'&&v?signed(v):side==='left'&&v?signed(-v):'0'} ${ax.rightTh}`})); }))); },
   persbar(){ return h('div',null, figTitle('ราคาของการเป็นใครสักคน'), h('div',{class:'fig-axis big'}, h('span',{class:'l on',text:'กล้าหาญ +3'}), h('div',{class:'pbar'}, h('div',{class:'warm',style:'width:100%'}), h('div',{class:'cool',style:'width:0%'})), h('span',{class:'r',text:'−3 ระแวดระวัง'})), figNote('ทอยที่ต้องกล้า: 2d6 + Mod + 3 · ทอยที่ต้องระวัง: 2d6 + Mod − 3')); },
   profile(){ return h('div',null, figTitle('เว็บอ่านนิสัยให้ฟัง'), h('div',{class:'fig-profile'}, h('b',{text:'ลักษณะนิสัยโดยรวม'}), h('div',{class:'dim',text:'นักวางแผนตัวยง ทุกการตัดสินใจต้องมีเหตุผลรองรับ · ถนัดหลบมากกว่าชน · ไม่ไว้ใจอะไรง่าย ๆ'}), h('div',{class:'fig-chips'}, h('span',{class:'tag prop',text:'Controller (คอนโทรลเลอร์)'}), h('span',{class:'tag',text:'Specialist (สเปเชียลลิสต์)'})), h('div',{class:'dim',text:'เหมาะกับสาย Controller หรือ Specialist · Talent ที่เข้ากัน: INT, INF'}))); },
@@ -3090,7 +3139,7 @@ const FIGS = {
   attack(){ return h('div',null, figTitle('Attack Roll'), h('div',{class:'fig-dice'}, dieFace(4,'ok'), dieFace(4,'ok'), h('span',{class:'fig-op',text:'='}), h('span',{class:'fig-big num hi',text:'8'}), h('span',{class:'fig-lbl',text:'CV'})), figNote('ออกคู่ = Perfect Strike (Might หรือ Sight ×2) · ฝ่ายรับต้องประกาศ Parry หรือ Evade ก่อน ไม่ประกาศ = โดนเต็ม')); },
   parry(){ return h('div',null, figTitle('Parry: ทอย 2 + Parry Dice แล้วเลือกเอง 2 ลูก'), h('div',{class:'fig-dice'}, dieFace(2,'ok'), dieFace(4,'dim'), dieFace(6,'ok'), h('span',{class:'fig-op',text:'→'}), h('span',{class:'fig-big num hi',text:'8'})), figNote('ผู้โจมตีได้ CV 8 · เลือก 2+6 = 8 เท่ากันพอดี = Perfect Parry ได้ 1 AP คืน · หรือเลือก 4+6 = 10 ป้องกันได้เฉย ๆ · Disadvantage ทอย 2d6 เปล่า โล่ไม่ช่วย')); },
   hitloc(){ const s = svg('svg',{viewBox:'0 0 56 96',class:'fig-doll'}); s.append(svg('circle',{cx:28,cy:12,r:8,class:'bp hi'}), svg('rect',{x:17,y:23,width:22,height:30,rx:4,class:'bp'}), svg('rect',{x:5,y:24,width:9,height:28,rx:4,class:'bp'}), svg('rect',{x:42,y:24,width:9,height:28,rx:4,class:'bp'}), svg('rect',{x:17,y:56,width:9,height:34,rx:4,class:'bp'}), svg('rect',{x:30,y:56,width:9,height:34,rx:4,class:'bp'})); return h('div',null, figTitle('ตำแหน่งที่โดน จากผลรวมลูกเต๋าโจมตี'), h('div',{class:'fig-row'}, s, h('table',{class:'fig-table'}, [['2 · 3 · 11 · 12','ศีรษะ'],['6 · 7 · 8','ลำตัว'],['4 หรือ 9','ทอย 1d6: 1-3 ขาขวา · 4-6 แขนขวา'],['5 หรือ 10','ทอย 1d6: 1-3 ขาซ้าย · 4-6 แขนซ้าย']].map(([a,b])=>h('tr',null, h('td',{class:'num',text:a}), h('td',{class:'dim',text:b})))))); },
-  damage(){ return h('div',null, figTitle('ลำดับการหักความเสียหาย'), h('div',{class:'fig-flow'}, h('span',{class:'tag',text:'ความเสียหาย 5'}), '→', h('span',{class:'tag prop',text:'เกราะลำตัว A 2'}), '→', h('span',{class:'tag neg',text:'HP −3'}), '+', h('span',{class:'tag neg',text:'Toughness ลำตัว −3'})), figNote('เกราะของอวัยวะที่โดนหักก่อน ที่เหลือหักทั้ง HP และ Toughness ของอวัยวะนั้น')); },
+  damage(){ return h('div',null, figTitle('ลำดับการหักความเสียหาย'), h('div',{class:'fig-flow'}, h('span',{class:'tag',text:'ความเสียหาย 5'}), '→', h('span',{class:'tag prop',text:'เกราะลำตัว A 2'}), '→', h('span',{class:'tag neg',text:'HP −3'}), '+', h('span',{class:'tag neg',text:'Toughness ลำตัว −1'})), figNote('ทุกครั้งที่โดน Toughness ของอวัยวะนั้นลด 1 · เกราะหักความเสียหายก่อน ที่เหลือหัก HP · แพ้ทางธาตุ ×2')); },
   wound(){ return h('div',null, figTitle('Toughness ของอวัยวะหมด'), h('div',{class:'fig-tough'}, [['ศีรษะ',3,3],['ลำตัว',3,3],['แขนขวา',0,3],['แขนซ้าย',3,3],['ขาขวา',2,3],['ขาซ้าย',3,3]].map(([n,v,m])=>h('div',{class:'fig-tbox'+(v===0?' out':'')}, h('div',{class:'k',text:n}), h('div',{class:'num',text:`${v}/${m}`})))), figNote('แขนขวา 0 = ใช้ไม่ได้ ทอยตารางบาดแผลฉกรรจ์ · ติดลบจนถึง −3 (เท่าค่าเต็ม) = เสียอวัยวะ')); },
   sanity(){ return h('div',null, figTitle('ทรัพยากรของตัวละคร'), h('div',{class:'fig-res'}, [['HP',12,14,'#e5484d'],['MP',6,10,'#58b7ff'],['Sanity',3,6,'#a371f7'],['Temp HP',2,2,'#d4a84a']].map(([n,v,m,c])=>h('div',{class:'fig-resrow'}, h('span',{class:'k',text:n}), h('div',{class:'bar'}, h('div',{style:`width:${v/m*100}%;background:${c}`})), h('span',{class:'num',text:`${v}/${m}`})))), figNote('Temporary Health หายก่อน HP จริง และพักผ่อนไม่คืน · Sanity ต่ำ = เสี่ยงเสียสติ')); },
   cost(){ const sk = DATA.skills.find(s=>/Sanity/i.test(s.cost||'')) || DATA.skills.find(s=>s.cost); return h('div',null, figTitle('อ่านช่อง Cost ก่อนร่าย'), h('div',{class:'fig-card'}, h('b',{text: sk ? sk.nameEn : 'Blood Rite'}), h('div',{class:'dim',text: sk ? (sk.nameTh||'') : ''}), h('div',{class:'fig-cost'}, h('span',{class:'k',text:'Cost'}), h('span',{class:'tag neg',text: sk ? sk.cost : '1 Sanity'})), h('div',{class:'dim',style:'font-size:12.5px'}, T(sk ? String(sk.effect||'').slice(0,140)+'…' : '')))); },
@@ -3143,7 +3192,7 @@ const LESSONS = [
     ['smirk', 'สังเกตให้ดี ค่าดิบเลขคี่ไม่ได้ให้ Mod เพิ่ม 9 กับ 10 ให้ Mod ต่างกัน แต่ 10 กับ 11 ให้เท่ากัน ตอนแจกแต้ม Extra ให้มองที่เลขคู่ถัดไปเสมอ ปุ่ม Auto Fill ในวิซาร์ดรู้เรื่องนี้ดี'],
     ['explain', 'ค่าพลังรองคำนวณจาก Mod ทั้งหมด HP = 10 + VIT Mod + STR Mod · MP = 10 + INF Mod + INT Mod · Sanity = 5 + INF Mod · Passive PER = 7 + PER Mod', 'derived'],
     ['explain', 'Toughness ต่ออวัยวะ = (VIT ดิบ + STR ดิบ) ÷ 10 + 1 และแบกของได้ STR × 3 กิโลกรัม ตัวใหญ่แบกได้มากกว่านั้น'],
-    ['guilty', 'ค่าที่ติดป้าย (เสนอ) เช่น Reflex Might Sight คือสิ่งที่ไฟล์แกนยังไม่ได้เขียนเป็นตารางให้ผู้เล่น เว็บใช้สูตรฝั่ง Bestiary ไปก่อน ถ้าเจ้าเห็นว่าไม่สมเหตุผล บอกคนทำกฎ อย่าบอกเรา เราแค่อ่านให้ฟัง', 'proposed'],
+    ['explain', 'ค่าสถานะศักยภาพอีกชุดคำนวณจาก Mod เช่นกัน Initiative = PER Mod · Reflex = AGI Mod หารสองบวกหนึ่ง · Might = STR Mod หารสองบวกหนึ่ง · Sight = PER Mod หารสองบวกหนึ่ง ปัดเศษลงทั้งหมด ตัวเลขพวกนี้โผล่ตอนต่อสู้ จำไว้ว่ามาจากไหนก็พอ', 'proposed'],
   ]},
   { id:'pers', nav:'บุคลิกภาพ', title:'บุคลิกภาพคือค่าพลังที่เจ้าเลือกเอง', scene:'study', lines:[
     ['ask', 'ทีนี้คำถามที่เราชอบที่สุด ตัวละครของเจ้าเป็นคนแบบไหน', null],
@@ -3183,7 +3232,7 @@ const LESSONS = [
     ['explain', 'Parry ทอย 2d6 บวกจำนวน Parry Dice จากโล่ แล้วเลือกเองว่าจะใช้สองลูกไหน จะเอาสูงสุด หรือจะเอาให้เท่ากับผลของผู้โจมตีเพื่อ Perfect Parry ก็ได้', 'parry'],
     ['explain', 'Evade ทอย 2d6 + Reflex ถ้าได้ Advantage ก็เลือกลูกเองเช่นกัน แต่ Parry แบบ Disadvantage ทอยสองลูกเปล่า ๆ โล่ช่วยไม่ได้ ผลเท่ากับผู้โจมตีพอดีคือ Perfect ได้ 1 AP คืนทันที'],
     ['think', 'เมื่อโดน ให้ดูว่าโดนตรงไหน ผลรวม 2 3 11 12 คือหัว 6 7 8 คือลำตัว 4 กับ 9 ทอย 1d6 ต่อ 1-3 ขาขวา 4-6 แขนขวา ส่วน 5 กับ 10 เป็นข้างซ้ายแบบเดียวกัน', 'hitloc'],
-    ['explain', 'เกราะของอวัยวะนั้นหักความเสียหายกายภาพออกก่อน ที่เหลือหัก HP และ Toughness ของอวัยวะนั้น', 'damage'],
+    ['explain', 'โดนเข้าหนึ่งครั้ง Toughness ของอวัยวะที่โดนลดลง 1 ส่วน HP หักเท่าความเสียหายที่เหลือหลังเกราะของอวัยวะนั้นรับไปแล้ว แพ้ทางธาตุความเสียหายคูณสอง', 'damage'],
     ['guilty', 'Toughness ของอวัยวะไหนหมด อวัยวะนั้นใช้ไม่ได้และต้องทอยตารางบาดแผลฉกรรจ์ ติดลบจนถึงค่าเต็มคือเสียอวัยวะ เราเคยนำทัพในสงครามร้อยปี ลูกรัก เรารู้ว่าแขนที่หายไปไม่งอกกลับมาเพราะพักผ่อน คิดก่อนยืนรับดาบ', 'wound'],
   ], tryLabel:'ทอย Parry ดูในหน้าต่างทอยเต๋า', tryHash:'#chars' },
   { id:'mind', nav:'จิตใจและราคาของเวท', title:'สิ่งที่หักไม่ใช่แค่กระดูก', scene:'study', lines:[
@@ -3347,7 +3396,7 @@ function renderHome(){
       feat('☾', 'เวทมนตร์ที่มีราคา', 'เวทจ่ายด้วย MP หรือ Sanity สติเป็นทรัพยากรเท่ากับเลือด และ GM เรียกเก็บได้เมื่อเจ้าฝืนนิสัยที่เลือกไว้'),
       feat('◈', 'บุคลิกภาพคือค่าพลังที่เลือกเอง', 'หกคู่ตรงข้าม แจก 3 2 2 1 1 0 ฝั่งที่เลือกเป็นบวก ฝั่งตรงข้ามติดลบเท่ากัน ระบบอ่านนิสัยแล้วบอกสายการเล่นที่เข้ากัน'),
       feat('⚑', 'โต๊ะออนไลน์ แผนที่ 20×20', `สุ่มแผนที่ต่อสู้ตามสถานที่ หมากมีรูปจากชีท ทอยเต๋าเด้งหน้าทุกคนและทอยได้ทีละคน แชต ลำดับเทิร์น และ Insight Point ตามกฎจริง`)),
-    h('p',{class:'dim home-foot',text:`${DATA.kins.length} วงศา · ${DATA.kins.reduce((a,k)=>a+k.childhood.length+k.specialChildhood.length+k.adulthood.length,0)} พื้นหลัง · ${DATA.skills.filter(s=>s.category!=='Granted').length} ทักษะและเวทมนตร์ · ${DATA.knowledge.length} สาขาความรู้ · ${DATA.sets.sets.length} ชุดเริ่มต้น · ข้อมูลจาก ${Object.values(DATA.source).join(' · ')} · ค่าที่ติดป้าย (เสนอ) คือสูตรที่ไฟล์แกนยังไม่ล็อก · Beastman ยังไม่เปิดให้เลือก`})));
+    h('p',{class:'dim home-foot',text:`${DATA.kins.length} วงศา · ${DATA.kins.reduce((a,k)=>a+k.childhood.length+k.specialChildhood.length+k.adulthood.length,0)} พื้นหลัง · ${DATA.skills.filter(s=>s.category!=='Granted').length} ทักษะและเวทมนตร์ · ${DATA.knowledge.length} สาขาความรู้ · ${DATA.sets.sets.length} ชุดเริ่มต้น · ข้อมูลจาก ${Object.values(DATA.source).join(' · ')} · Beastman ยังไม่เปิดให้เลือก`})));
   function feat(glyph, title, text){ return h('div',{class:'card featcard'}, h('div',{class:'glyph',text:glyph}), h('h4',{text:title}), h('div',{class:'desc'}, T(text))); }
 }
 function renderRules(){
@@ -3357,10 +3406,11 @@ function renderRules(){
   g.append(h('div',{class:'card'}, h('h3',{text:'การทอยหลัก'}), h('ul',{style:'padding-left:18px;font-size:14px;color:var(--bone-dim)'},
     h('li',null, T('Check: 2d6 + Stat Mod + Personality (ถ้าเข้าบริบท)')),
     h('li',null, T('ไม่มี DC: 10+ Full Success · 7-9 Partial Success (สำเร็จแต่มีราคา) · 6- Failure')),
-    h('li',null, T('Clash Throw: ทั้งสองฝ่ายทอย ฝ่ายสูงกว่าชนะ เท่ากันผู้ท้าชนะ (Challenge: ผู้ท้า ≥ ผู้ถูกท้า = สำเร็จ)')),
+    h('li',null, T('Clash / Challenge: ทั้งสองฝ่ายทอย ฝ่ายสูงกว่าชนะ เท่ากันฝ่ายตั้งรับ (ผู้ถูกท้า) ชนะ')),
+    h('li',null, T('Knowledge Check: 2d6 + ระดับความรู้ + Mod ค่าพลังกำกับ (+ บุคลิกภาพถ้าเข้าบริบท)')),
     h('li',null, T('Saving Throw: ต้านทานผล เลือกไม่ทอยและรับผลได้ · Luck ST ทอยเปล่า ผ่านที่ 8')),
     h('li',null, T('Advantage: 3d6 เก็บ 2 ดีสุด · Disadvantage: 3d6 เก็บ 2 แย่สุด · ได้ทั้งคู่ = ทอยปกติ')),
-    h('li',null, T('Critical: [6,6] ผ่านทันทีแม้ต่ำกว่า DC · [1,1] ล้มเหลวทันที')))));
+    h('li',null, T('Critical: [6,6] ผ่านทันทีแม้ต่ำกว่า DC · [1,1] ล้มเหลวทันที ใช้กับ Check และ Saving Throw (Attack/Parry/Evade ไม่นับ Critical)')))));
   g.append(h('div',{class:'card'}, h('h3',{text:'ระดับความยาก (DC)'}), h('table',{class:'t'}, DATA.meta.dc.map(([k,v])=>h('tr',null,h('td',{text:k}),h('td',{class:'num',text:v+(v===14?'+':'')})))), h('p',{class:'dim',style:'font-size:13px',text:'ตัวเลขทุกช่องตรวจกับไฟล์แกนแล้ว'})));
   g.append(h('div',{class:'card'}, h('h3',{text:'การต่อสู้'}), h('ul',{style:'padding-left:18px;font-size:14px;color:var(--bone-dim)'},
     h('li',null, T('Initiative: 2d6 + Initiative Mod ลำดับคงอยู่ทั้งฉาก ซุ่มโจมตีได้เริ่มก่อน')),
@@ -3374,12 +3424,13 @@ function renderRules(){
     h('li',null, T('เขตใกล้เคียง 4-25 ม.: วิ่งเข้าร่วมวงได้ทันที ยิงใส่เขตปะทะได้')),
     h('li',null, T('เขตไกล 26-100+ ม.: ยิงยากขึ้น (ลด CV ตามระยะ) เคลื่อนที่ไปต้องใช้ Swift + 1 AP')),
     h('li',null, T('AoE: Burst = เป้าหมายหลัก + ตัวที่ "อยู่ติดกันเป็นกลุ่ม" · Cone = ตัวแรกในทิศและตัวที่อยู่ด้านหลัง · Aura = ทุกคนในเขตเดียวกับผู้ร่าย')))));
-  g.append(h('div',{class:'card'}, h('h3',{text:'ความก้าวหน้า (IP)'}), h('table',{class:'t'}, DATA.meta.ipTable.map(([k,v])=>h('tr',null,h('td',{text:k}),h('td',{text:v})))), h('p',{class:'dim',style:'font-size:13px',text:'ได้ IP เมื่อจบเซสชั่น +1 · Minor +2 · Major +3 · Epic +4 · บทเรียนจากความล้มเหลว +1 · ใช้ได้ตอนจบเซสชั่นหรือ Downtime'})));
+  g.append(h('div',{class:'card'}, h('h3',{text:'ความก้าวหน้า (IP)'}), h('table',{class:'t'}, DATA.meta.ipTable.map(([k,v])=>h('tr',null,h('td',{text:k}),h('td',{text:v})))), h('p',{class:'dim',style:'font-size:13px',text:'ได้ IP เมื่อจบเซสชั่น +1 · Minor +2 · Major +3 · Epic +4 · บทเรียนจากความล้มเหลว +1 · หนึ่งเหตุการณ์นับชั้นสูงสุดชั้นเดียว รวมไม่เกิน 5 IP ต่อเซสชั่น Epic ครั้งเดียวต่ออาร์ค · ใช้ได้ตอนจบเซสชั่นหรือ Downtime'})));
   g.append(h('div',{class:'card'}, h('h3',{text:'ทรัพยากร'}), h('ul',{style:'padding-left:18px;font-size:14px;color:var(--bone-dim)'},
     h('li',null, T('Max HP = 10 + VIT Mod + STR Mod · Max MP = 10 + INF Mod + INT Mod')),
     h('li',null, T('Toughness = ((Raw VIT + Raw STR)/10) + 1 · Max Sanity = 5 + INF Mod')),
     h('li',null, T('Passive PER = 7 + PER Mod · Capacity = STR × 3 (Medium) / ×4 (Large) / ×5 (Huge)')),
-    h('li',null, T('Mod = (ค่าพลัง / 2) - 5 ปัดลง ช่วง -5 ถึง +5')))));
+    h('li',null, T('Mod = (ค่าพลัง / 2) - 5 ปัดลง ช่วง -5 ถึง +5')),
+    h('li',null, T('Initiative = PER Mod · Reflex = (AGI Mod/2)+1 · Might = (STR Mod/2)+1 · Sight = (PER Mod/2)+1 · Parry Dice เริ่ม 0 (+1 ต่อโล่) · Toughness: Large +1, Huge +2 คงที่ตลอดชีวิต ยกด้วยอุปกรณ์เท่านั้น')))));
   root.append(g);
 }
 
