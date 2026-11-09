@@ -733,6 +733,7 @@ main{position:relative}
 .gridmap.nightvision .cell.insight:not(.fog){filter:grayscale(1) brightness(1.05) contrast(1.1)}
 .gridmap.nightvision .cell.nosight:not(.fog){filter:grayscale(1) brightness(.3)}
 .gridmap .cell.insight:not(.fog){box-shadow:inset 0 0 0 1px rgba(212,168,74,.18)}
+.gtok .climbbadge{position:absolute;left:-6px;bottom:-6px;font-size:11px;line-height:1;z-index:2;filter:drop-shadow(0 1px 2px #000)}
 .gtok .initbadge{position:absolute;top:-6px;right:-6px;font-size:10px;line-height:1;background:var(--gold);color:#1a1206;border-radius:999px;padding:2px 4px;font-weight:700;z-index:2}
 .gtok.water{box-shadow:0 0 0 2px #2b5e8a,0 0 10px rgba(43,94,138,.9)}.gtok.water img{filter:saturate(.7) brightness(.85)}
 .gridwrap{position:relative;max-width:720px}.gridwrap .mapimg{position:absolute;background-size:100% 100%;background-repeat:no-repeat;pointer-events:none;border-radius:4px;z-index:1}
@@ -2854,12 +2855,12 @@ function openIpShop(c, onChange){
 const MAP_W = 20, MAP_H = 20, CELL_M = 2; // 1 ช่อง = 2 เมตร
 const TILE = {
   '.': {th:'พื้น', pass:1},        ',': {th:'หญ้าสูง (กำบัง)', pass:1, cover:1},
-  'T': {th:'ต้นไม้', pass:0, opaque:1},      'W': {th:'น้ำลึก (ว่าย)', pass:3, swim:1},        'w': {th:'น้ำตื้น (ช้า)', pass:2},
+  'T': {th:'ต้นไม้', pass:0, opaque:1, climb:1},      'W': {th:'น้ำลึก (ว่าย)', pass:3, swim:1},        'w': {th:'น้ำตื้น (ช้า)', pass:2},
   'R': {th:'หิน/ผนัง', pass:0, opaque:1},    'r': {th:'เศษหิน (ช้า)', pass:2},   '=': {th:'ถนน', pass:1},
   'F': {th:'พื้นอาคาร', pass:1},   '#': {th:'กำแพง', pass:0, opaque:1},         'D': {th:'ประตู', pass:1},
   'S': {th:'ทราย', pass:1},        's': {th:'หิมะ (ช้า)', pass:2},     'B': {th:'สะพาน', pass:1},
-  'H': {th:'บ้าน', pass:0, opaque:1},        'M': {th:'โคลน (ช้า)', pass:2},     'C': {th:'ขอบหน้าผา', pass:0},
-  'P': {th:'เสา', pass:0, opaque:1},         'L': {th:'ลาวา (อันตราย)', pass:2, danger:1}, '~': {th:'เหว', pass:0},
+  'H': {th:'บ้าน', pass:0, opaque:1},        'M': {th:'โคลน (ช้า)', pass:2},     'C': {th:'ขอบหน้าผา', pass:0, cling:1},
+  'P': {th:'เสา', pass:0, opaque:1, climb:1}, 'L': {th:'ลาวา (อันตราย)', pass:2, danger:1}, '~': {th:'เหว', pass:0, cling:1},
   'G': {th:'หลุมศพ (กำบัง)', pass:1, cover:1}, 'A': {th:'แท่นบูชา', pass:1}, 'X': {th:'กองไฟ', pass:0},
 };
 const MAP_KINDS = [
@@ -2926,6 +2927,9 @@ function generateMap(kind, seed){
 }
 function mapCell(map, x, y){ if (!map || !inb(x,y)) return 'R'; return map.cells[y*MAP_W + x] || '.'; }
 function setMapCell(map, x, y, ch){ if (!inb(x,y)) return; const a = map.cells.split(''); a[y*MAP_W+x] = ch; map.cells = a.join(''); }
+/* ปีนป่าย (ผู้ใช้เคาะ 9 พ.ย. 2026): ช่อง climb (ต้นไม้ เสา) และ cling (เหว ขอบหน้าผา) เข้าได้เฉพาะหมากที่ติ๊ก 🧗 ปีนป่าย · เกาะขอบเหว/หน้าผา = ติด Prone ตลอดเวลาที่อยู่ตรงนั้น */
+function cellClimbable(map, x, y){ const t = TILE[mapCell(map,x,y)]; return !!(t && (t.climb || t.cling)); }
+function cellCling(map, x, y){ const t = TILE[mapCell(map,x,y)]; return !!(t && t.cling); }
 function cellPassable(map, x, y){ const t = TILE[mapCell(map,x,y)]; return !!(t && t.pass); }
 /* ยืนได้ (ไม่ใช่น้ำลึก): ใช้ตอนวางหมากอัตโนมัติ */
 function cellStandable(map, x, y){ const t = TILE[mapCell(map,x,y)]; return !!(t && t.pass && !t.swim); }
@@ -3159,7 +3163,7 @@ function condChips(t, r, gm){
   const cs = t.conds||[]; if (!cs.length) return null;
   return h('div',{class:'conds'}, cs.map(c=>{ const g = GLOSSARY[c.id]||{};
     const chip = h('span',{class:'cond c-'+condClass(c.id), title:(g.th? g.th+': ' : '')+(g.text||'') + (gm? ' (คลิกชื่อเพื่อเอาออก)':'')});
-    chip.append(h('span',{class:'cl', onclick: gm ? (e)=>{ e.stopPropagation(); removeCond(t, r, c); } : null, text: condLabel(c, r)}));
+    chip.append(h('span',{class:'cl', onclick: gm ? (e)=>{ e.stopPropagation(); if (c.auto==='cling'){ toast('Prone นี้มาจากการเกาะขอบเหว/หน้าผา ย้ายหมากขึ้นมาก่อนถึงจะหาย'); return; } removeCond(t, r, c); } : null, text: condLabel(c, r) + (c.auto==='cling' ? ' (เกาะขอบ)' : '')}));
     if (gm && COND_STACK.has(c.id)) chip.append(h('button',{class:'cadj',title:'ลดระดับ 1',onclick:(e)=>{ e.stopPropagation(); adjustCond(t, r, c, -1); },text:'−'}), h('button',{class:'cadj',title:'เพิ่มระดับ 1',onclick:(e)=>{ e.stopPropagation(); adjustCond(t, r, c, +1); },text:'+'}));
     return chip; }));
 }
@@ -3276,6 +3280,7 @@ function renderTableInner(){
   if (!Table.localMode) for (const c of Store.chars) if (Store.isMine(c) && (c.roomIds||[]).includes(r.id) && !(r.tokens||[]).some(t=>t.charId===c.id)) Store.unshareFromRoom(c, r.id);
   // HP/Sanity ของหมากกับชีทต้องตรงกัน (ฝั่งที่แก้ล่าสุดชนะ) ถ้าหมากต้องอัปเดตตามชีท ให้บันทึกห้องแล้ววาดใหม่
   if (syncVitalsWithSheets(r) && !Table._vitalsSaving){ Table._vitalsSaving = true; Table.save(); Table._vitalsSaving = false; return; }
+  if (gm && enforceCling(r) && !Table._clingSaving){ Table._clingSaving = true; Table.save(); Table._clingSaving = false; return; } // เกาะขอบเหว = Prone เสมอ (GM เป็นคนเขียนห้อง)
   // header
   const gmKeyBtn = gm && r.gmKey ? h('button',{class:'small ghost',title:'รหัสสำหรับเข้าเป็น GM จากเครื่องอื่น',onclick:()=>{ modal(h('div',null, h('h3',{text:'รหัส GM ของห้องนี้'}), h('p',{class:'desc',text:'ใช้เมื่อคุณเปิดห้องจากเครื่องหรือเบราว์เซอร์อื่น: กด "เข้าเป็น GM" แล้วกรอกรหัสนี้ อย่าให้ผู้เล่นเห็น'}), h('div',{style:'font-family:var(--font-display);font-size:28px;letter-spacing:4px',text:r.gmKey}))); },text:'รหัส GM'}) : null;
   const becomeGm = !gm && r.gmKey ? h('button',{class:'small ghost',onclick:()=>{ const k=(prompt('กรอกรหัส GM ของห้องนี้')||'').trim().toUpperCase(); if(!k) return; if (k===r.gmKey){ rememberGmKey(r.id,k); toast('คุณเป็น GM ของห้องนี้แล้ว'); renderTable(); } else toast('รหัสไม่ถูกต้อง'); },text:'เข้าเป็น GM'}) : null;
@@ -3294,11 +3299,11 @@ function renderTableInner(){
   if (myChars.length){ const sel = h('select',null, myChars.map(c=>h('option',{value:c.id,text:c.name}))); addRow.append(sel, h('button',{class:'small primary',onclick:()=>placeCharacter(Store.get(sel.value), r),text:'วางตัวละครลงบอร์ด'})); }
   else addRow.append(h('span',{class:'dim',style:'font-size:13px',text:'ยังไม่มีตัวละครที่พร้อมเล่น สร้างในหน้า "สร้างตัวละคร" ก่อน'}));
   if (gm){ const nm=h('input',{placeholder:'ชื่อ NPC/ศัตรู',style:'width:150px'}); const hp=h('input',{type:'number',style:'width:64px',value:10,title:'HP สูงสุด'}); const ini=h('input',{type:'number',style:'width:56px',value:0,title:'Initiative (บวกกับ 2d6 ตอนจัดลำดับเทิร์น)'}); const nv=h('input',{type:'checkbox',title:'มองเห็นในความมืด (Dark Vision)'});
-    addRow.append(nm, h('label',{class:'fld'}, h('span',{text:'HP สูงสุด'}), hp), h('label',{class:'fld'}, h('span',{text:'Initiative'}), ini), h('label',{class:'fld chk',title:'มองเห็นในความมืด (Dark Vision) ไม่ติดตาบอดในที่มืด'}, nv, h('span',{text:'Dark Vision'})), h('button',{class:'small',onclick:()=>{ const n=nm.value.trim()||'ศัตรู'; const pos = freeCell(r.map, r.tokens, [0,1,2,3]); r.tokens.push({id:uid(), name:n, kind:'npc', x:pos.x, y:pos.y, hp:+hp.value||10, hpMax:+hp.value||10, san:0, sanMax:0, init:+ini.value||0, hidden:true, note:'', desc:'', nv: nv.checked, torch:false, aquatic:false, inWater:false}); Table.save(); },text:'+ NPC (ซ่อนไว้ก่อน)'})); }
+    addRow.append(nm, h('label',{class:'fld'}, h('span',{text:'HP สูงสุด'}), hp), h('label',{class:'fld'}, h('span',{text:'Initiative'}), ini), h('label',{class:'fld chk',title:'มองเห็นในความมืด (Dark Vision) ไม่ติดตาบอดในที่มืด'}, nv, h('span',{text:'Dark Vision'})), h('button',{class:'small',onclick:()=>{ const n=nm.value.trim()||'ศัตรู'; const pos = freeCell(r.map, r.tokens, [0,1,2,3]); r.tokens.push({id:uid(), name:n, kind:'npc', x:pos.x, y:pos.y, hp:+hp.value||10, hpMax:+hp.value||10, san:0, sanMax:0, init:+ini.value||0, hidden:true, note:'', desc:'', nv: nv.checked, torch:false, aquatic:false, inWater:false, climb:false}); Table.save(); },text:'+ NPC (ซ่อนไว้ก่อน)'})); }
   left.append(addRow);
   // ---- แผนที่ต่อสู้ 20×20 ----
   left.append(mapPanel(r, gm));
-  left.append(h('p',{class:'dim',style:'font-size:12px;margin-top:8px',text:`หนึ่งช่องคือ ${CELL_M} เมตร ช่องที่ติดกัน (รวมทแยง) คือเขตปะทะ ไม่เกิน 25 เมตรคือเขตใกล้เคียง ไกลกว่านั้นคือเขตไกล จากใกล้เคียงเข้าปะทะใช้ 1 Swift ถอยออกจากปะทะก็ 1 Swift แต่โดนโจมตีฉวยโอกาส จากใกล้เคียงไปไกลใช้ Swift บวก 1 AP ช่องเดินช้า (น้ำตื้น หิมะ โคลน เศษหิน) นับเป็นสองช่อง น้ำลึกว่ายได้แต่เสียเทิร์นที่ลงไป และโจมตีไม่ได้จนกว่าจะขึ้นฝั่ง (สัตว์น้ำยกเว้น) · ลากหมากเพื่อย้าย คลิกหมากเพื่อดูโซนและระยะมองเห็น`}));
+  left.append(h('p',{class:'dim',style:'font-size:12px;margin-top:8px',text:`หนึ่งช่องคือ ${CELL_M} เมตร ช่องที่ติดกัน (รวมทแยง) คือเขตปะทะ ไม่เกิน 25 เมตรคือเขตใกล้เคียง ไกลกว่านั้นคือเขตไกล จากใกล้เคียงเข้าปะทะใช้ 1 Swift ถอยออกจากปะทะก็ 1 Swift แต่โดนโจมตีฉวยโอกาส จากใกล้เคียงไปไกลใช้ Swift บวก 1 AP ช่องเดินช้า (น้ำตื้น หิมะ โคลน เศษหิน) นับเป็นสองช่อง น้ำลึกว่ายได้แต่เสียเทิร์นที่ลงไป และโจมตีไม่ได้จนกว่าจะขึ้นฝั่ง (สัตว์น้ำยกเว้น) · ต้นไม้ เสา เหว และขอบหน้าผาเข้าได้เฉพาะหมากที่ติ๊ก 🧗 ปีนป่าย เกาะขอบเหวหรือหน้าผาอยู่ = ติด Prone ตลอด · ลากหมากเพื่อย้าย คลิกหมากเพื่อดูโซนและระยะมองเห็น`}));
   // หน้าปัด: ลำดับเทิร์นและหมาก + หมากที่เลือก (ฝังคอลัมน์ขวา กด ⇱ ปลดลอยได้ ปิดไม่ได้)
   right.append(h('div',{style:'margin-bottom:12px'}, twinDock(r, gm)));
   // clocks
@@ -3329,7 +3334,7 @@ async function placeCharacter(c, r){
   if (r.tokens.some(t=>t.charId===c.id)){ toast('ตัวละครนี้อยู่บนบอร์ดแล้ว'); return; }
   const d = compute(c); const thumb = await makeThumb(c.portrait);
   const pos = freeCell(r.map, r.tokens, [16,17,18,19]);
-  r.tokens.push({id:uid(), name:c.name, kind:'pc', charId:c.id, ownerId:Store.me||'local', ownerName: Store.displayName||'', x:pos.x, y:pos.y, hp:(c.current&&c.current.hp)??d.hp, hpMax:d.hp, san:(c.current&&c.current.sanity)??d.sanity, sanMax:d.sanity, tough: Object.assign({}, (c.current&&c.current.tough)||{}), init:d.initiative, hidden:false, note:'', desc:'', thumb: thumb||null, nv: charHasNightVision(c), torch:false, aquatic:false, inWater:false, vitalsAt:(c.current&&c.current.at)||Date.now()});
+  r.tokens.push({id:uid(), name:c.name, kind:'pc', charId:c.id, ownerId:Store.me||'local', ownerName: Store.displayName||'', x:pos.x, y:pos.y, hp:(c.current&&c.current.hp)??d.hp, hpMax:d.hp, san:(c.current&&c.current.sanity)??d.sanity, sanMax:d.sanity, tough: Object.assign({}, (c.current&&c.current.tough)||{}), init:d.initiative, hidden:false, note:'', desc:'', thumb: thumb||null, nv: charHasNightVision(c), torch:false, aquatic:false, inWater:false, climb:false, vitalsAt:(c.current&&c.current.at)||Date.now()});
   Table.save(); Table.post({kind:'sys', who:'', text:`${c.name} เข้าร่วมฉาก`});
   Store.shareToRoom(c, r.id);
 }
@@ -3484,7 +3489,7 @@ function tokBody(r, gm){
   const box = h('div',{class:'twin-tok'});
   const eater = t.inside ? r.tokens.find(o=>o.id===t.inside) : null;
   box.append(h('div',{class:'row',style:'gap:8px;align-items:center'}, t.thumb ? h('img',{class:'av big',src:t.thumb,alt:''}) : h('div',{class:'av big',text:(t.name||'?').slice(0,2)}),
-    h('div',{style:'flex:1;min-width:0'}, h('div',{style:'font-weight:600'}, t.name, t.hidden? h('span',{class:'dim',text:' (ซ่อน)'}):null), h('div',{class:'mini'}, tag(t.kind==='pc' ? 'ตัวละคร' : 'NPC', t.kind==='pc'?'stat':'neg'), t.ownerName? h('span',{class:'dim',text:t.ownerName}):null, eater ? h('span',{class:'tag neg',text:'🦷 อยู่ในตัว '+eater.name}) : h('span',{class:'num dim',text:`(${t.x},${t.y})`}), t.inWater? tag('🌊 ในน้ำลึก','warn'):null, t.aquatic? tag('🐟 สัตว์น้ำ','stat'):null, t.nv? tag('👁 Dark Vision'):null, t.torch? tag('🔥 แหล่งแสง','prop'):null))));
+    h('div',{style:'flex:1;min-width:0'}, h('div',{style:'font-weight:600'}, t.name, t.hidden? h('span',{class:'dim',text:' (ซ่อน)'}):null), h('div',{class:'mini'}, tag(t.kind==='pc' ? 'ตัวละคร' : 'NPC', t.kind==='pc'?'stat':'neg'), t.ownerName? h('span',{class:'dim',text:t.ownerName}):null, eater ? h('span',{class:'tag neg',text:'🦷 อยู่ในตัว '+eater.name}) : h('span',{class:'num dim',text:`(${t.x},${t.y})`}), t.inWater? tag('🌊 ในน้ำลึก','warn'):null, t.aquatic? tag('🐟 สัตว์น้ำ','stat'):null, t.climb? tag('🧗 ปีนป่าย','stat'):null, cellClimbable(r.map, t.x, t.y) && !t.inside ? tag((cellCling(r.map,t.x,t.y) ? 'เกาะ' : 'อยู่บน') + (TILE[mapCell(r.map,t.x,t.y)]||{}).th, 'warn') : null, t.nv? tag('👁 Dark Vision'):null, t.torch? tag('🔥 แหล่งแสง','prop'):null))));
   // ค่าชีวิต
   const vital = (label, key, maxKey, cls)=>{ const v = t[key]||0, mx = t[maxKey]||0; return h('div',{class:'vital'}, h('span',{class:'vl '+cls,text:label}), mine ? h('button',{class:'small',title:label+' −1',onclick:()=>{ tokenVitals(t, key, v-1); Table.save(); }},'−') : null, h('b',{class:'num',text:`${v} / ${mx}`}), mine ? h('button',{class:'small',title:label+' +1',onclick:()=>{ tokenVitals(t, key, Math.min(mx, v+1)); Table.save(); }},'+') : null, mine ? h('input',{type:'number',value:v,style:'width:56px',onchange:(e)=>{ tokenVitals(t, key, +e.target.value||0); Table.save(); }}) : null); };
   // NPC: Toughness ค่าเดียว GM ลดได้จากโต๊ะ (ตัวละครผู้เล่นใช้ตารางต่ออวัยวะในแผงต่อสู้ด้านล่าง)
@@ -3502,6 +3507,7 @@ function tokBody(r, gm){
     ctl.append(h('button',{class:'small ghost'+(t.torch?' on':''),title:'ถือแหล่งแสง (คบเพลิง ตะเกียง) ส่องรอบตัว 4 ช่องในที่มืด',onclick:()=>{ t.torch=!t.torch; Table.save(); if (!t.hidden) Table.post({kind:'sys',who:'',text:`${t.name} ${t.torch?'จุดแหล่งแสง':'ดับแหล่งแสง'}`}); },text:'🔥 แสง'}));
     if (gm) ctl.append(h('button',{class:'small ghost'+(t.nv?' on':''),title:'มองเห็นในความมืด (Dark Vision)',onclick:()=>{ t.nv=!t.nv; Table.save(); },text:'👁 Dark Vision'}));
     if (gm) ctl.append(h('button',{class:'small ghost'+(t.aquatic?' on':''),title:'สัตว์น้ำ/เงือก: อยู่ในน้ำลึกแล้วยังโจมตีได้และไม่เสียเทิร์น',onclick:()=>{ t.aquatic=!t.aquatic; Table.save(); },text:'🐟 สัตว์น้ำ'}));
+    ctl.append(h('button',{class:'small ghost'+(t.climb?' on':''),title:'ปีนป่าย: เข้าช่องต้นไม้ เสา เหว และขอบหน้าผาได้ (เกาะขอบเหว/หน้าผา = Prone ตลอดเวลาที่เกาะ)',onclick:()=>{ t.climb=!t.climb; Table.save(); if (!t.hidden) Table.post({kind:'sys',who:'',text:`${t.name} ${t.climb?'เตรียมปีนป่าย 🧗':'เลิกปีนป่าย'}`}); },text:'🧗 ปีนป่าย'}));
     if (gm && t.charId) ctl.append(h('button',{class:'small ghost',title:'ใส่ไอเทมลงกระเป๋าของตัวละครนี้',onclick:()=>giveItemModal(t, r),text:'🎁 ไอเทม'}));
     if (gm) ctl.append(h('button',{class:'small ghost',title:t.hidden?'เปิดเผยให้ผู้เล่นเห็น':'ซ่อนจากผู้เล่น',onclick:()=>{t.hidden=!t.hidden; Table.save(); if(!t.hidden) Table.post({kind:'sys',who:'',text:`${t.name} ปรากฏตัวที่ (${t.x},${t.y})`});},text:t.hidden?'👁 เปิดเผย':'🙈 ซ่อน'}));
     ctl.append(h('button',{class:'small ghost',style:'margin-left:auto',title: gm ? 'เอาออกจากบอร์ด (ลบสำเนาชีทในห้องด้วย)' : 'ถอนตัวละครออกจากบอร์ด (GM จะไม่เห็นชีทอีก)',onclick:()=>{ if (!confirm(`เอา ${t.name} ออกจากบอร์ด?`)) return; detachToken(r, t); r.tokens=r.tokens.filter(x=>x!==t); r.enc.order=(r.enc.order||[]).filter(x=>x!==t.id); if (Table.sel===t.id) Table.sel=null; dropTokenCopy(r, t); Table.save(); },text:'✕ เอาออก'}));
@@ -3576,12 +3582,24 @@ Table.attackBlocked = function(c){ const r = this.room; if (!r || !c) return nul
 /* ---- เคลื่อนหมาก (ลากวาง): ตรวจพื้น ข้อห้ามจากสถานะ หมากซ้อน น้ำลึก แล้วบันทึก ---- */
 function tryMoveToken(r, t, x, y, gm, fogged){
   const tile = TILE[mapCell(r.map,x,y)]||TILE['.'];
-  if (!tile.pass){ toast('ผ่านช่องนี้ไม่ได้ ('+tile.th+')'); return false; }
+  if (!tile.pass){
+    if (!(tile.climb || tile.cling)){ toast('ผ่านช่องนี้ไม่ได้ ('+tile.th+')'); return false; }
+    if (!t.climb){ toast(`ต้องติ๊ก 🧗 ปีนป่าย ให้ ${t.name} ก่อน ถึงจะเข้า${tile.th}ได้`); return false; } // ผู้ใช้เคาะ 9 พ.ย. 2026
+  }
   const block = moveBlocked(r, t, {x,y}); if (block){ if (!gm || t.inside){ toast(block); return false; } toast('GM ย้ายข้ามข้อห้าม: '+block); }
   if (r.tokens.some(o=>o!==t && !o.inside && o.x===x && o.y===y)){ toast(fogged ? 'มีอะไรบางอย่างอยู่ตรงนั้นในความมืด เดินเข้าไปไม่ได้' : 'มีหมากอยู่ตรงนั้นแล้ว'); return false; }
-  const dist = cellDist(t,{x,y}); const wasWater = !!t.inWater; t.x=x; t.y=y; t.inWater = !!tile.swim; syncDevoured(r, t); Table.save();
-  if (!t.hidden){ Table.post({kind:'sys',who:'',text:`${t.name} เคลื่อนที่ ${dist} ช่อง ไป (${x},${y})${tile.pass===2?' ('+tile.th+')':''}${tile.swim? ' ลงน้ำลึก' : (wasWater ? ' ขึ้นจากน้ำ' : '')}`}); if (tile.swim && !wasWater && !t.aquatic) Table.post({kind:'sys',who:'',text:`${t.name} ว่ายอยู่ในน้ำลึก: เสียเทิร์นนี้ไปกับการว่าย และประกาศโจมตีไม่ได้จนกว่าจะขึ้นฝั่ง`}); }
+  const dist = cellDist(t,{x,y}); const wasWater = !!t.inWater; const wasCling = cellCling(r.map, t.x, t.y); t.x=x; t.y=y; t.inWater = !!tile.swim; syncDevoured(r, t);
+  const clingNow = !!tile.cling; enforceCling(r); Table.save();
+  if (!t.hidden){ Table.post({kind:'sys',who:'',text:`${t.name} เคลื่อนที่ ${dist} ช่อง ไป (${x},${y})${tile.pass===2?' ('+tile.th+')':''}${tile.swim? ' ลงน้ำลึก' : (wasWater ? ' ขึ้นจากน้ำ' : '')}${tile.climb ? ' 🧗 ปีนขึ้น'+tile.th : ''}${clingNow ? ' 🧗 เกาะ'+tile.th : ''}`}); if (tile.swim && !wasWater && !t.aquatic) Table.post({kind:'sys',who:'',text:`${t.name} ว่ายอยู่ในน้ำลึก: เสียเทิร์นนี้ไปกับการว่าย และประกาศโจมตีไม่ได้จนกว่าจะขึ้นฝั่ง`}); if (clingNow && !wasCling) Table.post({kind:'sys',who:'',text:`${t.name} เกาะ${tile.th}อยู่: นับว่าติด 🛌 Prone ตลอดเวลาที่เกาะ`}); else if (wasCling && !clingNow) Table.post({kind:'sys',who:'',text:`${t.name} ปีนขึ้นมาจากขอบแล้ว พ้นจาก Prone`}); }
   return true;
+}
+/* เกาะขอบเหว/หน้าผา = Prone เสมอ: เติม Prone (auto) ให้หมากที่อยู่บนช่อง cling และถอด Prone ที่เป็น auto เมื่อออกมาแล้ว คืน true ถ้ามีการเปลี่ยน */
+function enforceCling(r){
+  let changed = false;
+  for (const t of r.tokens||[]){ if (t.inside) continue; const on = cellCling(r.map, t.x, t.y); t.conds = t.conds||[]; const auto = t.conds.find(c=>c.id==='Prone' && c.auto==='cling'); const any = t.conds.find(c=>c.id==='Prone');
+    if (on && !any){ t.conds.push({id:'Prone', turns:null, at:Date.now(), auto:'cling'}); changed = true; }
+    else if (!on && auto){ t.conds = t.conds.filter(c=>c!==auto); changed = true; } }
+  return changed;
 }
 function cellAtPoint(grid, cx, cy){ const el = document.elementFromPoint(cx, cy); const cell = el && el.closest ? el.closest('.cell') : null; return cell && grid.contains(cell) ? cell : null; }
 /* ลากหมากด้วย pointer: ขยับเกิน 6px = ลาก (ปล่อยบนช่อง = ย้าย) · ปล่อยโดยไม่ขยับ = เลือกหมาก (โชว์โซนและระยะมองเห็น) */
@@ -3660,6 +3678,7 @@ function mapPanel(r, gm){
       if (conds.length) tk.append(h('div',{class:'cbadges'}, conds.slice(0,3).map(c=>h('span',{text:condIcon(c.id)+(COND_STACK.has(c.id)? (c.lv||1) : '')}))));
       if (inside.length) tk.append(h('span',{class:'devbadge',text:'🦷'+inside.length}));
       if (t.torch) tk.append(h('span',{class:'torchbadge',text:'🔥'}));
+      if (cellClimbable(map, x, y)) tk.append(h('span',{class:'climbbadge',title: cellCling(map,x,y) ? 'เกาะขอบ (Prone)' : 'ปีนอยู่',text:'🧗'}));
       if (r.enc.active && t.initRoll!=null) tk.append(h('span',{class:'initbadge num',title:'ลำดับ Initiative',text:String(t.initRoll)}));
       if (gm || t.ownerId===Store.me) enableTokenDrag(tk, t, r, grid, gm, vis); else tk.addEventListener('click', (e)=>{ e.stopPropagation(); selectToken(t, r, gm); });
       cell.append(tk); }
