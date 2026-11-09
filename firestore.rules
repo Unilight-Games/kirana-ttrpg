@@ -68,5 +68,10 @@ service cloud.firestore {
       allow create: if signedIn() && (isDev() || request.resource.data.ownerId == request.auth.uid);
       allow update, delete: if signedIn() && (isDev() || resource.data.ownerId == request.auth.uid);
     }
+    // ภาพประกอบแผนที่ (v1.6): ของเจ้าของเท่านั้น ไม่ติดไปกับการเผยแพร่
+    match /mapimages/{id} {
+      allow read, update, delete: if signedIn() && (isDev() || resource.data.ownerId == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
+    }
   }
 }
