@@ -726,6 +726,13 @@ main{position:relative}
 .gtok.grab{cursor:grab}.gtok.lifting{opacity:.35}.gtok.ghost{box-shadow:0 10px 24px rgba(0,0,0,.7),0 0 0 2px var(--gold)}.gtok.ghost .hpbar{display:none}
 .cell.drop{outline:2px solid var(--gold)!important;z-index:3}
 .cell.nosight{filter:brightness(.5) saturate(.6)}.cell.nosight .gtok{opacity:.5}
+/* v1.9: ในฉากแสงสลัว/มืด/หมอกทมิฬ ฟิลเตอร์ของฉาก (.dark-scene/.dim-scene/.nightvision) เคยทับ .nosight จนมองไม่เห็นระยะ → ให้ช่องในระยะสว่างปกติ ช่องพ้นระยะมืดลงชัดเจน */
+.gridmap.dim-scene .cell.insight:not(.fog),.gridmap.dark-scene .cell.insight:not(.fog){filter:brightness(1.02) saturate(1)}
+.gridmap.dim-scene .cell.nosight:not(.fog){filter:brightness(.42) saturate(.5)}
+.gridmap.dark-scene .cell.nosight:not(.fog){filter:brightness(.3) saturate(.4)}
+.gridmap.nightvision .cell.insight:not(.fog){filter:grayscale(1) brightness(1.05) contrast(1.1)}
+.gridmap.nightvision .cell.nosight:not(.fog){filter:grayscale(1) brightness(.3)}
+.gridmap .cell.insight:not(.fog){box-shadow:inset 0 0 0 1px rgba(212,168,74,.18)}
 .gtok .initbadge{position:absolute;top:-6px;right:-6px;font-size:10px;line-height:1;background:var(--gold);color:#1a1206;border-radius:999px;padding:2px 4px;font-weight:700;z-index:2}
 .gtok.water{box-shadow:0 0 0 2px #2b5e8a,0 0 10px rgba(43,94,138,.9)}.gtok.water img{filter:saturate(.7) brightness(.85)}
 .gridwrap{position:relative;max-width:720px}.gridwrap .mapimg{position:absolute;background-size:100% 100%;background-repeat:no-repeat;pointer-events:none;border-radius:4px;z-index:1}
@@ -2883,6 +2890,15 @@ const LIGHTS = [ ['bright','สว่างจ้า'], ['low','แสงหม�
 const LIGHT_NOTE = { bright:'ทุกคนเห็นชัด · Stealth ติด Disadvantage · อสูรทั่วไปไม่โผล่', low:'เห็นทั้งบอร์ด · มองเขตไกลอาจติด Disadvantage ตามที่ GM ประกาศ', dim:'ไม่มี Dark Vision เห็นถึง 25 ม. และติด Disadvantage ในการทอย PER ที่ใช้สายตา · Stealth ได้ Advantage', dark:'ไม่มี Dark Vision ตาบอด เห็นแค่ช่องติดตัว · Dark Vision เห็น 30 ม. เป็นเฉดเทา · กองไฟส่อง 8 ม. · ทุกคนซ่อนตัวได้', abyss:'ทุกคนเห็นแค่เขตปะทะ Dark Vision ไม่มีผล · แหล่งแสงส่องได้ 1 ช่อง · อยู่นานต้องทอย Sanity Check' };
 function lightLabel(id){ const l = LIGHTS.find(x=>x[0]===id); return l ? l[1] : LIGHTS[1][1]; }
 function visionCells(tok, light){ const nv = !!tok.nv; if (light==='dim') return nv ? Infinity : 12; if (light==='dark') return nv ? 15 : 1; if (light==='abyss') return 1; return Infinity; }
+/* คำบอกระยะมองเห็นของหมากตัวหนึ่งในแสงปัจจุบัน (ใช้ในตำนานใต้แผนที่และหน้าปัดหมาก) */
+function sightLabel(t, light){
+  const rad = visionCells(t, light); const lit = lightSourceCells(light); let s;
+  if (rad === Infinity) s = light==='dim' ? 'ทั้งบอร์ดตามเส้นสายตา (Dark Vision)' : 'ทั้งบอร์ดตามเส้นสายตา';
+  else if (rad <= 1) s = light==='abyss' ? '1 ช่อง = เขตปะทะเท่านั้น (หมอกทมิฬบังทุกคน Dark Vision ไม่ช่วย)' : '1 ช่อง = ช่องติดตัว (ตาบอดในความมืด ไม่มี Dark Vision)';
+  else s = `${rad} ช่อง (${rad===12 ? 'สุดเขตใกล้เคียง 25 ม.' : '~'+(rad*CELL_M)+' ม.'})${t.nv ? ' ด้วย Dark Vision' + (light==='dark' ? ' เห็นเป็นเฉดเทา' : '') : ''}`;
+  if (lit) s += ` · กองไฟหรือหมากที่ถือ 🔥 ส่องให้เห็นรอบจุดนั้น ${lit} ช่อง`;
+  return s;
+}
 function lightSourceCells(light){ return light==='abyss' ? 1 : (light==='dark' || light==='dim') ? 4 : 0; }
 /* คืน Set ของ 'x,y' ที่ผู้เล่นคนนี้มองเห็นจากหมากทุกตัวของตน (รัศมีตามแสง + เส้นสายตา) หรือ null = เห็นทั้งบอร์ด (GM หรือยังไม่มีหมากของตัวเอง) */
 function computeVisibility(r, me){
@@ -3415,6 +3431,7 @@ function tokBody(r, gm){
   const npcTough = (!t.charId && gm) ? h('div',{class:'vital'}, h('span',{class:'vl',text:'Toughness'}), h('button',{class:'small',title:'Toughness −1',onclick:()=>{ t.tgh = Math.max(0, (t.tgh??t.tghMax??1) - 1); if (t.tghMax==null) t.tghMax = Math.max(1, t.tgh+1); Table.save(); }},'−'), h('b',{class:'num'+((t.tgh??1)<=0?' bad':''),text: t.tgh==null ? (t.tghMax!=null ? `${t.tghMax} / ${t.tghMax}` : '- / -') : `${t.tgh} / ${t.tghMax??'-'}`}), h('button',{class:'small',title:'Toughness +1',onclick:()=>{ const mx = t.tghMax??1; t.tgh = Math.min(mx, (t.tgh??mx) + 1); if (t.tghMax==null) t.tghMax = mx; Table.save(); }},'+'), h('input',{type:'number',min:0,value:t.tghMax??'',placeholder:'สูงสุด',title:'Toughness สูงสุดของ NPC นี้',style:'width:64px',onchange:(e)=>{ const mx = Math.max(0, +e.target.value||0); t.tghMax = mx; if (t.tgh==null || t.tgh>mx) t.tgh = mx; Table.save(); }})) : (!t.charId && t.tghMax!=null ? h('div',{class:'vital'}, h('span',{class:'vl',text:'Toughness'}), h('b',{class:'num'+((t.tgh??1)<=0?' bad':''),text:`${t.tgh??t.tghMax} / ${t.tghMax}`})) : null);
   box.append(h('div',{class:'vitals'}, vital('HP','hp','hpMax','hp'), t.sanMax ? vital('Sanity','san','sanMax','san') : null, npcTough, h('div',{class:'vital'}, h('span',{class:'vl',text:'Init'}), h('b',{class:'num',text:signed(t.init||0)}), r.enc&&r.enc.active&&t.initRoll!=null ? h('span',{class:'dim',text:`ทอยได้ ${t.initRoll}`}) : null)));
   if (t.charId && t.kind==='pc') box.append(h('p',{class:'dim',style:'font-size:11px;margin:2px 0 0',text:'HP และ Sanity ซิงก์กับชีทของเจ้าของ ฝั่งที่แก้ล่าสุดเป็นค่าที่ใช้'}));
+  if (mine && !t.inside) box.append(h('p',{class:'dim sightrow',style:'font-size:12px;margin:4px 0 0'}, '👁 ระยะมองเห็น (', h('span',{text:lightLabel(r.light||'low')}), '): ', h('span',{text:sightLabel(t, r.light||'low')})));
   // สถานะ
   const condRow = h('div',{class:'row',style:'gap:6px;margin-top:6px;align-items:center'}, h('span',{class:'dim',style:'font-size:12px',text:'สถานะ'}), condChips(t, r, gm) || h('span',{class:'dim',style:'font-size:12px',text:'ไม่มี'}), gm ? h('button',{class:'small ghost',onclick:()=>condModal(t, r),text:'+ สถานะ'}) : null);
   box.append(condRow);
@@ -3569,7 +3586,7 @@ function mapPanel(r, gm){
     const ch = mapCell(map,x,y); const tile = TILE[ch]||TILE['.'];
     const fog = !!(vis && !vis.has(x+','+y));
     const cell = h('div',{class:'cell t-'+(ch.replace(/[^A-Za-z]/g, m=>({'.':'ground',',':'grass','=':'road','#':'wall','~':'chasm'}[m]||'ground')))+(fog?' fog':''),title: fog ? `(${x},${y}) มองไม่เห็น` : `(${x},${y}) ${tile.th}`,dataset:{x,y}});
-    if (selTok && !(selTok.x===x && selTok.y===y)){ const dist = cellDist(selTok,{x,y}); const band = rangeBand(dist); cell.classList.add('rng-'+band.id); if (sight && !fog && !sight.has(x+','+y)) cell.classList.add('nosight'); }
+    if (selTok && !(selTok.x===x && selTok.y===y)){ const dist = cellDist(selTok,{x,y}); const band = rangeBand(dist); cell.classList.add('rng-'+band.id); if (sight && !fog) cell.classList.add(sight.has(x+','+y) ? 'insight' : 'nosight'); }
     cell.onclick = ()=>{
       if (Table.brush && gm){ setMapCell(r.map, x, y, Table.brush); Table.save(); return; }
       if (byPos[x+','+y]) return; // หมากจัดการคลิกเอง (เลือก/ลาก)
@@ -3594,6 +3611,7 @@ function mapPanel(r, gm){
   // ตำนานพื้นที่ปรากฏ
   const used = [...new Set(map.cells.split(''))].filter(k=>TILE[k]);
   wrap.append(h('div',{class:'legend'}, used.map(k=>h('span',{class:'lg'}, h('i',{class:'sw t-'+(k.replace(/[^A-Za-z]/g, m=>({'.':'ground',',':'grass','=':'road','#':'wall','~':'chasm'}[m]||'ground')))}), TILE[k].th)), selTok ? h('span',{class:'lg dim',text:'· แดง = เขตปะทะ · ทอง = ใกล้เคียง · ช่องมืดลง = พ้นระยะมองเห็นของหมากที่เลือก'}) : null));
+  if (selTok && sight) wrap.append(h('p',{class:'dim sightnote',style:'font-size:12px;margin:6px 0 0'}, '👁 ระยะมองเห็นของ ', h('b',{text:selTok.name}), ` ใน${lightLabel(light)}: ${sightLabel(selTok, light)}`));
   if (vis && !gm) wrap.append(h('p',{class:'dim',style:'font-size:12px;margin:6px 0 0',text:`💡 ${lightLabel(light)}: ช่องมืดคือส่วนที่หมากของคุณมองไม่เห็น (กำแพง หิน บ้าน ต้นไม้ และเสา บังสายตา) ${light==='abyss' ? 'เห็นได้แค่ช่องติดตัว' : light==='dark' ? 'ถ้าไม่มี Dark Vision เห็นแค่ช่องติดตัว แหล่งแสง 🔥 ส่องรอบตัว 4 ช่อง' : light==='dim' ? 'เห็นได้ 12 ช่อง (25 ม.) ถ้าไม่มี Dark Vision' : ''}`}));
   return wrap;
 }
