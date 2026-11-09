@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kirana TTRPG Online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Taviraj:wght@500;600&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Taviraj:wght@500;600&family=Grenze+Gotisch:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   /* Kirana: โลกใต้ม่านมานา หมึกน้ำเงินดำ กระดูกซีด เลือดจันทร์ มานาเขียวน้ำแข็ง */
@@ -16,7 +16,7 @@
   --font-display:"Chakra Petch","IBM Plex Sans Thai",system-ui,sans-serif;
   --font-body:"IBM Plex Sans Thai","Sarabun",system-ui,sans-serif;
   --font-gothic:"Taviraj","IBM Plex Sans Thai",Georgia,serif;
-  --font-black:"UnifrakturMaguntia","Taviraj",Georgia,serif;
+  --font-black:"Grenze Gotisch","Taviraj",Georgia,serif;
   --velvet:rgba(58,13,19,.94); --velvet-2:rgba(32,7,11,.97); --brass:#b08a46; --parch:#f1e7d2;
   --radius:8px;
   /* layout: ซ้าย = งานหลัก (วิซาร์ด/ชีท/โต๊ะ), ขวา = แผงสรุป "ตอนนี้ได้อะไร" ติดตามทุกขั้น */
@@ -495,7 +495,7 @@ body.bg-map #bgfx{background:radial-gradient(circle at 30% 20%,rgba(79,209,197,.
 .card{background:rgba(20,27,36,.93)}
 .top{background:rgba(13,17,23,.86)}
 main{position:relative}
-.gothic{font-family:var(--font-black);letter-spacing:1px;color:var(--parch)}
+.gothic{font-family:var(--font-black);font-weight:600;letter-spacing:.5px;color:var(--parch)}
 .kicker{font-family:var(--font-gothic);font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
 
 /* ===== หน้าแรก: เนเมสไซอาร์ต้อนรับ ===== */
@@ -752,7 +752,8 @@ input,select,textarea{box-shadow:inset 0 2px 6px rgba(0,0,0,.45);border-color:#2
 input:focus,select:focus,textarea:focus{border-color:var(--gold)}
 nav a.active{background:transparent;box-shadow:inset 0 -2px 0 var(--gold);border-radius:0;color:var(--bone)}
 .top{border-bottom:1px solid #3a2f1c;box-shadow:0 1px 0 rgba(212,168,74,.12)}
-.brand{font-family:var(--font-black);font-weight:400;font-size:22px;letter-spacing:.5px;color:#e9dfc8;text-shadow:0 0 14px rgba(212,168,74,.25)}
+.brand{font-family:var(--font-black);font-weight:600;font-size:23px;letter-spacing:.3px;color:#e9dfc8;text-shadow:0 0 14px rgba(212,168,74,.25)}
+.brand .brand-sub{font-family:var(--font-display);font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:600;margin-left:2px;padding-top:4px}
 .modal .box{border:1px solid #5a4a22;box-shadow:0 30px 70px rgba(0,0,0,.8),0 0 0 1px rgba(212,168,74,.18),inset 0 0 0 1px rgba(212,168,74,.08);background:linear-gradient(180deg,#171d26,#0f141b)}
 .modal .box h3,.modal .box h2{font-family:var(--font-gothic)}
 .stephead p{font-family:var(--font-body)}
@@ -761,12 +762,71 @@ table.t th{font-family:var(--font-display);font-size:11.5px;letter-spacing:.8px;
 .view.active>.stephead:first-child{padding-bottom:10px;border-bottom:1px solid rgba(212,168,74,.14);margin-bottom:14px}
 .home-h{font-family:var(--font-gothic)}.featcard h4{font-family:var(--font-gothic);font-size:16px}
 .tag{background:rgba(0,0,0,.25)}
+/* ===== v1.7: แท็บทอยเต๋าในห้อง หน้าปัดคงที่ Toughness บนโต๊ะ ชื่อเว็บอ่านง่าย ชีทสีกระดาษ (ผู้ใช้เคาะ 9 พ.ย. 2026) ===== */
+#twins .hud-dock{pointer-events:auto}
+#twins .rdock{right:14px;top:auto;bottom:24px;z-index:3}
+#twins .rdock .badge.hidden{display:none}
+#twins .hud-win.twin-dice{width:520px}
+#twins .twin-dice .hud-dice{padding:0}#twins .twin-dice .hud-dice h3{display:none}
+.twin-dice .lockbanner{margin-top:6px}
+.cp-t td .tadj{padding:0 6px;font-size:12px;line-height:1.3;margin:0 3px;min-width:22px}
+.cp-t td.bad span{color:var(--bad);font-weight:700}
+.chat h3 .rollbtn{font-family:var(--font-body);font-weight:400}
+.vital .vl{min-width:64px}
+@media (max-width:760px){#twins .rdock{bottom:12px;right:8px}#twins .hud-win.twin-dice{width:auto}}
+
+/* ---- ชีทตัวละครเป็นกระดาษ: สีนวลครีม ตัวหนังสือสีหมึก การ์ดและหน้าต่าง HUD ของชีทใช้ชุดสีเดียวกัน ส่วนอื่นของเว็บยังเป็นกอธิคมืด ---- */
+#v-sheet,#hud .hud-win{
+  --ink:#fbf6ea; --ink-2:#f3ead6; --ink-3:#e9dec5; --line:#d6c7a3; --line-2:#bba97e;
+  --bone:#2b2318; --bone-dim:#5c4e3a; --bone-mute:#86755a;
+  --blood:#9c2f23; --blood-2:#b9412f; --mana:#157a73; --mana-2:#1f9088; --gold:#8d6b1e;
+  --ok:#2e7d46; --warn:#a26f10; --bad:#b9412f;
+  color:var(--bone); color-scheme:light;
+}
+#v-sheet .sc-STR{--sc:#c0392b}#v-sheet .sc-AGI{--sc:#2e8b3e}#v-sheet .sc-VIT{--sc:#c9680f}#v-sheet .sc-PER{--sc:#9c7a0a}#v-sheet .sc-INF{--sc:#7a4bd6}#v-sheet .sc-INT{--sc:#1e73be}
+#hud .hud-win .sc-STR{--sc:#c0392b}#hud .hud-win .sc-AGI{--sc:#2e8b3e}#hud .hud-win .sc-VIT{--sc:#c9680f}#hud .hud-win .sc-PER{--sc:#9c7a0a}#hud .hud-win .sc-INF{--sc:#7a4bd6}#hud .hud-win .sc-INT{--sc:#1e73be}
+#v-sheet.active{padding:16px 18px 24px;border-radius:12px;border:1px solid #cdbb92;background:radial-gradient(ellipse at 18% 8%,rgba(255,255,255,.55),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(140,110,60,.16),transparent 60%),linear-gradient(180deg,#f5ecd9,#eee3cb);box-shadow:0 24px 60px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.55),inset 0 0 60px rgba(120,90,40,.10)}
+#v-sheet.active>.stephead:first-child{border-bottom-color:rgba(120,90,40,.25)}
+#v-sheet .card,#v-sheet .cs .box{background:rgba(251,246,234,.85);border-color:var(--line);box-shadow:inset 0 0 0 1px rgba(141,107,30,.06),0 3px 10px rgba(80,60,20,.10);background-image:none}
+#v-sheet .card::before{border-color:rgba(141,107,30,.14)}
+#v-sheet .card.sel::before{border-color:rgba(21,122,115,.35)}
+#v-sheet .statbox,#v-sheet .kin-stats .s{background:#fbf6ea}
+#v-sheet .tag,#hud .hud-win .tag{background:rgba(141,107,30,.06)}
+#v-sheet button,#hud .hud-win button{background:linear-gradient(180deg,#fdf9f0,#ebe0c8);border-color:#b9a77f;color:var(--bone);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 1px 2px rgba(80,60,20,.15)}
+#v-sheet button:hover,#hud .hud-win button:hover{border-color:var(--gold);color:#1a140c}
+#v-sheet button.primary,#hud .hud-win button.primary{background:linear-gradient(180deg,#c84a3a,#9c2f23);border-color:#b9412f;color:#fff8ee;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 6px rgba(156,47,35,.25)}
+#v-sheet button.primary:hover,#hud .hud-win button.primary:hover{background:linear-gradient(180deg,#d65a49,#ad3528)}
+#v-sheet button.ghost,#hud .hud-win button.ghost{background:transparent;box-shadow:none}
+#v-sheet input,#v-sheet select,#v-sheet textarea,#hud .hud-win input,#hud .hud-win select,#hud .hud-win textarea{background:#fdf9f0;color:var(--bone);border-color:#bba97e;box-shadow:inset 0 1px 3px rgba(80,60,20,.14)}
+#v-sheet input::placeholder,#v-sheet textarea::placeholder,#hud .hud-win input::placeholder,#hud .hud-win textarea::placeholder{color:#a08f70}
+#v-sheet ::-webkit-scrollbar-track,#hud .hud-win ::-webkit-scrollbar-track{background:#e9dfc6}#v-sheet ::-webkit-scrollbar-thumb,#hud .hud-win ::-webkit-scrollbar-thumb{background:#bba97e;border-color:#e9dfc6}
+#v-sheet .die{background:#2b2318;color:#fbf6ea}
+#v-sheet .ptable .lw{color:#c9680f}#v-sheet .ptable .rc{color:#1e73be}
+#v-sheet .wslot,#hud .hud-win .wslot{background:linear-gradient(180deg,rgba(156,47,35,.08),rgba(90,40,30,.16));border-color:#b9a77f}
+#v-sheet .wslot.shield,#hud .hud-win .wslot.shield{background:linear-gradient(180deg,rgba(21,122,115,.08),rgba(20,60,80,.16))}
+#v-sheet .wslot .nm,#hud .hud-win .wslot .nm{color:var(--bone)}#v-sheet .wslot .sl,#hud .hud-win .wslot .sl{color:#7a5a2a}
+#v-sheet .wslot.filled,#hud .hud-win .wslot.filled{border-color:#8d6b1e}
+#v-sheet .term{border-bottom-color:var(--mana)}
+#v-sheet table.t th{color:var(--gold)}
+#v-sheet .roombar{color:var(--parch)}
+#v-sheet .resbar .bar,#v-sheet .bar{background:#e4d8bb}
+#hud .hud-win{background:linear-gradient(180deg,#f7efdc,#ebe0c6);border-color:#b08a46;box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 1px rgba(141,107,30,.18)}
+#hud .hud-win .hud-head{border-bottom-color:#cdbb92;background:linear-gradient(90deg,rgba(141,107,30,.14),transparent)}
+#hud .hud-win .tile{border-color:#c9b891;background:linear-gradient(160deg,#fdf9f0,#eee3cb);box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),0 2px 6px rgba(80,60,20,.15)}
+#hud .hud-win .tile.sel{box-shadow:0 0 0 2px rgba(141,107,30,.35),0 4px 10px rgba(80,60,20,.2)}
+#hud .hud-win .tile.add{background:transparent}
+#hud .hud-win .hud-detail{border-color:#c9b891;background:rgba(141,107,30,.06)}
+#hud .hud-win .book{border-color:#c9b891;background:linear-gradient(90deg,#efe4cb 0,#f6eedb 48%,#d9cba8 50%,#f6eedb 52%,#efe4cb 100%)}
+#hud .hud-win .book .toc{border-right-color:#cdbb92}#hud .hud-win .book .toc-i:hover{border-color:#b08a46}#hud .hud-win .book .toc-i.on{background:rgba(141,107,30,.14)}
+#hud .hud-win .dslot{border-color:#bba97e;background:rgba(141,107,30,.05)}#hud .hud-win .dslot.filled{border-color:#a08f70;background:linear-gradient(160deg,#fbf6ea,#ebe0c6)}
+#hud .hud-win .hud-x:hover{border-color:var(--blood);color:var(--blood)}
+@media (max-width:760px){#hud .hud-win .book .toc{border-bottom-color:#cdbb92}#v-sheet.active{padding:10px 10px 18px;border-radius:8px}}
 </style>
 </head>
 <body class="bg-study">
 <div id="bgfx" aria-hidden="true"></div>
 <header class="top"><div class="top-in">
-  <div class="brand"><span class="moon"></span>KIRANA TTRPG</div>
+  <div class="brand"><span class="moon"></span>Kirana <span class="brand-sub">TTRPG</span></div>
   <nav id="nav">
     <a href="#home" data-v="home">หน้าแรก</a>
     <a href="#create" data-v="tutor">สอนเล่น</a>
@@ -1323,7 +1383,7 @@ function loginGate(A, auth){
       }
     }, text: 'เข้าสู่ระบบด้วย Google'});
     box.append(
-      h('div', {class:'brand', style:'justify-content:center;margin-bottom:6px'}, h('span', {class:'moon'}), 'KIRANA TTRPG'),
+      h('div', {class:'brand', style:'justify-content:center;margin-bottom:6px'}, h('span', {class:'moon'}), 'Kirana ', h('span',{class:'brand-sub',text:'TTRPG'})),
       h('h2', {style:'text-align:center', text:'โต๊ะนี้เปิดให้เฉพาะผู้เล่นที่ล็อกอิน'}),
       h('p', {class:'desc', style:'text-align:center;max-width:46ch;margin:8px auto 14px', text:'ล็อกอินด้วยบัญชี Google เพื่อให้ตัวละครของคุณตามไปทุกเครื่อง และให้ GM รู้ว่าใครเป็นใครในห้อง ไม่มีการเก็บรหัสผ่านไว้ที่เว็บนี้'}),
       btn, status,
@@ -2279,7 +2339,7 @@ function renderSheet(id){
   left.append(resBox);
   const tb = h('div',{class:'box',dataset:{k:'tough'}}, h('h4',null, T('Toughness'), ' / ', T('Armor')));
   const bg2 = h('div',{class:'body2'}, h('span',{class:'dim',text:'ส่วน'}), h('span',{class:'dim',text:'Tough'}), h('span',{class:'dim',text:'เกราะ'}));
-  for (const [k,label] of DATA.meta.bodyParts){ const v = cur.tough[k]; bg2.append(h('span',{text:label}), h('div',{class:'row',style:'gap:2px'}, h('button',{class:'small',onclick:()=>{cur.tough[k]=v-1; save(); rerender();},text:'−'}), h('b',{class:'num',style:'min-width:38px;text-align:center;'+(v<=0?'color:var(--bad)':''),text:`${v}/${d.toughness}`}), h('button',{class:'small',onclick:()=>{cur.tough[k]=Math.min(d.toughness,v+1); save(); rerender();},text:'+'})), h('input',{value:c.armor[k]||'',placeholder:'0',title:'A/B = กันกายภาพทั่วไป / กัน Blunt (หรือชนิดในวงเล็บ)',onchange:(e)=>{c.armor[k]=e.target.value; save();}})); }
+  for (const [k,label] of DATA.meta.bodyParts){ const v = cur.tough[k]; bg2.append(h('span',{text:label}), h('div',{class:'row',style:'gap:2px'}, h('button',{class:'small',onclick:()=>{cur.tough[k]=v-1; vit(); rerender();},text:'−'}), h('b',{class:'num',style:'min-width:38px;text-align:center;'+(v<=0?'color:var(--bad)':''),text:`${v}/${d.toughness}`}), h('button',{class:'small',onclick:()=>{cur.tough[k]=Math.min(d.toughness,v+1); vit(); rerender();},text:'+'})), h('input',{value:c.armor[k]||'',placeholder:'0',title:'A/B = กันกายภาพทั่วไป / กัน Blunt (หรือชนิดในวงเล็บ)',onchange:(e)=>{c.armor[k]=e.target.value; save();}})); }
   tb.append(bg2, h('div',{class:'row',style:'margin-top:6px;justify-content:space-between;align-items:center'}, h('span',{class:'dim',style:'font-size:11px',text:'เกราะ A/B = กันทั่วไป / กัน Blunt'}), h('button',{class:'small ghost',title:'คำนวณค่าเกราะจากของสวมใส่ใหม่',onclick:()=>{ recalcArmor(c); save(); rerender(); },text:'จากของสวมใส่'})), h('p',{class:'dim',style:'font-size:11px;margin:8px 0 0',text:'Hit Location: '+DATA.meta.hitLocation}));
   left.append(tb);
   // ===== middle =====
@@ -2423,7 +2483,7 @@ function renderMinSheet(c){
 /* ===== HUD แบบเกม: ปุ่มลอยข้างจอ (กระเป๋า / คัมภีร์สกิล / ถุงย่ามของสวมใส่) ลากย้ายได้ เปิดเป็นหน้าต่างลอย ===== */
 const HUD = {
   pos: null, open: null, winPos: {}, sel: {},  // sel = สิ่งที่เลือกอยู่ในแต่ละหน้าต่าง
-  load(){ try{ Object.assign(this, JSON.parse(localStorage.getItem('kirana.hud')||'{}')); }catch(e){} },
+  load(){ try{ Object.assign(this, JSON.parse(localStorage.getItem('kirana.hud')||'{}')); }catch(e){} for (const k of Object.keys(this.winPos||{})){ const p = this.winPos[k]; if (!p || !(p.x>=0) || !(p.y>=0) || (p.w!=null && !(p.w>0))) delete this.winPos[k]; } },
   persist(){ try{ localStorage.setItem('kirana.hud', JSON.stringify({pos:this.pos, winPos:this.winPos, open:this.open})); }catch(e){} },
   hide(){ const el = $('#hud'); if (el) clear(el); },
 };
@@ -2476,7 +2536,7 @@ function renderHUD(c, d, ctx){
   const body = h('div',{class:'hud-body'});
   win.append(head, body);
   const wp = HUD.winPos[HUD.open]; if (wp){ win.style.left = wp.x+'px'; win.style.top = wp.y+'px'; win.style.right='auto'; if (wp.w) win.style.width = wp.w+'px'; if (wp.h) win.style.height = wp.h+'px'; }
-  { let first = true; new ResizeObserver(()=>{ if (first){ first=false; return; } const cur = HUD.winPos[HUD.open] || {x: win.getBoundingClientRect().left, y: win.getBoundingClientRect().top}; HUD.winPos[HUD.open] = {...cur, w: win.offsetWidth, h: win.offsetHeight}; HUD.persist(); }).observe(win); }
+  { const key = HUD.open; let first = true; new ResizeObserver(()=>{ if (first){ first=false; return; } if (!win.isConnected || !win.offsetWidth || !win.offsetHeight) return; /* หน้าต่างที่ถูกถอดจาก DOM มีขนาด 0 ห้ามจำ ไม่งั้นเด้งไปมุมซ้ายบน */ const rct = win.getBoundingClientRect(); const cur = HUD.winPos[key] || {x: Math.max(0, Math.round(rct.left)), y: Math.max(0, Math.round(rct.top))}; HUD.winPos[key] = {...cur, w: win.offsetWidth, h: win.offsetHeight}; HUD.persist(); }).observe(win); }
   root.append(win);
   makeDraggable(win, head, (p)=>{ HUD.winPos[HUD.open] = {...(HUD.winPos[HUD.open]||{}), ...p}; HUD.persist(); });
   hudCtx = ctx;
@@ -2807,7 +2867,7 @@ function rememberGmKey(roomId, key){ const k = gmKeys(); k[roomId] = key; try { 
 const Table = {
   roomId:null, room:null, chat:[], unsub:[], peers:[], localMode:false, writing:false, pending:null, presence:null,
   rollLock:null, rolling:false, seenRolls:new Set(), chatReady:false,
-  roomChars:[], sel:null, brush:null, hover:null,
+  roomChars:[], sel:null, brush:null, hover:null, chatWho:null, diceWho:null,
   isGM(){ if (!this.room) return false; if (this.localMode || this.room.gmId===Store.me || Store.isOwner) return true; const k = gmKeys()[this.room.id]; return !!(k && this.room.gmKey && k===this.room.gmKey); },
   async open(id){
     this.close(); this.roomId = id; this.localMode = !Store.db;
@@ -2836,7 +2896,7 @@ const Table = {
     if (Store.room){ try { const r = await Store.room.join('kirana-'+id); this.presence = r; const me = Store.me||'guest'; r.presence({who: me, name: Store.displayName||'', at: Date.now()}); r.onPeers(p=>{ this.peers = Array.isArray(p)? p : Object.values(p||{}); renderPeers(); }); } catch(e){ console.warn('room', e); } }
     renderTable();
   },
-  close(){ for (const u of this.unsub) try{ typeof u==='function' && u(); }catch(e){} this.unsub=[]; if (this.presence){ try{ this.presence.leave(); }catch(e){} this.presence=null; } this.roomId=null; this.room=null; this.chat=[]; this.peers=[]; this.roomChars=[]; this.sel=null; this.brush=null; this.rollLock=null; this.rolling=false; this.seenRolls=new Set(); this.chatReady=false; DiceShow.clear(); updateRollLockUI(); clearTwins(); },
+  close(){ for (const u of this.unsub) try{ typeof u==='function' && u(); }catch(e){} this.unsub=[]; if (this.presence){ try{ this.presence.leave(); }catch(e){} this.presence=null; } this.roomId=null; this.room=null; this.chat=[]; this.peers=[]; this.roomChars=[]; this.sel=null; this.brush=null; this.chatWho=null; this.diceWho=null; this.rollLock=null; this.rolling=false; this.seenRolls=new Set(); this.chatReady=false; DiceShow.clear(); updateRollLockUI(); clearTwins(); },
   /* ---- ด่านล็อกการทอย: ทอยได้ทีละคน ระหว่างเต๋าเด้งอยู่บนจอทุกคน คนอื่นกดทอยไม่ได้ ---- */
   lockActive(lk){ lk = lk===undefined ? this.rollLock : lk; return !!(lk && lk.at && (Date.now() - lk.at) < ROLL_LOCK_TTL); },
   lockedByOther(){ return this.lockActive() && this.rollLock.by !== (Store.me||'local'); },
@@ -2918,10 +2978,11 @@ function updateRollLockUI(){
   const other = Table.roomId && Table.lockedByOther();
   const busy = !!(Table.roomId && (Table.rolling || other));
   document.body.classList.toggle('roll-locked', busy);
-  const b = $('#roll-lock-banner'); if (!b) return;
-  if (other){ b.textContent = `${Table.rollLock.who||'ผู้เล่นอีกคน'} กำลังทอยเต๋า… รอให้เต๋าหยุดก่อน`; b.classList.remove('hidden'); }
-  else if (Table.rolling){ b.textContent = 'เต๋าของคุณกำลังทอย…'; b.classList.remove('hidden'); }
-  else b.classList.add('hidden');
+  for (const b of document.querySelectorAll('#roll-lock-banner, .lockbanner[data-lock]')){ // ป้ายในแชตและในหน้าต่างทอยเต๋า
+    if (other){ b.textContent = `${Table.rollLock.who||'ผู้เล่นอีกคน'} กำลังทอยเต๋า… รอให้เต๋าหยุดก่อน`; b.classList.remove('hidden'); }
+    else if (Table.rolling){ b.textContent = 'เต๋าของคุณกำลังทอย…'; b.classList.remove('hidden'); }
+    else b.classList.add('hidden');
+  }
 }
 setInterval(()=>{ if (Table.roomId && Table.rollLock && !Table.lockActive() && document.body.classList.contains('roll-locked') && !Table.rolling) updateRollLockUI(); }, 1000);
 function loadLocalRooms(){ try{ return JSON.parse(localStorage.getItem('kirana.rooms.v1')||'[]'); }catch(e){ return []; } }
@@ -3080,9 +3141,9 @@ function renderTableHome(){
 function renderTable(){
   if (!Table.roomId || location.hash!=='#room-'+Table.roomId) return;
   // จำช่องที่กำลังพิมพ์อยู่ (แชต ฉาก ชื่อ NPC) เพื่อไม่ให้การพิมพ์ถูกตัดเมื่อห้องอัปเดต
-  const ae = document.activeElement; const keep = (ae && $('#v-table').contains(ae) && /^(INPUT|TEXTAREA)$/.test(ae.tagName)) ? {ph: ae.getAttribute('placeholder')||'', tag: ae.tagName, value: ae.value, s: ae.selectionStart, e: ae.selectionEnd} : null;
+  const ae = document.activeElement; const scopes = [$('#v-table'), $('#twins')].filter(Boolean); const keep = (ae && scopes.some(sc=>sc.contains(ae)) && /^(INPUT|TEXTAREA)$/.test(ae.tagName)) ? {ph: ae.getAttribute('placeholder')||'', tag: ae.tagName, value: ae.value, s: ae.selectionStart, e: ae.selectionEnd} : null;
   try { renderTableInner(); } catch(err){ console.error('renderTable', err); const root = $('#v-table'); root.append(h('div',{class:'warnbox',style:'margin-top:10px'}, 'แสดงห้องไม่สำเร็จ: '+(err && err.message||err), ' ', h('button',{class:'small',onclick:()=>renderTable(),text:'ลองใหม่'}))); }
-  if (keep){ const el = [...$('#v-table').querySelectorAll(keep.tag.toLowerCase())].find(x=>(x.getAttribute('placeholder')||'')===keep.ph); if (el){ if (keep.value && el.value !== keep.value) el.value = keep.value; try { el.focus({preventScroll:true}); el.setSelectionRange(keep.s, keep.e); } catch(e){} } }
+  if (keep){ const el = scopes.flatMap(sc=>[...sc.querySelectorAll(keep.tag.toLowerCase())]).find(x=>(x.getAttribute('placeholder')||'')===keep.ph); if (el && el !== document.activeElement){ if (keep.value && el.value !== keep.value) el.value = keep.value; try { el.focus({preventScroll:true}); el.setSelectionRange(keep.s, keep.e); } catch(e){} } }
 }
 function renderTableInner(){
   const root = clearKeep($('#v-table'));
@@ -3121,7 +3182,7 @@ function renderTableInner(){
   // ---- แผนที่ต่อสู้ 20×20 ----
   left.append(mapPanel(r, gm));
   left.append(h('p',{class:'dim',style:'font-size:12px;margin-top:8px',text:`หนึ่งช่องคือ ${CELL_M} เมตร ช่องที่ติดกัน (รวมทแยง) คือเขตปะทะ ไม่เกิน 25 เมตรคือเขตใกล้เคียง ไกลกว่านั้นคือเขตไกล จากใกล้เคียงเข้าปะทะใช้ 1 Swift ถอยออกจากปะทะก็ 1 Swift แต่โดนโจมตีฉวยโอกาส จากใกล้เคียงไปไกลใช้ Swift บวก 1 AP ช่องเดินช้า (น้ำตื้น หิมะ โคลน เศษหิน) นับเป็นสองช่อง น้ำลึกว่ายได้แต่เสียเทิร์นที่ลงไป และโจมตีไม่ได้จนกว่าจะขึ้นฝั่ง (สัตว์น้ำยกเว้น) · ลากหมากเพื่อย้าย คลิกหมากเพื่อดูโซนและระยะมองเห็น`}));
-  // หน้าปัดลอย: ลำดับเทิร์นและหมาก + หมากที่เลือก (จอแคบ = แผงฝังในคอลัมน์ขวา)
+  // หน้าปัด: ลำดับเทิร์นและหมาก + หมากที่เลือก (ฝังคอลัมน์ขวา กด ⇱ ปลดลอยได้ ปิดไม่ได้)
   right.append(h('div',{style:'margin-bottom:12px'}, twinDock(r, gm)));
   // clocks
   const ck = h('div',{class:'card',style:'margin-bottom:12px'}, h('h3',{text:'นาฬิกาชะตากรรม (Fate Clock)'}));
@@ -3130,27 +3191,16 @@ function renderTableInner(){
   ck.append(ckrow);
   if (gm){ const nm=h('input',{placeholder:'ชื่อนาฬิกา',style:'width:140px'}); const seg=h('select',null,[4,6,8,10,12].map(n=>h('option',{value:n,text:n+' ช่อง'}))); ck.append(h('div',{class:'row',style:'margin-top:8px'}, nm, seg, h('button',{class:'small',onclick:()=>{ r.clocks=r.clocks||[]; r.clocks.push({id:uid(),name:nm.value.trim()||'นาฬิกา',seg:+seg.value,fill:0}); Table.save(); },text:'+ นาฬิกา'}))); }
   right.append(ck);
-  // chat + dice
-  const chatBox = h('div',{class:'card chat'}, h('h3',{text:'แชตและการทอยของโต๊ะ'}), h('div',{class:'log',id:'chatlog'}));
+  // แชตและบันทึกการทอย อยู่ใต้แผนที่ (ผู้ใช้เคาะ 9 พ.ย. 2026) ปุ่มทอยย้ายไปหน้าต่างลอย 🎲 ที่แท็บมุมจอ
+  const chatBox = h('div',{class:'card chat',style:'margin-top:12px'}, h('h3',{class:'row',style:'justify-content:space-between'}, h('span',{text:'แชตและบันทึกการทอยของโต๊ะ'}), h('button',{class:'small ghost rollbtn',title:'เปิดหน้าต่างทอยเต๋า (แท็บ 🎲 มุมจอ)',onclick:()=>{ TWin.dice = true; TWin.persist(); renderTwins(r, gm); },text:'🎲 ทอยเต๋า'})), h('div',{class:'log',id:'chatlog'}));
   const who = h('select',{id:'chat-who'}, h('option',{value:'',text: gm?'GM'+(Store.displayName?' ('+Store.displayName+')':'') : (Store.displayName||'ผู้เล่น')}), myChars.map(c=>h('option',{value:c.id,text:c.name})));
+  if (Table.chatWho && myChars.some(c=>c.id===Table.chatWho)) who.value = Table.chatWho; who.onchange = ()=>{ Table.chatWho = who.value; };
   const inp = h('input',{placeholder:'พิมพ์ข้อความ หรือ /r 2d6+2 · /adv · /dis · /gm (ลับ)',style:'flex:1;min-width:160px'});
   const send = ()=>{ const txt = inp.value.trim(); if(!txt) return; inp.value=''; const c = Store.get(who.value); const name = c? c.name : (gm?'GM':(Store.displayName||'ผู้เล่น')); handleChatInput(txt, name, c, gm); };
   inp.onkeydown = (e)=>{ if (e.key==='Enter' && !e.isComposing){ e.preventDefault(); send(); } };
   chatBox.append(h('div',{class:'row'}, who, inp, h('button',{class:'primary small',onclick:send,text:'ส่ง'})));
-  const quick = h('div',{class:'row'});
-  const selChar = ()=>Store.get(who.value);
-  const whoName = ()=>{ const c=selChar(); return c? c.name : (gm?'GM':(Store.displayName||'ผู้เล่น')); };
-  const qroll = (label, kind)=>{ const c=selChar(); if (kind==='attack' && c){ const blk = Table.attackBlocked(c); if (blk){ toast(blk); return; } } Table.guardedRoll(whoName(), ()=>Table.postRoll(doRoll({label, kind, c}), c), label); };
-  quick.append(h('button',{class:'small rollbtn',onclick:()=>qroll('2d6','check'),text:'2d6'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Attack Roll','attack'),text:'Attack (CV)'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Luck Saving Throw','luck'),text:'Luck'}),
-    ...(gm? [h('button',{class:'small ghost rollbtn',onclick:()=>{ Table.guardedRoll('GM', ()=>{ const e=doRoll({label:'ทอยลับของ GM'}); Table.post({kind:'roll',who:'GM',text:e.label,roll:{dice:e.r.dice,kept:e.r.kept,keptIdx:e.r.keptIdx,sum:e.r.sum,crit:e.r.crit,double:e.r.double,mode:e.mode},mod:0,pm:0,total:e.total,judge:e.judge,gmOnly:true}); }, 'ทอยลับ'); },text:'ทอยลับ (GM)'})] : []));
-  chatBox.append(quick);
   chatBox.append(h('div',{id:'roll-lock-banner',class:'lockbanner hidden'}));
-  // แผงทอยเต็มของตัวละครที่เลือก (Stat Check, Saving Throw, Knowledge) ทอยผ่านด่านล็อกเดียวกัน
-  const panelHost = h('div',{style:'margin-top:8px'});
-  const drawPanel = ()=>{ clear(panelHost); const c = selChar(); if (!c) { panelHost.append(h('p',{class:'dim',style:'font-size:12px;margin:0',text:'เลือกตัวละครในช่องด้านบนเพื่อเปิดแผงทอย Stat Check / Saving Throw'})); return; } panelHost.append(dicePanel(c, (e)=>Table.postRoll(e, c), {guard:(run,label)=>Table.guardedRoll(c.name, run, label), noLog:true})); };
-  who.addEventListener('change', drawPanel); drawPanel();
-  chatBox.append(panelHost);
-  right.append(chatBox);
+  left.append(chatBox);
   updateRollLockUI();
   root.append(h('div',{class:'table-wrap'}, left, right));
   renderChatOnly(); renderPeers();
@@ -3162,53 +3212,115 @@ async function placeCharacter(c, r){
   if (r.tokens.some(t=>t.charId===c.id)){ toast('ตัวละครนี้อยู่บนบอร์ดแล้ว'); return; }
   const d = compute(c); const thumb = await makeThumb(c.portrait);
   const pos = freeCell(r.map, r.tokens, [16,17,18,19]);
-  r.tokens.push({id:uid(), name:c.name, kind:'pc', charId:c.id, ownerId:Store.me||'local', ownerName: Store.displayName||'', x:pos.x, y:pos.y, hp:(c.current&&c.current.hp)??d.hp, hpMax:d.hp, san:(c.current&&c.current.sanity)??d.sanity, sanMax:d.sanity, init:d.initiative, hidden:false, note:'', desc:'', thumb: thumb||null, nv: charHasNightVision(c), torch:false, aquatic:false, inWater:false, vitalsAt:(c.current&&c.current.at)||Date.now()});
+  r.tokens.push({id:uid(), name:c.name, kind:'pc', charId:c.id, ownerId:Store.me||'local', ownerName: Store.displayName||'', x:pos.x, y:pos.y, hp:(c.current&&c.current.hp)??d.hp, hpMax:d.hp, san:(c.current&&c.current.sanity)??d.sanity, sanMax:d.sanity, tough: Object.assign({}, (c.current&&c.current.tough)||{}), init:d.initiative, hidden:false, note:'', desc:'', thumb: thumb||null, nv: charHasNightVision(c), torch:false, aquatic:false, inWater:false, vitalsAt:(c.current&&c.current.at)||Date.now()});
   Table.save(); Table.post({kind:'sys', who:'', text:`${c.name} เข้าร่วมฉาก`});
   Store.shareToRoom(c, r.id);
 }
-/* ===== หน้าปัดลอยในห้อง (ลำดับเทิร์นและหมาก · หมากที่เลือก) ย้าย/ย่อขยายได้เหมือนหน้าต่างกระเป๋าและถุงย่าม ===== */
+/* ===== หน้าปัดในห้อง (ลำดับเทิร์นและหมาก · หมากที่เลือก · ทอยเต๋า) ย้าย/ย่อขยายได้เหมือนหน้าต่างกระเป๋าและถุงย่าม =====
+   v1.7: หน้าต่างคงอยู่ข้ามการวาดใหม่ (เปลี่ยนแค่เนื้อใน) ตำแหน่งมาจากการลากเท่านั้น จึงไม่เด้งไปมุมจอ · ลำดับเทิร์นกับหมากที่เลือกปิดไม่ได้ (ผู้ใช้เคาะ 9 พ.ย. 2026) */
 const TWin = {
-  open: {order:true, tok:true}, float: {order:false, tok:false}, pos: {}, collapsed: {},
-  load(){ try { Object.assign(this, JSON.parse(localStorage.getItem('kirana.twin')||'{}')); } catch(e){} this.open = Object.assign({order:true, tok:true}, this.open||{}); this.float = Object.assign({order:false, tok:false}, this.float||{}); },
-  persist(){ try { localStorage.setItem('kirana.twin', JSON.stringify({open:this.open, float:this.float, pos:this.pos, collapsed:this.collapsed})); } catch(e){} },
+  float: {order:false, tok:false}, pos: {}, collapsed: {}, dice: false, dock: null,
+  load(){ try { const s = JSON.parse(localStorage.getItem('kirana.twin')||'{}'); this.float = Object.assign({order:false, tok:false}, s.float||{}); this.pos = s.pos||{}; this.collapsed = s.collapsed||{}; this.dice = !!s.dice; this.dock = s.dock||null; for (const k of Object.keys(this.pos)){ const p = this.pos[k]; if (!p || !(p.w>0) || !(p.x>=0) || !(p.y>=0)) delete this.pos[k]; } } catch(e){} },
+  persist(){ try { localStorage.setItem('kirana.twin', JSON.stringify({float:this.float, pos:this.pos, collapsed:this.collapsed, dice:this.dice, dock:this.dock})); } catch(e){} },
 };
 TWin.load();
+const TWIN_TITLE = {order:'⚔ ลำดับเทิร์นและหมาก', tok:'🎯 หมากที่เลือก', dice:'🎲 ทอยเต๋า'};
 function isNarrow(){ return window.innerWidth < 900; }
 function twinsRoot(){ let root = $('#twins'); if (!root){ root = h('div',{id:'twins'}); document.body.append(root); } return root; }
 function clearTwins(){ const root = $('#twins'); if (root) clear(root); }
 function renderTwins(r, gm){
-  const root = twinsRoot(); clear(root);
-  if (!r || location.hash !== '#room-'+r.id || isNarrow()) return;
-  if (TWin.open.order && TWin.float.order) root.append(twin('order', '⚔ ลำดับเทิร์นและหมาก', orderBody(r, gm)));
-  if (TWin.open.tok && TWin.float.tok) root.append(twin('tok', '🎯 หมากที่เลือก', tokBody(r, gm)));
+  const root = twinsRoot();
+  const inRoom = r && location.hash === '#room-'+r.id;
+  if (!inRoom){ clear(root); return; }
+  const want = [];
+  if (!isNarrow()){ if (TWin.float.order) want.push(['order', ()=>orderBody(r, gm), null]); if (TWin.float.tok) want.push(['tok', ()=>tokBody(r, gm), null]); }
+  if (TWin.dice) want.push(['dice', ()=>diceBody(r, gm), diceKey(r, gm)]);
+  for (const el of [...root.querySelectorAll('.twin')]) if (!want.some(([k])=>el.classList.contains('twin-'+k))) el.remove();
+  for (const [key, build, cacheKey] of want){
+    let win = root.querySelector('.twin-'+key);
+    if (!win){ win = twin(key); root.append(win); }
+    if (cacheKey && win.dataset.key === cacheKey) continue; // เนื้อในเดิมใช้ได้ ไม่ต้องสร้างใหม่ (แผงทอยจำโหมด/บุคลิกภาพที่ตั้งไว้)
+    if (cacheKey) win.dataset.key = cacheKey;
+    fillTwin(win, build());
+  }
+  // แท็บทอยเต๋าลอย (เหมือน dock ในชีท) อยู่เสมอขณะอยู่ในห้อง
+  let dock = root.querySelector('.rdock'); if (!dock){ dock = roomDock(); root.append(dock); }
+  dock.querySelector('.hud-btn').classList.toggle('on', !!TWin.dice);
+  for (const el of root.querySelectorAll('.twin, .rdock')) clampToViewport(el);
 }
-function twin(key, title, body){
-  const win = h('div',{class:'hud-win twin twin-'+key+(TWin.collapsed[key]?' collapsed':'')});
-  const head = h('div',{class:'hud-head'}, h('b',{text:title}),
-    h('button',{class:'hud-x',title: TWin.collapsed[key] ? 'ขยาย' : 'ย่อ',onclick:()=>{ TWin.collapsed[key] = !TWin.collapsed[key]; TWin.persist(); renderTwins(Table.room, Table.isGM()); }}, h('span',{text: TWin.collapsed[key] ? '▢' : '—'})),
-    h('button',{class:'hud-x',title:'เก็บกลับเข้าคอลัมน์ขวา',onclick:()=>{ TWin.float[key] = false; TWin.persist(); renderTable(); }}, h('span',{text:'⇲'})),
-    h('button',{class:'hud-x',title:'ปิด (เปิดใหม่ได้ที่แถบ "หน้าปัด" ในห้อง)',onclick:()=>{ TWin.open[key] = false; TWin.persist(); renderTable(); }}, svgEl('close')));
-  const b = h('div',{class:'hud-body'}, body);
+/* เปลี่ยนเนื้อในหน้าต่าง เก็บตำแหน่งเลื่อนและช่องที่กำลังพิมพ์ไว้ */
+function fillTwin(win, body){
+  const b = win.querySelector('.hud-body'); const top = b.scrollTop;
+  const ae = document.activeElement; const keep = (ae && b.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) ? {ph: ae.getAttribute('placeholder')||'', tag: ae.tagName, value: ae.value, s: ae.selectionStart, e: ae.selectionEnd} : null;
+  clear(b); b.append(body); b.scrollTop = top;
+  if (keep){ const el = [...b.querySelectorAll(keep.tag.toLowerCase())].find(x=>(x.getAttribute('placeholder')||'')===keep.ph); if (el){ if (keep.tag!=='SELECT' && keep.value && el.value !== keep.value) el.value = keep.value; try { el.focus({preventScroll:true}); if (keep.tag!=='SELECT') el.setSelectionRange(keep.s, keep.e); } catch(e){} } }
+}
+function twin(key){
+  const win = h('div',{class:'hud-win twin twin-'+key+(key==='dice'?' dice':'')+(TWin.collapsed[key]?' collapsed':'')});
+  const collapseBtn = h('button',{class:'hud-x',title: TWin.collapsed[key] ? 'ขยาย' : 'ย่อ',onclick:()=>{ TWin.collapsed[key] = !TWin.collapsed[key]; TWin.persist(); win.classList.toggle('collapsed', !!TWin.collapsed[key]); collapseBtn.title = TWin.collapsed[key] ? 'ขยาย' : 'ย่อ'; collapseBtn.firstChild.textContent = TWin.collapsed[key] ? '▢' : '–'; if (!TWin.collapsed[key] && TWin.pos[key] && TWin.pos[key].h) win.style.height = TWin.pos[key].h+'px'; }}, h('span',{text: TWin.collapsed[key] ? '▢' : '–'}));
+  const head = h('div',{class:'hud-head'}, key==='dice' ? svgEl('dice') : null, h('b',{text: key==='dice' ? 'ทอยเต๋า' : TWIN_TITLE[key]}), collapseBtn);
+  if (key==='dice') head.append(h('button',{class:'hud-x',title:'ปิด (เปิดใหม่ได้ที่แท็บ 🎲 มุมจอ)',onclick:()=>{ TWin.dice = false; TWin.persist(); renderTwins(Table.room, Table.isGM()); }}, svgEl('close')));
+  else head.append(h('button',{class:'hud-x',title:'เก็บกลับเข้าคอลัมน์ขวา',onclick:()=>{ TWin.float[key] = false; TWin.persist(); renderTable(); }}, h('span',{text:'⇲'})));
+  const b = h('div',{class:'hud-body'});
   win.append(head, b);
   const p = TWin.pos[key];
-  if (p){ win.style.left = p.x+'px'; win.style.top = p.y+'px'; win.style.right = 'auto'; if (p.w) win.style.width = p.w+'px'; if (p.h && !TWin.collapsed[key]) win.style.height = p.h+'px'; }
-  else { win.style.right = '14px'; win.style.top = key==='order' ? '84px' : '46%'; win.style.width = '360px'; }
-  let first = true; new ResizeObserver(()=>{ if (first){ first=false; return; } if (TWin.collapsed[key]) return; const rct = win.getBoundingClientRect(); TWin.pos[key] = {x: rct.left, y: rct.top, w: win.offsetWidth, h: win.offsetHeight}; TWin.persist(); }).observe(win);
-  makeDraggable(win, head, (pp)=>{ TWin.pos[key] = {...(TWin.pos[key]||{w: win.offsetWidth, h: win.offsetHeight}), ...pp}; TWin.persist(); });
-  requestAnimationFrame(()=>{ const rct = win.getBoundingClientRect(); if (rct.right > window.innerWidth+2 || rct.bottom > window.innerHeight+2 || rct.left < 0 || rct.top < 0){ delete TWin.pos[key]; win.style.left=''; win.style.top = key==='order' ? '84px' : '46%'; win.style.right='14px'; win.style.width='360px'; win.style.height=''; } });
+  if (p){ win.style.left = p.x+'px'; win.style.top = p.y+'px'; win.style.right = 'auto'; win.style.bottom = 'auto'; if (p.w) win.style.width = p.w+'px'; if (p.h && !TWin.collapsed[key]) win.style.height = p.h+'px'; }
+  else if (key==='dice'){ win.style.right = '14px'; win.style.bottom = '96px'; win.style.top = 'auto'; }
+  else if (key==='tok'){ win.style.right = '14px'; win.style.top = '84px'; }
+  else { win.style.right = TWin.float.tok ? '390px' : '14px'; win.style.top = '84px'; } // ลำดับเทิร์นอยู่ซ้ายของหมากที่เลือกเมื่อลอยทั้งคู่
+  // ขนาดจากการย่อขยายด้วยมือเท่านั้น: หน้าต่างที่หลุดจาก DOM หรือยุบอยู่มีขนาด 0 ต้องไม่ถูกจำ (ตัวการที่ทำให้เด้งไปมุมซ้ายบนใน v1.6)
+  let first = true; new ResizeObserver(()=>{ if (first){ first=false; return; } if (!win.isConnected || TWin.collapsed[key] || !win.offsetWidth || !win.offsetHeight) return; const cur = TWin.pos[key]; if (cur && cur.w===win.offsetWidth && cur.h===win.offsetHeight) return; const rct = win.getBoundingClientRect(); TWin.pos[key] = {x: Math.max(0, Math.round(rct.left)), y: Math.max(0, Math.round(rct.top)), w: win.offsetWidth, h: win.offsetHeight}; TWin.persist(); }).observe(win);
+  makeDraggable(win, head, (pp)=>{ TWin.pos[key] = {...(TWin.pos[key]||{w: win.offsetWidth, h: win.offsetHeight}), x: Math.round(pp.x), y: Math.round(pp.y)}; TWin.persist(); });
   return win;
 }
-/* หน้าปัดในคอลัมน์ขวา: ค่าเริ่มต้นฝังเป็นการ์ด กด ⇱ เพื่อปลดเป็นหน้าต่างลอยที่ลากและย่อขยายได้ (จำตำแหน่งไว้) · จอแคบฝังเสมอ */
+/* ดันหน้าต่าง/แท็บที่หลุดขอบจอกลับเข้ามา (ไม่รีเซ็ตตำแหน่ง) */
+function clampToViewport(el){
+  const rct = el.getBoundingClientRect(); if (!rct.width) return;
+  const maxX = Math.max(4, window.innerWidth - rct.width - 4), maxY = Math.max(4, window.innerHeight - Math.min(rct.height, 120) - 4);
+  if (rct.left >= 0 && rct.top >= 0 && rct.left <= maxX && rct.top <= maxY) return;
+  const x = Math.min(maxX, Math.max(4, rct.left)), y = Math.min(maxY, Math.max(4, rct.top));
+  el.style.left = x+'px'; el.style.top = y+'px'; el.style.right = 'auto'; el.style.bottom = 'auto';
+}
+window.addEventListener('resize', ()=>{ const root = $('#twins'); if (root) for (const el of root.querySelectorAll('.twin, .rdock')) clampToViewport(el); });
+/* แท็บทอยเต๋ามุมจอ: ปุ่มเดียวแบบ dock ในชีท ลากย้ายได้ กดเปิด/ปิดหน้าต่างทอย ป้ายทองคือผลทอยล่าสุดของฉัน */
+function roomDock(){
+  const dock = h('div',{class:'hud-dock rdock'});
+  const btn = h('button',{class:'hud-btn'+(TWin.dice?' on':''),title:'ทอยเต๋า',onclick:()=>{ if (dock.dataset.justDragged) return; TWin.dice = !TWin.dice; TWin.persist(); renderTwins(Table.room, Table.isGM()); }}, svgEl('dice'), h('span',{class:'lbl',text:'ทอยเต๋า'}), h('span',{class:'badge gold hidden'}));
+  dock.append(h('div',{class:'hud-grip',title:'ลากเพื่อย้าย'}, svgEl('grip')), btn);
+  if (TWin.dock && TWin.dock.x>=0 && TWin.dock.y>=0){ dock.style.left = TWin.dock.x+'px'; dock.style.top = TWin.dock.y+'px'; dock.style.right = 'auto'; dock.style.bottom = 'auto'; }
+  makeDraggable(dock, dock, (p)=>{ TWin.dock = {x: Math.round(p.x), y: Math.round(p.y)}; TWin.persist(); });
+  return dock;
+}
+function diceBadge(total){ const bd = document.querySelector('#twins .rdock .badge'); if (!bd) return; bd.textContent = String(total); bd.classList.remove('hidden'); }
+function diceKey(r, gm){ const mine = Store.chars.filter(c=>c.done && Store.isMine(c)); return (gm?'gm':'pl') + '|' + (Table.localMode?'L':'F') + '|' + mine.map(c=>c.id+':'+c.name+':'+(c.updatedAt||0)).join(','); }
+/* เนื้อในหน้าต่างทอยเต๋า: เลือกตัวละครที่ทอยในนาม ปุ่มทอยด่วน (2d6 / Attack / Luck / ทอยลับ GM) และแผงทอยเต็มแบบเดียวกับในชีท */
+function diceBody(r, gm){
+  const myChars = Store.chars.filter(c=>c.done && Store.isMine(c));
+  const box = h('div',{class:'twin-dice'});
+  if (Table.diceWho==null){ const sel = Table.sel ? (r.tokens||[]).find(x=>x.id===Table.sel) : null; Table.diceWho = (sel && sel.charId && myChars.some(c=>c.id===sel.charId)) ? sel.charId : (myChars[0] ? myChars[0].id : ''); }
+  const who = h('select',{style:'min-width:160px'}, h('option',{value:'',text: gm?'GM'+(Store.displayName?' ('+Store.displayName+')':'') : (Store.displayName||'ผู้เล่น')}), myChars.map(c=>h('option',{value:c.id,text:c.name})));
+  who.value = myChars.some(c=>c.id===Table.diceWho) ? Table.diceWho : '';
+  const selChar = ()=>Store.get(who.value);
+  const whoName = ()=>{ const c=selChar(); return c? c.name : (gm?'GM':(Store.displayName||'ผู้เล่น')); };
+  const onRoll = (e, c)=>{ Table.postRoll(e, c); diceBadge(e.total); };
+  const qroll = (label, kind)=>{ const c=selChar(); if (kind==='attack' && c){ const blk = Table.attackBlocked(c); if (blk){ toast(blk); return; } } Table.guardedRoll(whoName(), ()=>onRoll(doRoll({label, kind, c}), c), label); };
+  const quick = h('div',{class:'row'}, h('button',{class:'small rollbtn',onclick:()=>qroll('2d6','check'),text:'2d6'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Attack Roll','attack'),text:'Attack (CV)'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Luck Saving Throw','luck'),text:'Luck'}),
+    ...(gm? [h('button',{class:'small ghost rollbtn',onclick:()=>{ Table.guardedRoll('GM', ()=>{ const e=doRoll({label:'ทอยลับของ GM'}); Table.post({kind:'roll',who:'GM',text:e.label,roll:{dice:e.r.dice,kept:e.r.kept,keptIdx:e.r.keptIdx,sum:e.r.sum,crit:e.r.crit,double:e.r.double,mode:e.mode},mod:0,pm:0,total:e.total,judge:e.judge,gmOnly:true}); diceBadge(e.total); }, 'ทอยลับ'); },text:'ทอยลับ (GM)'})] : []));
+  box.append(h('div',{class:'row',style:'margin-bottom:6px;align-items:center'}, h('span',{class:'dim',style:'font-size:12px',text:'ทอยในนาม'}), who), quick, h('div',{class:'lockbanner hidden',dataset:{lock:'1'}}));
+  const panelHost = h('div',{style:'margin-top:8px'});
+  const drawPanel = ()=>{ clear(panelHost); const c = selChar(); if (!c){ panelHost.append(h('p',{class:'dim',style:'font-size:12px;margin:0',text:'เลือกตัวละครด้านบนเพื่อเปิดแผงทอย Stat Check / Saving Throw / ความรู้ ผลทอยเด้งให้ทุกคนในห้องเห็น'})); return; } const p = dicePanel(c, (e)=>onRoll(e, c), {guard:(run,label)=>Table.guardedRoll(c.name, run, label), noLog:true}); p.classList.remove('card'); p.classList.add('hud-dice'); panelHost.append(p); };
+  who.addEventListener('change', ()=>{ Table.diceWho = who.value; drawPanel(); }); drawPanel();
+  box.append(panelHost);
+  updateRollLockUI();
+  return box;
+}
+/* หน้าปัดในคอลัมน์ขวา: ฝังเป็นการ์ดเสมอ กด ⇱ เพื่อปลดเป็นหน้าต่างลอยที่ลากและย่อขยายได้ (จำตำแหน่งไว้) · จอแคบฝังเสมอ · ไม่มีปุ่มปิด */
 function twinDock(r, gm){
   const wrap = h('div',{class:'twindock-wrap'});
-  const row = h('div',{class:'row twindock'}, h('span',{class:'dim',style:'font-size:12px',text:'หน้าปัด'}),
-    h('button',{class:'small'+(TWin.open.order?' on':''),onclick:()=>{ TWin.open.order = !TWin.open.order; TWin.persist(); renderTable(); },text:'⚔ ลำดับเทิร์นและหมาก'}),
-    h('button',{class:'small'+(TWin.open.tok?' on':''),onclick:()=>{ TWin.open.tok = !TWin.open.tok; TWin.persist(); renderTable(); },text:'🎯 หมากที่เลือก'}));
-  wrap.append(row);
-  const panel = (key, title, body)=>{ if (!TWin.open[key]) return null; const floating = TWin.float[key] && !isNarrow();
-    const head = h('h3',{class:'row',style:'justify-content:space-between'}, h('span',{text:title}), isNarrow() ? null : h('button',{class:'small ghost',title: floating ? 'เก็บกลับเข้าคอลัมน์' : 'ปลดเป็นหน้าต่างลอย ลากวางที่ไหนก็ได้',onclick:()=>{ TWin.float[key] = !TWin.float[key]; TWin.persist(); renderTable(); },text: floating ? '⇲ เก็บกลับ' : '⇱ ลอย'}));
+  const panel = (key, body)=>{ const floating = TWin.float[key] && !isNarrow();
+    const head = h('h3',{class:'row',style:'justify-content:space-between'}, h('span',{text:TWIN_TITLE[key].replace(/^\S+\s/,'')}), isNarrow() ? null : h('button',{class:'small ghost',title: floating ? 'เก็บกลับเข้าคอลัมน์' : 'ปลดเป็นหน้าต่างลอย ลากวางที่ไหนก็ได้',onclick:()=>{ TWin.float[key] = !TWin.float[key]; TWin.persist(); renderTable(); },text: floating ? '⇲ เก็บกลับ' : '⇱ ลอย'}));
     return h('div',{class:'card twin-card',style:'margin-top:8px'}, head, floating ? h('p',{class:'dim',style:'font-size:12px;margin:4px 0 0',text:'กำลังลอยอยู่เป็นหน้าต่างบนจอ ลากหัวหน้าต่างเพื่อย้าย'}) : body); };
-  wrap.append(panel('order', 'ลำดับเทิร์นและหมาก', orderBody(r, gm)), panel('tok', 'หมากที่เลือก', tokBody(r, gm)));
+  wrap.append(panel('order', orderBody(r, gm)), panel('tok', tokBody(r, gm)));
   return wrap;
 }
 /* ลำดับที่ใช้แสดงหมาก: ตามลำดับเทิร์นเมื่อเริ่มสู้แล้ว ที่เหลือต่อท้าย (ผู้ใช้เคาะ 9 พ.ย. 2026) */
@@ -3228,7 +3340,7 @@ function orderBody(r, gm){
   const toks = orderedTokens(r).filter(canSee);
   toks.forEach((t, i)=>{
     const inOrder = enc.active && (enc.order||[]).includes(t.id);
-    const row = h('div',{class:`tok ${t.kind}${t.hidden?' hid':''}${cur===t.id?' turn':''}${Table.sel===t.id?' sel':''}`,onclick:(e)=>{ if (e.target.closest('button,select,input,a')) return; Table.sel = Table.sel===t.id ? null : t.id; if (Table.sel) TWin.open.tok = true; renderTable(); }},
+    const row = h('div',{class:`tok ${t.kind}${t.hidden?' hid':''}${cur===t.id?' turn':''}${Table.sel===t.id?' sel':''}`,onclick:(e)=>{ if (e.target.closest('button,select,input,a')) return; Table.sel = Table.sel===t.id ? null : t.id; renderTable(); }},
       inOrder ? h('span',{class:'ord num',text:String(i+1)}) : h('span',{class:'ord dim',text:'·'}),
       t.thumb ? h('img',{class:'av',src:t.thumb,alt:''}) : h('div',{class:'av',text:(t.name||'?').slice(0,2)}),
       h('div',{class:'nm'}, h('div',null, h('span',{text:t.name}), t.hidden? h('span',{class:'dim',text:' (ซ่อน)'}):null, t.inside? h('span',{class:'dim',text:' 🦷'}):null, t.inWater? h('span',{title:'อยู่ในน้ำลึก',text:' 🌊'}):null),
@@ -3251,7 +3363,9 @@ function tokBody(r, gm){
     h('div',{style:'flex:1;min-width:0'}, h('div',{style:'font-weight:600'}, t.name, t.hidden? h('span',{class:'dim',text:' (ซ่อน)'}):null), h('div',{class:'mini'}, tag(t.kind==='pc' ? 'ตัวละคร' : 'NPC', t.kind==='pc'?'stat':'neg'), t.ownerName? h('span',{class:'dim',text:t.ownerName}):null, eater ? h('span',{class:'tag neg',text:'🦷 อยู่ในตัว '+eater.name}) : h('span',{class:'num dim',text:`(${t.x},${t.y})`}), t.inWater? tag('🌊 ในน้ำลึก','warn'):null, t.aquatic? tag('🐟 สัตว์น้ำ','stat'):null, t.nv? tag('👁 Dark Vision'):null, t.torch? tag('🔥 แหล่งแสง','prop'):null))));
   // ค่าชีวิต
   const vital = (label, key, maxKey, cls)=>{ const v = t[key]||0, mx = t[maxKey]||0; return h('div',{class:'vital'}, h('span',{class:'vl '+cls,text:label}), mine ? h('button',{class:'small',title:label+' −1',onclick:()=>{ tokenVitals(t, key, v-1); Table.save(); }},'−') : null, h('b',{class:'num',text:`${v} / ${mx}`}), mine ? h('button',{class:'small',title:label+' +1',onclick:()=>{ tokenVitals(t, key, Math.min(mx, v+1)); Table.save(); }},'+') : null, mine ? h('input',{type:'number',value:v,style:'width:56px',onchange:(e)=>{ tokenVitals(t, key, +e.target.value||0); Table.save(); }}) : null); };
-  box.append(h('div',{class:'vitals'}, vital('HP','hp','hpMax','hp'), t.sanMax ? vital('Sanity','san','sanMax','san') : null, h('div',{class:'vital'}, h('span',{class:'vl',text:'Init'}), h('b',{class:'num',text:signed(t.init||0)}), r.enc&&r.enc.active&&t.initRoll!=null ? h('span',{class:'dim',text:`ทอยได้ ${t.initRoll}`}) : null)));
+  // NPC: Toughness ค่าเดียว GM ลดได้จากโต๊ะ (ตัวละครผู้เล่นใช้ตารางต่ออวัยวะในแผงต่อสู้ด้านล่าง)
+  const npcTough = (!t.charId && gm) ? h('div',{class:'vital'}, h('span',{class:'vl',text:'Toughness'}), h('button',{class:'small',title:'Toughness −1',onclick:()=>{ t.tgh = Math.max(0, (t.tgh??t.tghMax??1) - 1); if (t.tghMax==null) t.tghMax = Math.max(1, t.tgh+1); Table.save(); }},'−'), h('b',{class:'num'+((t.tgh??1)<=0?' bad':''),text: t.tgh==null ? (t.tghMax!=null ? `${t.tghMax} / ${t.tghMax}` : '- / -') : `${t.tgh} / ${t.tghMax??'-'}`}), h('button',{class:'small',title:'Toughness +1',onclick:()=>{ const mx = t.tghMax??1; t.tgh = Math.min(mx, (t.tgh??mx) + 1); if (t.tghMax==null) t.tghMax = mx; Table.save(); }},'+'), h('input',{type:'number',min:0,value:t.tghMax??'',placeholder:'สูงสุด',title:'Toughness สูงสุดของ NPC นี้',style:'width:64px',onchange:(e)=>{ const mx = Math.max(0, +e.target.value||0); t.tghMax = mx; if (t.tgh==null || t.tgh>mx) t.tgh = mx; Table.save(); }})) : (!t.charId && t.tghMax!=null ? h('div',{class:'vital'}, h('span',{class:'vl',text:'Toughness'}), h('b',{class:'num'+((t.tgh??1)<=0?' bad':''),text:`${t.tgh??t.tghMax} / ${t.tghMax}`})) : null);
+  box.append(h('div',{class:'vitals'}, vital('HP','hp','hpMax','hp'), t.sanMax ? vital('Sanity','san','sanMax','san') : null, npcTough, h('div',{class:'vital'}, h('span',{class:'vl',text:'Init'}), h('b',{class:'num',text:signed(t.init||0)}), r.enc&&r.enc.active&&t.initRoll!=null ? h('span',{class:'dim',text:`ทอยได้ ${t.initRoll}`}) : null)));
   if (t.charId && t.kind==='pc') box.append(h('p',{class:'dim',style:'font-size:11px;margin:2px 0 0',text:'HP และ Sanity ซิงก์กับชีทของเจ้าของ ฝั่งที่แก้ล่าสุดเป็นค่าที่ใช้'}));
   // สถานะ
   const condRow = h('div',{class:'row',style:'gap:6px;margin-top:6px;align-items:center'}, h('span',{class:'dim',style:'font-size:12px',text:'สถานะ'}), condChips(t, r, gm) || h('span',{class:'dim',style:'font-size:12px',text:'ไม่มี'}), gm ? h('button',{class:'small ghost',onclick:()=>condModal(t, r),text:'+ สถานะ'}) : null);
@@ -3298,8 +3412,13 @@ function combatPanel(c, t, gm){
     box.append(wbox); }
   // Toughness + เกราะ
   const tb = h('table',{class:'t cp-t'}, h('thead',null, h('tr',null, h('th',{text:'อวัยวะ'}), h('th',{text:'Toughness'}), h('th',{text:'เกราะ A/B'}))));
-  for (const [k,label] of DATA.meta.bodyParts) tb.append(h('tr',null, h('td',{text:label}), h('td',{class:'num'+(((cur.tough||{})[k]??1) <= 0 ? ' bad' : ''),text:(cur.tough||{})[k]??(d? d.toughness : '-')}), h('td',{class:'num',text:(c.armor||{})[k]||'-'})));
-  box.append(h('div',{class:'cp-sec'}, h('b',{text:'Toughness และเกราะ'}), h('div',{class:'tablewrap'}, tb)));
+  // Toughness ต่ออวัยวะ: เจ้าของหรือ GM กด ± ได้จากโต๊ะ (ผู้ใช้เคาะ 9 พ.ย. 2026) ค่าอยู่บนหมาก (t.tough) แล้วซิงก์เข้าชีทเหมือน HP/Sanity
+  const mine = gm || t.ownerId===Store.me || Table.localMode; const tmax = d ? d.toughness : null;
+  const tval = (k)=>{ const v = (t.tough||{})[k]; if (v!=null) return v; const cv = (cur.tough||{})[k]; if (cv!=null) return cv; return tmax; };
+  const setT = (k, v)=>{ if (!t.tough) t.tough = {}; for (const [kk] of DATA.meta.bodyParts) if (t.tough[kk]==null){ const cv = tval(kk); if (cv!=null) t.tough[kk] = cv; } t.tough[k] = Math.max(0, tmax!=null ? Math.min(tmax, v) : v); t.vitalsAt = Date.now(); Table.save(); };
+  for (const [k,label] of DATA.meta.bodyParts){ const v = tval(k);
+    tb.append(h('tr',null, h('td',{text:label}), h('td',{class:'num'+((v??1) <= 0 ? ' bad' : '')}, mine && v!=null ? h('button',{class:'small tadj',title:label+' Toughness −1',onclick:()=>setT(k, v-1)},'−') : null, h('span',{text: v==null ? '-' : (tmax!=null ? `${v}/${tmax}` : String(v))}), mine && v!=null ? h('button',{class:'small tadj',title:label+' Toughness +1',onclick:()=>setT(k, v+1)},'+') : null), h('td',{class:'num',text:(c.armor||{})[k]||'-'}))); }
+  box.append(h('div',{class:'cp-sec'}, h('b',{text:'Toughness และเกราะ'}), h('div',{class:'tablewrap'}, tb), mine ? h('p',{class:'dim',style:'font-size:11px;margin:4px 0 0',text:'Toughness ที่แก้ตรงนี้ซิงก์เข้าชีทของเจ้าของเหมือน HP และ Sanity'}) : null));
   if (min){ box.append(h('p',{class:'dim',style:'font-size:11.5px',text:'เจ้าของแชร์เฉพาะค่าหลัก อาวุธ สกิล และ Trait ไม่เปิดเผย'})); return box; }
   // สกิลและ Trait ที่เกี่ยวกับการต่อสู้
   const kin = c.kin ? KIN[c.kin] : null;
@@ -3316,15 +3435,17 @@ function combatPanel(c, t, gm){
 }
 /* ---- ซิงก์ HP/Sanity ระหว่างหมากกับชีท: ฝั่งที่แก้ล่าสุดชนะ (token.vitalsAt เทียบ c.current.at) ---- */
 function tokenVitals(t, key, value){ t[key] = value; t.vitalsAt = Date.now(); }
+function toughEq(a, b){ a = a||{}; b = b||{}; for (const [k] of DATA.meta.bodyParts) if ((a[k]??null) !== (b[k]??null)) return false; return true; }
 function syncVitalsWithSheets(r){
   let roomChanged = false;
   for (const t of r.tokens||[]){ if (!t.charId || t.kind!=='pc') continue; const c = Store.chars.find(x=>x.id===t.charId && Store.isMine(x)); if (!c || !c.current) continue; const cur = c.current; const ta = t.vitalsAt||0, ca = cur.at||0;
-    if (t.hp === cur.hp && t.san === cur.sanity) continue;
-    if (ta > ca){ cur.hp = t.hp; cur.sanity = t.san; cur.at = ta; Store.upsert(c); if (location.hash==='#sheet-'+c.id) renderSheet(c.id); }
-    else { t.hp = cur.hp; t.san = cur.sanity; t.vitalsAt = ca || Date.now(); roomChanged = true; } }
+    const same = t.hp === cur.hp && t.san === cur.sanity && t.tough && toughEq(t.tough, cur.tough);
+    if (same) continue;
+    if (ta > ca){ cur.hp = t.hp; cur.sanity = t.san; if (t.tough) cur.tough = Object.assign({}, cur.tough||{}, t.tough); else { t.tough = Object.assign({}, cur.tough||{}); roomChanged = true; } cur.at = ta; Store.upsert(c); if (location.hash==='#sheet-'+c.id) renderSheet(c.id); }
+    else { t.hp = cur.hp; t.san = cur.sanity; t.tough = Object.assign({}, cur.tough||{}); t.vitalsAt = ca || Date.now(); roomChanged = true; } }
   return roomChanged;
 }
-function pushVitalsFromSheet(c){ const r = Table.room; if (!r) return; const t = (r.tokens||[]).find(x=>x.charId===c.id); if (!t) return; const cur = c.current||{}; if (t.hp===cur.hp && t.san===cur.sanity) return; t.hp = cur.hp; t.san = cur.sanity; t.vitalsAt = cur.at||Date.now(); Table.save(); }
+function pushVitalsFromSheet(c){ const r = Table.room; if (!r) return; const t = (r.tokens||[]).find(x=>x.charId===c.id); if (!t) return; const cur = c.current||{}; if (t.hp===cur.hp && t.san===cur.sanity && t.tough && toughEq(t.tough, cur.tough)) return; t.hp = cur.hp; t.san = cur.sanity; t.tough = Object.assign({}, cur.tough||{}); t.vitalsAt = cur.at||Date.now(); Table.save(); }
 /* ---- น้ำลึก: ว่ายได้ ลงไปแล้วเสียเทิร์น และประกาศโจมตีไม่ได้ เว้นสัตว์น้ำ (ผู้ใช้เคาะ 9 พ.ย. 2026) ---- */
 Table.attackBlocked = function(c){ const r = this.room; if (!r || !c) return null; const t = (r.tokens||[]).find(x=>x.charId===c.id); if (!t) return null; if (t.inWater && !t.aquatic) return `${t.name} อยู่ในน้ำลึก ประกาศโจมตีไม่ได้จนกว่าจะขึ้นฝั่ง`; if (t.inside) return `${t.name} ถูกกลืนอยู่ โจมตีได้เฉพาะจากข้างใน (GM ตัดสิน)`; return null; };
 /* ---- เคลื่อนหมาก (ลากวาง): ตรวจพื้น ข้อห้ามจากสถานะ หมากซ้อน น้ำลึก แล้วบันทึก ---- */
@@ -3362,7 +3483,6 @@ function selectToken(t, r, gm){
   if (Table.sel===t.id) Table.sel = null;
   else if (selTok && selTok.id!==t.id){ const dist = cellDist(selTok,t); const band = rangeBand(dist); toast(`${selTok.name} → ${t.name}: ${dist} ช่อง (~${band.m} ม.) ${band.label}`); Table.sel = t.id; }
   else Table.sel = t.id;
-  if (Table.sel) TWin.open.tok = true;
   renderTable();
 }
 function mapPanel(r, gm){
@@ -3961,7 +4081,7 @@ const LESSONS = [
     ['surprise', 'รู้ไหม โต๊ะนี้นั่งได้ทั้งที่อยู่คนละเมือง เข้าสู่ระบบด้วยบัญชี Google ที่มุมขวาบน ตัวละครของเจ้าจะตามไปทุกเครื่อง', 'login'],
     ['explain', 'ชีทของเจ้าเป็นของเจ้าคนเดียว GM กับเพื่อนร่วมโต๊ะจะเห็นก็ต่อเมื่อเจ้าหยิบตัวละครลงบอร์ดในห้องนั้น และเจ้าเลือกได้ว่าจะให้เขาเห็นทั้งชีท หรือเห็นแค่ค่าหลัก ส่วนปุ่ม "ออนไลน์" บอกว่าใครอยู่ตรงไหน'],
     ['explain', 'GM สร้างห้องแล้วส่งลิงก์มา ผู้เล่นกด "วางตัวละครลงบอร์ด" รูปจากชีทจะไปอยู่บนหมาก GM เลือกสถานที่ สุ่มแผนที่หรือโหลดจากคลัง เพิ่ม NPC ซ่อนไว้ ตั้งแสงของฉาก แปะสถานะให้ใครก็ได้ แล้วเริ่มการต่อสู้ ทุกคนเดินหมากของตัวเอง', 'roomflow'],
-    ['smile', 'ทุกการทอยในห้องเด้งเป็นลูกเต๋าใหญ่กลางจอของทุกคน และทอยได้ทีละคน ระหว่างที่เต๋าของใครยังหมุนอยู่ คนอื่นก็รอหน่อย ในแชตพิมพ์ /r 2d6+2 เพื่อทอยเอง /adv กับ /dis ก็มี และ /gm ไว้กระซิบถึง GM', 'dicepop'],
+    ['smile', 'ทุกการทอยในห้องเด้งเป็นลูกเต๋าใหญ่กลางจอของทุกคน และทอยได้ทีละคน ระหว่างที่เต๋าของใครยังหมุนอยู่ คนอื่นก็รอหน่อย ปุ่มทอยอยู่ที่แท็บลูกเต๋ามุมขวาล่าง ลากไปวางตรงไหนก็ได้ ส่วนแชตกับบันทึกการทอยอยู่ใต้แผนที่ พิมพ์ /r 2d6+2 เพื่อทอยเอง /adv กับ /dis ก็มี และ /gm ไว้กระซิบถึง GM', 'dicepop'],
     ['shush', 'ถ้า GM ย้ายเครื่อง ใช้รหัส GM หกตัวของห้องกลับมาเป็น GM ได้ อย่าให้ผู้เล่นเห็นรหัสนั้นเชียว เราเห็นบาปของคนมามากพอจะรู้ว่าเกิดอะไรขึ้น เมื่อผู้เล่นได้รหัส GM', 'gmkey'],
   ], tryLabel:'ไปโต๊ะเล่น', tryHash:'#table' },
   { id:'end', nav:'ส่งท้าย', title:'เท่านี้ก็พอให้เจ้านั่งลงที่โต๊ะได้แล้ว', scene:'study', lines:[
