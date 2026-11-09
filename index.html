@@ -775,52 +775,57 @@ table.t th{font-family:var(--font-display);font-size:11.5px;letter-spacing:.8px;
 .vital .vl{min-width:64px}
 @media (max-width:760px){#twins .rdock{bottom:12px;right:8px}#twins .hud-win.twin-dice{width:auto}}
 
-/* ---- ชีทตัวละครเป็นกระดาษ: สีนวลครีม ตัวหนังสือสีหมึก การ์ดและหน้าต่าง HUD ของชีทใช้ชุดสีเดียวกัน ส่วนอื่นของเว็บยังเป็นกอธิคมืด ---- */
-#v-sheet,#hud .hud-win{
-  --ink:#fbf6ea; --ink-2:#f3ead6; --ink-3:#e9dec5; --line:#d6c7a3; --line-2:#bba97e;
-  --bone:#2b2318; --bone-dim:#5c4e3a; --bone-mute:#86755a;
-  --blood:#9c2f23; --blood-2:#b9412f; --mana:#157a73; --mana-2:#1f9088; --gold:#8d6b1e;
-  --ok:#2e7d46; --warn:#a26f10; --bad:#b9412f;
+/* ---- ชีทตัวละครเป็นกระดาษ (เปิดด้วย body.paper ค่าเริ่มต้น สลับเป็นมืดแบบเดิมได้ที่ ⚙): กระดาษเก่าสีครีมหม่น ตัวหนังสือสีหมึก การ์ดและหน้าต่าง HUD ของชีทใช้ชุดสีเดียวกัน ส่วนอื่นของเว็บยังเป็นกอธิคมืด ---- */
+body.paper #v-sheet,body.paper #hud .hud-win{
+  --ink:#ece3cc; --ink-2:#e3d8bc; --ink-3:#d8cbab; --line:#c3b28b; --line-2:#a7946a;
+  --bone:#2a2217; --bone-dim:#564830; --bone-mute:#7c6b4d;
+  --blood:#962d22; --blood-2:#b03d2c; --mana:#13726b; --mana-2:#1c867f; --gold:#85651b;
+  --ok:#2b7542; --warn:#98680f; --bad:#b03d2c;
   color:var(--bone); color-scheme:light;
 }
-#v-sheet .sc-STR{--sc:#c0392b}#v-sheet .sc-AGI{--sc:#2e8b3e}#v-sheet .sc-VIT{--sc:#c9680f}#v-sheet .sc-PER{--sc:#9c7a0a}#v-sheet .sc-INF{--sc:#7a4bd6}#v-sheet .sc-INT{--sc:#1e73be}
-#hud .hud-win .sc-STR{--sc:#c0392b}#hud .hud-win .sc-AGI{--sc:#2e8b3e}#hud .hud-win .sc-VIT{--sc:#c9680f}#hud .hud-win .sc-PER{--sc:#9c7a0a}#hud .hud-win .sc-INF{--sc:#7a4bd6}#hud .hud-win .sc-INT{--sc:#1e73be}
-#v-sheet.active{padding:16px 18px 24px;border-radius:12px;border:1px solid #cdbb92;background:radial-gradient(ellipse at 18% 8%,rgba(255,255,255,.55),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(140,110,60,.16),transparent 60%),linear-gradient(180deg,#f5ecd9,#eee3cb);box-shadow:0 24px 60px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.55),inset 0 0 60px rgba(120,90,40,.10)}
-#v-sheet.active>.stephead:first-child{border-bottom-color:rgba(120,90,40,.25)}
-#v-sheet .card,#v-sheet .cs .box{background:rgba(251,246,234,.85);border-color:var(--line);box-shadow:inset 0 0 0 1px rgba(141,107,30,.06),0 3px 10px rgba(80,60,20,.10);background-image:none}
-#v-sheet .card::before{border-color:rgba(141,107,30,.14)}
-#v-sheet .card.sel::before{border-color:rgba(21,122,115,.35)}
-#v-sheet .statbox,#v-sheet .kin-stats .s{background:#fbf6ea}
-#v-sheet .tag,#hud .hud-win .tag{background:rgba(141,107,30,.06)}
-#v-sheet button,#hud .hud-win button{background:linear-gradient(180deg,#fdf9f0,#ebe0c8);border-color:#b9a77f;color:var(--bone);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 1px 2px rgba(80,60,20,.15)}
-#v-sheet button:hover,#hud .hud-win button:hover{border-color:var(--gold);color:#1a140c}
-#v-sheet button.primary,#hud .hud-win button.primary{background:linear-gradient(180deg,#c84a3a,#9c2f23);border-color:#b9412f;color:#fff8ee;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 6px rgba(156,47,35,.25)}
-#v-sheet button.primary:hover,#hud .hud-win button.primary:hover{background:linear-gradient(180deg,#d65a49,#ad3528)}
-#v-sheet button.ghost,#hud .hud-win button.ghost{background:transparent;box-shadow:none}
-#v-sheet input,#v-sheet select,#v-sheet textarea,#hud .hud-win input,#hud .hud-win select,#hud .hud-win textarea{background:#fdf9f0;color:var(--bone);border-color:#bba97e;box-shadow:inset 0 1px 3px rgba(80,60,20,.14)}
-#v-sheet input::placeholder,#v-sheet textarea::placeholder,#hud .hud-win input::placeholder,#hud .hud-win textarea::placeholder{color:#a08f70}
-#v-sheet ::-webkit-scrollbar-track,#hud .hud-win ::-webkit-scrollbar-track{background:#e9dfc6}#v-sheet ::-webkit-scrollbar-thumb,#hud .hud-win ::-webkit-scrollbar-thumb{background:#bba97e;border-color:#e9dfc6}
-#v-sheet .die{background:#2b2318;color:#fbf6ea}
-#v-sheet .ptable .lw{color:#c9680f}#v-sheet .ptable .rc{color:#1e73be}
-#v-sheet .wslot,#hud .hud-win .wslot{background:linear-gradient(180deg,rgba(156,47,35,.08),rgba(90,40,30,.16));border-color:#b9a77f}
-#v-sheet .wslot.shield,#hud .hud-win .wslot.shield{background:linear-gradient(180deg,rgba(21,122,115,.08),rgba(20,60,80,.16))}
-#v-sheet .wslot .nm,#hud .hud-win .wslot .nm{color:var(--bone)}#v-sheet .wslot .sl,#hud .hud-win .wslot .sl{color:#7a5a2a}
-#v-sheet .wslot.filled,#hud .hud-win .wslot.filled{border-color:#8d6b1e}
-#v-sheet .term{border-bottom-color:var(--mana)}
-#v-sheet table.t th{color:var(--gold)}
-#v-sheet .roombar{color:var(--parch)}
-#v-sheet .resbar .bar,#v-sheet .bar{background:#e4d8bb}
-#hud .hud-win{background:linear-gradient(180deg,#f7efdc,#ebe0c6);border-color:#b08a46;box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 1px rgba(141,107,30,.18)}
-#hud .hud-win .hud-head{border-bottom-color:#cdbb92;background:linear-gradient(90deg,rgba(141,107,30,.14),transparent)}
-#hud .hud-win .tile{border-color:#c9b891;background:linear-gradient(160deg,#fdf9f0,#eee3cb);box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),0 2px 6px rgba(80,60,20,.15)}
-#hud .hud-win .tile.sel{box-shadow:0 0 0 2px rgba(141,107,30,.35),0 4px 10px rgba(80,60,20,.2)}
-#hud .hud-win .tile.add{background:transparent}
-#hud .hud-win .hud-detail{border-color:#c9b891;background:rgba(141,107,30,.06)}
-#hud .hud-win .book{border-color:#c9b891;background:linear-gradient(90deg,#efe4cb 0,#f6eedb 48%,#d9cba8 50%,#f6eedb 52%,#efe4cb 100%)}
-#hud .hud-win .book .toc{border-right-color:#cdbb92}#hud .hud-win .book .toc-i:hover{border-color:#b08a46}#hud .hud-win .book .toc-i.on{background:rgba(141,107,30,.14)}
-#hud .hud-win .dslot{border-color:#bba97e;background:rgba(141,107,30,.05)}#hud .hud-win .dslot.filled{border-color:#a08f70;background:linear-gradient(160deg,#fbf6ea,#ebe0c6)}
-#hud .hud-win .hud-x:hover{border-color:var(--blood);color:var(--blood)}
-@media (max-width:760px){#hud .hud-win .book .toc{border-bottom-color:#cdbb92}#v-sheet.active{padding:10px 10px 18px;border-radius:8px}}
+body.paper #v-sheet .sc-STR,body.paper #hud .hud-win .sc-STR{--sc:#b6321f}body.paper #v-sheet .sc-AGI,body.paper #hud .hud-win .sc-AGI{--sc:#2a7f38}body.paper #v-sheet .sc-VIT,body.paper #hud .hud-win .sc-VIT{--sc:#bd5f0c}body.paper #v-sheet .sc-PER,body.paper #hud .hud-win .sc-PER{--sc:#8f6f08}body.paper #v-sheet .sc-INF,body.paper #hud .hud-win .sc-INF{--sc:#7043cc}body.paper #v-sheet .sc-INT,body.paper #hud .hud-win .sc-INT{--sc:#1b69ad}
+body.paper #v-sheet.active{padding:16px 18px 24px;border-radius:12px;border:1px solid #b9a77f;background:radial-gradient(ellipse at 18% 8%,rgba(255,250,235,.30),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(120,90,40,.22),transparent 60%),linear-gradient(180deg,#e6dcc3,#d9cdaf);box-shadow:0 24px 60px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.35),inset 0 0 70px rgba(110,80,30,.14)}
+body.paper #v-sheet.active>.stephead:first-child{border-bottom-color:rgba(110,80,30,.3)}
+body.paper #v-sheet .card,body.paper #v-sheet .cs .box{background:rgba(238,230,210,.72);border-color:var(--line);box-shadow:inset 0 0 0 1px rgba(133,101,27,.06),0 3px 10px rgba(70,50,15,.12);background-image:none}
+body.paper #v-sheet .card::before{border-color:rgba(133,101,27,.16)}
+body.paper #v-sheet .card.sel::before{border-color:rgba(19,114,107,.35)}
+body.paper #v-sheet .statbox,body.paper #v-sheet .kin-stats .s{background:#ebe2ca}
+body.paper #v-sheet .tag,body.paper #hud .hud-win .tag{background:rgba(133,101,27,.07)}
+body.paper #v-sheet button,body.paper #hud .hud-win button{background:linear-gradient(180deg,#f0e8d4,#dccfb1);border-color:#a7946a;color:var(--bone);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 2px rgba(70,50,15,.18)}
+body.paper #v-sheet button:hover,body.paper #hud .hud-win button:hover{border-color:var(--gold);color:#17120a}
+body.paper #v-sheet button.on,body.paper #hud .hud-win button.on{border-color:var(--gold);color:var(--gold)}
+body.paper #v-sheet button.primary,body.paper #hud .hud-win button.primary{background:linear-gradient(180deg,#bf4536,#962d22);border-color:#b03d2c;color:#f6ecd8;box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 2px 6px rgba(150,45,34,.25)}
+body.paper #v-sheet button.primary:hover,body.paper #hud .hud-win button.primary:hover{background:linear-gradient(180deg,#cc5445,#a53427)}
+body.paper #v-sheet button.ghost,body.paper #hud .hud-win button.ghost{background:transparent;box-shadow:none}
+body.paper #v-sheet input,body.paper #v-sheet select,body.paper #v-sheet textarea,body.paper #hud .hud-win input,body.paper #hud .hud-win select,body.paper #hud .hud-win textarea{background:#f0e8d4;color:var(--bone);border-color:#a7946a;box-shadow:inset 0 1px 3px rgba(70,50,15,.16)}
+body.paper #v-sheet input::placeholder,body.paper #v-sheet textarea::placeholder,body.paper #hud .hud-win input::placeholder,body.paper #hud .hud-win textarea::placeholder{color:#978566}
+body.paper #v-sheet ::-webkit-scrollbar-track,body.paper #hud .hud-win ::-webkit-scrollbar-track{background:#dccfb1}body.paper #v-sheet ::-webkit-scrollbar-thumb,body.paper #hud .hud-win ::-webkit-scrollbar-thumb{background:#a7946a;border-color:#dccfb1}
+body.paper #v-sheet .die{background:#2a2217;color:#ece3cc}
+body.paper #v-sheet .ptable .lw{color:#bd5f0c}body.paper #v-sheet .ptable .rc{color:#1b69ad}
+body.paper #v-sheet .wslot,body.paper #hud .hud-win .wslot{background:linear-gradient(180deg,rgba(150,45,34,.09),rgba(90,40,30,.18));border-color:#a7946a}
+body.paper #v-sheet .wslot.shield,body.paper #hud .hud-win .wslot.shield{background:linear-gradient(180deg,rgba(19,114,107,.09),rgba(20,60,80,.18))}
+body.paper #v-sheet .wslot .nm,body.paper #hud .hud-win .wslot .nm{color:var(--bone)}body.paper #v-sheet .wslot .sl,body.paper #hud .hud-win .wslot .sl{color:#6f5226}
+body.paper #v-sheet .wslot.filled,body.paper #hud .hud-win .wslot.filled{border-color:#85651b}
+body.paper #v-sheet .term{border-bottom-color:var(--mana)}
+body.paper #v-sheet table.t th{color:var(--gold)}
+body.paper #v-sheet .roombar{color:var(--parch)}
+body.paper #v-sheet .resbar .bar,body.paper #v-sheet .bar{background:#d3c5a3}
+body.paper #hud .hud-win{background:linear-gradient(180deg,#e8ddc4,#d9cdaf);border-color:#a07d3e;box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 1px rgba(133,101,27,.2)}
+body.paper #hud .hud-win .hud-head{border-bottom-color:#bda97f;background:linear-gradient(90deg,rgba(133,101,27,.16),transparent)}
+body.paper #hud .hud-win .tile{border-color:#b9a77f;background:linear-gradient(160deg,#f0e8d4,#dccfb1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),0 2px 6px rgba(70,50,15,.18)}
+body.paper #hud .hud-win .tile.sel{box-shadow:0 0 0 2px rgba(133,101,27,.4),0 4px 10px rgba(70,50,15,.22)}
+body.paper #hud .hud-win .tile.add{background:transparent}
+body.paper #hud .hud-win .hud-detail{border-color:#b9a77f;background:rgba(133,101,27,.08)}
+body.paper #hud .hud-win .book{border-color:#b9a77f;background:linear-gradient(90deg,#dfd3b6 0,#e8ddc4 48%,#c9ba97 50%,#e8ddc4 52%,#dfd3b6 100%)}
+body.paper #hud .hud-win .book .toc{border-right-color:#bda97f}body.paper #hud .hud-win .book .toc-i:hover{border-color:#a07d3e}body.paper #hud .hud-win .book .toc-i.on{background:rgba(133,101,27,.16)}
+body.paper #hud .hud-win .dslot{border-color:#a7946a;background:rgba(133,101,27,.06)}body.paper #hud .hud-win .dslot.filled{border-color:#978566;background:linear-gradient(160deg,#ebe2ca,#dccfb1)}
+body.paper #hud .hud-win .hud-x:hover{border-color:var(--blood);color:var(--blood)}
+@media (max-width:760px){body.paper #hud .hud-win .book .toc{border-bottom-color:#bda97f}body.paper #v-sheet.active{padding:10px 10px 18px;border-radius:8px}}
+/* ปุ่มการแสดงผลที่แถบบน และกล่องตั้งค่า */
+.uibtn{font-size:16px;line-height:1;padding:4px 8px;margin-left:6px}
+.online+.uibtn{margin-left:0}
+@media (max-width:600px){.uibtn{margin-left:auto}}
+.uiset button.on{border-color:var(--gold);color:var(--gold)}
 </style>
 </head>
 <body class="bg-study">
@@ -837,6 +842,7 @@ table.t th{font-family:var(--font-display);font-size:11.5px;letter-spacing:.8px;
     <a href="#dev" data-v="dev" class="hidden" id="nav-dev">ผู้พัฒนา</a>
   </nav>
   <div class="online" id="online"><span class="dot"></span>โหมดออฟไลน์ (บันทึกในเครื่องนี้)</div>
+  <button class="small ghost uibtn" id="ui-settings" title="การแสดงผล: ขนาดตัวอักษรและโหมดสีของชีท" aria-label="การแสดงผล">⚙</button>
 </div></header>
 <main>
   <section class="view" id="v-home"></section>
@@ -885,6 +891,18 @@ const $ = (sel, root=document) => root.querySelector(sel);
 function clear(e){ while (e.firstChild) e.removeChild(e.firstChild); return e; }
 /* ล้างแล้ววาดใหม่โดยไม่ให้จอกระชากขึ้นหัวหน้า: คงความสูงเดิมไว้ระหว่างวาด แล้วคืนตำแหน่งเลื่อน (ผู้ใช้เคาะ 9 พ.ย. 2026) */
 function clearKeep(e){ if (!e) return e; const y = window.scrollY; const hgt = e.offsetHeight; if (hgt) e.style.minHeight = hgt + 'px'; clear(e); requestAnimationFrame(()=>{ e.style.minHeight = ''; if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y); }); return e; }
+/* ===== การแสดงผล (v1.8): ขนาด UI ด้วย CSS zoom ที่ body และโหมดสีของชีทตัวละคร (กระดาษ / มืดแบบเดิม) จำไว้ในเบราว์เซอร์ (ผู้ใช้เคาะ 9 พ.ย. 2026) ===== */
+const UI = {
+  zoom: null, theme: 'paper',
+  load(){ try { Object.assign(this, JSON.parse(localStorage.getItem('kirana.ui')||'{}')); } catch(e){} if (!(this.zoom > 0)) this.zoom = window.innerWidth >= 900 ? 1.15 : 1; if (this.theme !== 'dark') this.theme = 'paper'; },
+  persist(){ try { localStorage.setItem('kirana.ui', JSON.stringify({zoom:this.zoom, theme:this.theme})); } catch(e){} },
+  apply(){ document.body.style.zoom = this.zoom === 1 ? '' : String(this.zoom); document.body.classList.toggle('paper', this.theme==='paper'); document.body.classList.toggle('sheet-dark', this.theme!=='paper'); },
+};
+UI.load(); UI.apply();
+/* ตัวคูณ zoom ปัจจุบัน: พิกัดจากเมาส์/getBoundingClientRect/innerWidth เป็นพิกัดจอ ส่วน style.left/top ของธาตุใน body เป็นพิกัดที่ถูกย่อขยาย ต้องหารด้วยค่านี้ */
+function uiZoom(){ const b = document.body; if (!b) return 1; const z = b.currentCSSZoom; if (z > 0) return z; const s = parseFloat(getComputedStyle(b).zoom); return s > 0 ? s : 1; }
+function vw(){ return window.innerWidth / uiZoom(); }
+function vh(){ return window.innerHeight / uiZoom(); }
 function tag(text, cls){ return h('span', {class:'tag' + (cls ? ' ' + cls : ''), text}); }
 function signed(n){ return (n > 0 ? '+' : '') + n; }
 function uid(){ const a='abcdefghijkmnpqrstuvwxyz23456789'; let s=''; const r=crypto.getRandomValues(new Uint8Array(12)); for (const b of r) s+=a[b%a.length]; return s; }
@@ -1183,7 +1201,7 @@ function showOnlineList(anchor){
   onlPop = h('div',{class:'pop onl-pop',role:'dialog'}, h('div',{class:'pop-h'}, h('b',{text:`ออนไลน์ ${list.length} คน`}), h('button',{class:'small ghost',style:'margin-left:auto',onclick:()=>{ onlPop.remove(); onlPop=null; },text:'✕'})),
     h('div',{class:'pop-b'}, list.length ? list.map(p=>h('div',{class:'onl-row'}, h('span',{class:'dot on'}), h('b',{text:p.name||'?'}), p.dev? tag('ผู้พัฒนา','prop'):null, p.anon? tag('นิรนาม'):null, p.room? h('a',{href:'#room-'+p.room,class:'dim',style:'font-size:12px',text:' อยู่ในห้อง '+(p.roomName||p.room)}):null)) : h('div',{class:'dim',text:'ไม่มีใครออนไลน์'})));
   document.body.append(onlPop);
-  const r = anchor.getBoundingClientRect(); onlPop.style.width='300px'; onlPop.style.right='12px'; onlPop.style.top=(r.bottom+8+window.scrollY)+'px';
+  const r = anchor.getBoundingClientRect(); const z = uiZoom(); onlPop.style.width='300px'; onlPop.style.right='12px'; onlPop.style.top=((r.bottom+8+window.scrollY)/z)+'px';
   setTimeout(()=>document.addEventListener('click', function once(e){ if (onlPop && !onlPop.contains(e.target)){ onlPop.remove(); onlPop=null; } document.removeEventListener('click', once); }), 0);
 }
 
@@ -1246,12 +1264,12 @@ function showTerm(term, anchor){
   const g = GLOSSARY[term]; if (!g) return;
   popEl = h('div', {class:'pop', role:'dialog'}, h('div', {class:'pop-h'}, h('b', {text: term}), g.th ? h('span', {class:'dim', text:' ' + g.th}) : null, h('button', {class:'small ghost', style:'margin-left:auto', onclick:hideTerm, text:'✕'})), h('div', {class:'pop-b'}, termifyShallow(g.text)), h('div', {class:'pop-c', text: g.cat||''}));
   document.body.append(popEl);
-  const r = anchor.getBoundingClientRect(); const pw = Math.min(360, window.innerWidth - 24);
+  const z = uiZoom(); const r = anchor.getBoundingClientRect(); const pw = Math.min(360, vw() - 24); // พิกัดจอ → พิกัดหลัง zoom
   popEl.style.width = pw + 'px';
-  let left = Math.max(12, Math.min(r.left, window.innerWidth - pw - 12));
-  let top = r.bottom + 8 + window.scrollY;
+  let left = Math.max(12, Math.min(r.left/z, vw() - pw - 12));
+  let top = (r.bottom + 8 + window.scrollY)/z;
   popEl.style.left = left + 'px'; popEl.style.top = top + 'px';
-  requestAnimationFrame(()=>{ const ph = popEl.offsetHeight; if (r.bottom + 8 + ph > window.innerHeight) popEl.style.top = Math.max(12, r.top - ph - 8) + window.scrollY + 'px'; });
+  requestAnimationFrame(()=>{ const ph = popEl.offsetHeight; if (r.bottom/z + 8 + ph > vh()) popEl.style.top = Math.max(12, r.top/z - ph - 8) + window.scrollY/z + 'px'; });
   setTimeout(()=>document.addEventListener('click', hideTermOnce), 0);
 }
 function termifyShallow(text){ // one level only, no nested popups inside popup text
@@ -2402,7 +2420,7 @@ function renderSheet(id){
   idb.querySelector('.row .row').append(...[h('button',{class:'small ghost',title:'ลากย้ายและปรับขนาดทุกกรอบได้ตามถนัด',onclick:()=>{ if (lay.free){ lay.free=false; saveLayout(lay); } else { lay.free=true; saveLayout(lay); } rerender(); },text: lay.free ? 'กลับเป็นแบบตาราง' : 'จัดวางกรอบเอง'}), lay.free ? h('button',{class:'small ghost',onclick:()=>{ if (!confirm('ล้างการจัดวางที่บันทึกไว้?')) return; saveLayout({free:true, boxes:{}}); rerender(); },text:'รีเซ็ตตำแหน่ง'}) : null].filter(Boolean));
   root.append(cs);
   packColumns(cs, order);
-  if (lay.free && window.innerWidth > 760) applyFreeLayout(cs, lay);
+  if (lay.free && vw() > 760) applyFreeLayout(cs, lay);
   renderHUD(c, d, {save, rerender, txt, grow, dice: diceOpts});
   if (readOnly) lockForm(root);
 }
@@ -2414,8 +2432,8 @@ function saveLayout(l){ try{ localStorage.setItem('kirana.sheetLayout', JSON.str
 function applyFreeLayout(cs, lay){
   const boxes = [...cs.querySelectorAll('.box[data-k]')];
   // ตำแหน่งตั้งต้น = ตำแหน่งในตารางปัจจุบัน (วัดก่อนปลดออกจากกริด)
-  const base = cs.getBoundingClientRect();
-  const rects = boxes.map(b=>{ const r = b.getBoundingClientRect(); return {x:r.left-base.left, y:r.top-base.top, w:r.width, h:r.height}; });
+  const base = cs.getBoundingClientRect(); const z0 = uiZoom(); // พิกัดจอ → พิกัดหลัง zoom
+  const rects = boxes.map(b=>{ const r = b.getBoundingClientRect(); return {x:(r.left-base.left)/z0, y:(r.top-base.top)/z0, w:r.width/z0, h:r.height/z0}; });
   cs.classList.add('free');
   let maxBottom = 0;
   boxes.forEach((b,i)=>{
@@ -2425,9 +2443,9 @@ function applyFreeLayout(cs, lay){
     maxBottom = Math.max(maxBottom, y+hgt);
     const grip = h('div',{class:'box-grip',title:'ลากเพื่อย้าย · ดึงมุมขวาล่างเพื่อปรับขนาด'}, h('span',{class:'dots',text:'⋮⋮'}), h('span',{class:'dim',text:'ย้าย'}));
     b.prepend(grip);
-    let sx=0, sy=0, ox=0, oy=0, id=null;
-    grip.addEventListener('pointerdown', (e)=>{ if (e.button!==0) return; lay.zTop = (lay.zTop||1)+1; b.style.zIndex = lay.zTop; id=e.pointerId; grip.setPointerCapture(id); sx=e.clientX; sy=e.clientY; ox=parseFloat(b.style.left); oy=parseFloat(b.style.top); b.classList.add('dragging'); e.preventDefault(); });
-    grip.addEventListener('pointermove', (e)=>{ if (id==null || e.pointerId!==id) return; const nx = Math.max(0, Math.min(cs.clientWidth - b.offsetWidth, ox + e.clientX - sx)), ny = Math.max(0, oy + e.clientY - sy); b.style.left = nx+'px'; b.style.top = ny+'px'; });
+    let sx=0, sy=0, ox=0, oy=0, id=null, z=1;
+    grip.addEventListener('pointerdown', (e)=>{ if (e.button!==0) return; lay.zTop = (lay.zTop||1)+1; b.style.zIndex = lay.zTop; id=e.pointerId; grip.setPointerCapture(id); z = uiZoom(); sx=e.clientX; sy=e.clientY; ox=parseFloat(b.style.left); oy=parseFloat(b.style.top); b.classList.add('dragging'); e.preventDefault(); });
+    grip.addEventListener('pointermove', (e)=>{ if (id==null || e.pointerId!==id) return; const nx = Math.max(0, Math.min(cs.clientWidth - b.offsetWidth, ox + (e.clientX - sx)/z)), ny = Math.max(0, oy + (e.clientY - sy)/z); b.style.left = nx+'px'; b.style.top = ny+'px'; });
     const up = ()=>{ if (id==null) return; try{ grip.releasePointerCapture(id); }catch(x){} id=null; b.classList.remove('dragging'); store(); fitHeight(); };
     grip.addEventListener('pointerup', up); grip.addEventListener('pointercancel', up);
     const store = ()=>{ lay.boxes[k] = {x:parseFloat(b.style.left), y:parseFloat(b.style.top), w:b.offsetWidth, h:b.offsetHeight, z: +b.style.zIndex||0}; saveLayout(lay); };
@@ -2439,7 +2457,7 @@ function applyFreeLayout(cs, lay){
 
 /* จัดกรอบลงคอลัมน์: วัดความสูงจริงแล้ววางทีละกรอบลงคอลัมน์ที่เตี้ยที่สุด (ลำดับคงเดิม) */
 function packColumns(cs, boxes){
-  const n = window.innerWidth <= 760 ? 1 : (window.innerWidth <= 1100 ? 2 : 3);
+  const n = vw() <= 760 ? 1 : (vw() <= 1100 ? 2 : 3);
   const cols = Array.from({length:n}, ()=>h('div',{class:'cscol'}));
   cs.append(...cols);
   // วัดในคอลัมน์แรกก่อน (ทุกคอลัมน์กว้างเท่ากัน)
@@ -2502,8 +2520,9 @@ function svgEl(name, cls){ const w = document.createElement('span'); w.className
 function makeDraggable(el, handle, onEnd){
   let sx=0, sy=0, ox=0, oy=0, moved=false, id=null;
   handle.style.touchAction = 'none';
-  handle.addEventListener('pointerdown', (e)=>{ if (e.button!==0 || e.target.closest('button,input,textarea,select')) return; id = e.pointerId; handle.setPointerCapture(id); const r = el.getBoundingClientRect(); sx=e.clientX; sy=e.clientY; ox=r.left; oy=r.top; moved=false; el.classList.add('dragging'); e.preventDefault(); });
-  handle.addEventListener('pointermove', (e)=>{ if (id==null || e.pointerId!==id) return; const dx=e.clientX-sx, dy=e.clientY-sy; if (Math.abs(dx)+Math.abs(dy) > 3) moved=true; const w = el.offsetWidth, hh = el.offsetHeight; const x = Math.max(4, Math.min(window.innerWidth - w - 4, ox+dx)), y = Math.max(4, Math.min(window.innerHeight - hh - 4, oy+dy)); el.style.left = x+'px'; el.style.top = y+'px'; el.style.right='auto'; el.style.bottom='auto'; });
+  let z = 1; // พิกัดเมาส์เป็นพิกัดจอ style.left/top เป็นพิกัดที่ถูก zoom (ดู uiZoom)
+  handle.addEventListener('pointerdown', (e)=>{ if (e.button!==0 || e.target.closest('button,input,textarea,select')) return; id = e.pointerId; handle.setPointerCapture(id); z = uiZoom(); const r = el.getBoundingClientRect(); sx=e.clientX; sy=e.clientY; ox=r.left/z; oy=r.top/z; moved=false; el.classList.add('dragging'); e.preventDefault(); });
+  handle.addEventListener('pointermove', (e)=>{ if (id==null || e.pointerId!==id) return; const dx=(e.clientX-sx)/z, dy=(e.clientY-sy)/z; if (Math.abs(dx)+Math.abs(dy) > 3) moved=true; const w = el.offsetWidth, hh = el.offsetHeight; const x = Math.max(4, Math.min(window.innerWidth/z - w - 4, ox+dx)), y = Math.max(4, Math.min(window.innerHeight/z - hh - 4, oy+dy)); el.style.left = x+'px'; el.style.top = y+'px'; el.style.right='auto'; el.style.bottom='auto'; });
   const up = (e)=>{ if (id==null) return; try{ handle.releasePointerCapture(id); }catch(x){} id=null; el.classList.remove('dragging'); if (moved && onEnd) onEnd({x: parseFloat(el.style.left), y: parseFloat(el.style.top)}); if (moved) el.dataset.justDragged = '1'; setTimeout(()=>{ delete el.dataset.justDragged; }, 50); };
   handle.addEventListener('pointerup', up); handle.addEventListener('pointercancel', up);
 }
@@ -2536,7 +2555,7 @@ function renderHUD(c, d, ctx){
   const body = h('div',{class:'hud-body'});
   win.append(head, body);
   const wp = HUD.winPos[HUD.open]; if (wp){ win.style.left = wp.x+'px'; win.style.top = wp.y+'px'; win.style.right='auto'; if (wp.w) win.style.width = wp.w+'px'; if (wp.h) win.style.height = wp.h+'px'; }
-  { const key = HUD.open; let first = true; new ResizeObserver(()=>{ if (first){ first=false; return; } if (!win.isConnected || !win.offsetWidth || !win.offsetHeight) return; /* หน้าต่างที่ถูกถอดจาก DOM มีขนาด 0 ห้ามจำ ไม่งั้นเด้งไปมุมซ้ายบน */ const rct = win.getBoundingClientRect(); const cur = HUD.winPos[key] || {x: Math.max(0, Math.round(rct.left)), y: Math.max(0, Math.round(rct.top))}; HUD.winPos[key] = {...cur, w: win.offsetWidth, h: win.offsetHeight}; HUD.persist(); }).observe(win); }
+  { const key = HUD.open; let first = true; new ResizeObserver(()=>{ if (first){ first=false; return; } if (!win.isConnected || !win.offsetWidth || !win.offsetHeight) return; /* หน้าต่างที่ถูกถอดจาก DOM มีขนาด 0 ห้ามจำ ไม่งั้นเด้งไปมุมซ้ายบน */ const rct = win.getBoundingClientRect(); const z = uiZoom(); const cur = HUD.winPos[key] || {x: Math.max(0, Math.round(rct.left/z)), y: Math.max(0, Math.round(rct.top/z))}; HUD.winPos[key] = {...cur, w: win.offsetWidth, h: win.offsetHeight}; HUD.persist(); }).observe(win); }
   root.append(win);
   makeDraggable(win, head, (p)=>{ HUD.winPos[HUD.open] = {...(HUD.winPos[HUD.open]||{}), ...p}; HUD.persist(); });
   hudCtx = ctx;
@@ -3225,7 +3244,7 @@ const TWin = {
 };
 TWin.load();
 const TWIN_TITLE = {order:'⚔ ลำดับเทิร์นและหมาก', tok:'🎯 หมากที่เลือก', dice:'🎲 ทอยเต๋า'};
-function isNarrow(){ return window.innerWidth < 900; }
+function isNarrow(){ return vw() < 900; }
 function twinsRoot(){ let root = $('#twins'); if (!root){ root = h('div',{id:'twins'}); document.body.append(root); } return root; }
 function clearTwins(){ const root = $('#twins'); if (root) clear(root); }
 function renderTwins(r, gm){
@@ -3269,14 +3288,15 @@ function twin(key){
   else if (key==='tok'){ win.style.right = '14px'; win.style.top = '84px'; }
   else { win.style.right = TWin.float.tok ? '390px' : '14px'; win.style.top = '84px'; } // ลำดับเทิร์นอยู่ซ้ายของหมากที่เลือกเมื่อลอยทั้งคู่
   // ขนาดจากการย่อขยายด้วยมือเท่านั้น: หน้าต่างที่หลุดจาก DOM หรือยุบอยู่มีขนาด 0 ต้องไม่ถูกจำ (ตัวการที่ทำให้เด้งไปมุมซ้ายบนใน v1.6)
-  let first = true; new ResizeObserver(()=>{ if (first){ first=false; return; } if (!win.isConnected || TWin.collapsed[key] || !win.offsetWidth || !win.offsetHeight) return; const cur = TWin.pos[key]; if (cur && cur.w===win.offsetWidth && cur.h===win.offsetHeight) return; const rct = win.getBoundingClientRect(); TWin.pos[key] = {x: Math.max(0, Math.round(rct.left)), y: Math.max(0, Math.round(rct.top)), w: win.offsetWidth, h: win.offsetHeight}; TWin.persist(); }).observe(win);
+  let first = true; new ResizeObserver(()=>{ if (first){ first=false; return; } if (!win.isConnected || TWin.collapsed[key] || !win.offsetWidth || !win.offsetHeight) return; const cur = TWin.pos[key]; if (cur && cur.w===win.offsetWidth && cur.h===win.offsetHeight) return; const rct = win.getBoundingClientRect(); const z = uiZoom(); TWin.pos[key] = {x: Math.max(0, Math.round(rct.left/z)), y: Math.max(0, Math.round(rct.top/z)), w: win.offsetWidth, h: win.offsetHeight}; TWin.persist(); }).observe(win);
   makeDraggable(win, head, (pp)=>{ TWin.pos[key] = {...(TWin.pos[key]||{w: win.offsetWidth, h: win.offsetHeight}), x: Math.round(pp.x), y: Math.round(pp.y)}; TWin.persist(); });
   return win;
 }
 /* ดันหน้าต่าง/แท็บที่หลุดขอบจอกลับเข้ามา (ไม่รีเซ็ตตำแหน่ง) */
 function clampToViewport(el){
-  const rct = el.getBoundingClientRect(); if (!rct.width) return;
-  const maxX = Math.max(4, window.innerWidth - rct.width - 4), maxY = Math.max(4, window.innerHeight - Math.min(rct.height, 120) - 4);
+  const r0 = el.getBoundingClientRect(); if (!r0.width) return; const z = uiZoom();
+  const rct = {left:r0.left/z, top:r0.top/z, width:r0.width/z, height:r0.height/z}; // พิกัดหลัง zoom ให้ตรงกับ style.left/top
+  const maxX = Math.max(4, vw() - rct.width - 4), maxY = Math.max(4, vh() - Math.min(rct.height, 120) - 4);
   if (rct.left >= 0 && rct.top >= 0 && rct.left <= maxX && rct.top <= maxY) return;
   const x = Math.min(maxX, Math.max(4, rct.left)), y = Math.min(maxY, Math.max(4, rct.top));
   el.style.left = x+'px'; el.style.top = y+'px'; el.style.right = 'auto'; el.style.bottom = 'auto';
@@ -3468,8 +3488,8 @@ function enableTokenDrag(tk, t, r, grid, gm, fogSet){
     const pid = e.pointerId; const start = {x:e.clientX, y:e.clientY}; let ghost = null, moved = false, lastCell = null;
     try { tk.setPointerCapture(pid); } catch(x){}
     const onMove = (ev)=>{ if (ev.pointerId!==pid) return; const dx = ev.clientX-start.x, dy = ev.clientY-start.y; if (!moved && Math.hypot(dx,dy) < 6) return;
-      if (!moved){ moved = true; const rct = tk.getBoundingClientRect(); ghost = tk.cloneNode(true); ghost.classList.add('ghost'); Object.assign(ghost.style, {position:'fixed', left:rct.left+'px', top:rct.top+'px', width:rct.width+'px', height:rct.height+'px', inset:'auto', zIndex:1000, pointerEvents:'none', opacity:.9, margin:0}); ghost.dataset.ox = String(rct.left - start.x); ghost.dataset.oy = String(rct.top - start.y); document.body.append(ghost); tk.classList.add('lifting'); }
-      ghost.style.left = (ev.clientX + parseFloat(ghost.dataset.ox))+'px'; ghost.style.top = (ev.clientY + parseFloat(ghost.dataset.oy))+'px';
+      if (!moved){ moved = true; const z = uiZoom(); const rct = tk.getBoundingClientRect(); ghost = tk.cloneNode(true); ghost.classList.add('ghost'); Object.assign(ghost.style, {position:'fixed', left:(rct.left/z)+'px', top:(rct.top/z)+'px', width:(rct.width/z)+'px', height:(rct.height/z)+'px', inset:'auto', zIndex:1000, pointerEvents:'none', opacity:.9, margin:0}); ghost.dataset.z = String(z); ghost.dataset.ox = String((rct.left - start.x)/z); ghost.dataset.oy = String((rct.top - start.y)/z); document.body.append(ghost); tk.classList.add('lifting'); }
+      { const z = parseFloat(ghost.dataset.z)||1; ghost.style.left = (ev.clientX/z + parseFloat(ghost.dataset.ox))+'px'; ghost.style.top = (ev.clientY/z + parseFloat(ghost.dataset.oy))+'px'; }
       const cell = cellAtPoint(grid, ev.clientX, ev.clientY); if (cell !== lastCell){ if (lastCell) lastCell.classList.remove('drop'); if (cell) cell.classList.add('drop'); lastCell = cell; } };
     const onUp = (ev)=>{ if (ev.pointerId!==pid) return; tk.removeEventListener('pointermove', onMove); tk.removeEventListener('pointerup', onUp); tk.removeEventListener('pointercancel', onUp); try { tk.releasePointerCapture(pid); } catch(x){} if (ghost) ghost.remove(); tk.classList.remove('lifting'); if (lastCell) lastCell.classList.remove('drop');
       if (!moved || ev.type==='pointercancel'){ if (!moved) selectToken(t, r, gm); return; }
@@ -3853,7 +3873,7 @@ const POLICY = [
     'โต๊ะเล่น: ห้องที่คุณสร้างหรือเข้าร่วม แผนที่ ตำแหน่งหมาก สถานะ ค่าพลังบนหมาก ข้อความแชต ผลทอยเต๋า ไอเทมที่ GM มอบ และรหัสเข้าห้องที่ GM ตั้ง (รหัสเก็บแยกและไม่มีใครอ่านผ่านเว็บได้ ระบบใช้เทียบตอนเข้าห้องเท่านั้น)',
     'คลังแผนที่: แผนที่ที่คุณสร้าง คำอธิบาย และ NPC ที่เตรียมไว้',
     'สถานะออนไลน์: ขณะเปิดเว็บ ระบบบันทึกว่าคุณออนไลน์และอยู่ในห้องไหน เพื่อให้เพื่อนร่วมโต๊ะเห็นว่าใครอยู่ ข้อมูลนี้หมดอายุเองภายในไม่กี่นาทีหลังปิดหน้าเว็บ',
-    'ในเครื่องของคุณ: เบราว์เซอร์เก็บสำเนาตัวละคร ตำแหน่งปุ่มลอย ความคืบหน้าบทสอนเล่น รหัส GM ของห้องที่คุณเป็น GM และผังชีทที่คุณจัดเอง ข้อมูลส่วนนี้อยู่ในเครื่องคุณเท่านั้น ลบได้ด้วยการออกจากระบบหรือล้างข้อมูลเว็บไซต์ในเบราว์เซอร์',
+    'ในเครื่องของคุณ: เบราว์เซอร์เก็บสำเนาตัวละคร ตำแหน่งปุ่มลอยและหน้าปัด ความคืบหน้าบทสอนเล่น รหัส GM ของห้องที่คุณเป็น GM ผังชีทที่คุณจัดเอง และค่าการแสดงผล (ขนาด UI โหมดสีของชีท) ข้อมูลส่วนนี้อยู่ในเครื่องคุณเท่านั้น ลบได้ด้วยการออกจากระบบหรือล้างข้อมูลเว็บไซต์ในเบราว์เซอร์',
     'ที่อยู่ไอพี: ถ้าเว็บเปิดโหมดต้องเข้าสู่ระบบ ขณะโหลดหน้าแรกเว็บจะขอที่อยู่ไอพีสาธารณะของคุณจากบริการ api.ipify.org หนึ่งครั้ง เพื่อจำเครื่องของผู้พัฒนา ค่านี้ใช้เทียบในหน่วยความจำแล้วทิ้ง ไม่ได้บันทึกลงฐานข้อมูล',
     'เว็บไม่ใช้คุกกี้โฆษณา ไม่มีระบบติดตามพฤติกรรม และไม่ขายหรือส่งต่อข้อมูลให้ใคร',
   ]},
@@ -4302,7 +4322,19 @@ function route(){
   }
   if (changedView) window.scrollTo(0, 0); // เปลี่ยนหน้า = เริ่มที่หัวหน้า ส่วนการวาดใหม่ในหน้าเดิมคงตำแหน่งเดิม (clearKeep)
 }
+/* ---- การแสดงผล: ขนาด UI และโหมดสีของชีท (ปุ่ม ⚙ มุมขวาบน) ---- */
+function uiSettingsModal(){
+  const box = h('div',{class:'uiset'});
+  const build = ()=>{ clear(box);
+    box.append(h('h3',{text:'การแสดงผล'}), h('p',{class:'desc',style:'margin:4px 0 10px',text:'ค่าพวกนี้จำไว้ในเบราว์เซอร์เครื่องนี้ ไม่ติดไปกับบัญชี'}));
+    box.append(h('div',{class:'kicker',text:'ขนาดตัวอักษรและปุ่ม'}), h('div',{class:'row',style:'margin:6px 0 12px'}, [[1,'ปกติ 100%'],[1.15,'ใหญ่ 115%'],[1.3,'ใหญ่มาก 130%'],[1.45,'ใหญ่ที่สุด 145%']].map(([zz,l])=>h('button',{class:'small'+(Math.abs(UI.zoom-zz)<.01?' on':''),onclick:()=>{ UI.zoom = zz; UI.persist(); UI.apply(); build(); },text:l}))));
+    box.append(h('div',{class:'kicker',text:'โหมดสีของชีทตัวละคร'}), h('div',{class:'row',style:'margin:6px 0 4px'}, [['paper','☀ กระดาษ (สว่าง)'],['dark','☾ มืด (แบบเดิม)']].map(([t,l])=>h('button',{class:'small'+(UI.theme===t?' on':''),onclick:()=>{ UI.theme = t; UI.persist(); UI.apply(); build(); },text:l}))),
+      h('p',{class:'dim',style:'font-size:12px;margin:4px 0 0',text:'มีผลกับชีทตัวละครและหน้าต่างกระเป๋า ถุงย่าม คัมภีร์ ทอยเต๋าในชีท ส่วนอื่นของเว็บเป็นโทนมืดเสมอ'}));
+  };
+  build(); modal(box);
+}
 window.addEventListener('hashchange', route);
+{ const b = $('#ui-settings'); if (b) b.addEventListener('click', uiSettingsModal); }
 Store.listeners.add(()=>{ const hsh=location.hash; if (hsh==='#chars') renderChars(); else if (hsh==='' || hsh==='#home') renderHome(); });
 route();
 initCapabilities().then(()=>{ Store.ready = true; if (location.hash==='#table') renderTableHome(); if (location.hash==='#chars') renderChars(); if (location.hash==='#maps') renderMaps(); { const me = location.hash.match(/^#mapedit-([a-z0-9]+)$/); if (me) renderMapEditor(me[1]); } if (location.hash==='#dev'){ if (devAllowed()) renderDev(); else location.hash='#home'; } const m = location.hash.match(/^#room-([a-z0-9]+)$/); if (m){ Table.close(); Table.open(m[1]); } if (Store.isDevUid) $('#nav-dev').classList.remove('hidden'); });
