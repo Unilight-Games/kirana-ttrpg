@@ -989,6 +989,35 @@ body.paper #hud .hud-win .hud-x:hover{border-color:var(--blood);color:var(--bloo
 .uiset button.on{border-color:var(--gold);color:var(--gold)}
 button.danger{color:var(--blood-2)}button.danger:hover{border-color:var(--blood-2);color:var(--blood-2)}
 body.paper #v-sheet button.danger{color:var(--blood)}
+/* v1.19: ดาวและคอมเมนต์ของผลงานที่เผยแพร่ (แผนที่ NPC และ Asset) */
+.rvstars{position:relative;display:inline-block;line-height:1;white-space:nowrap;font-size:14px;letter-spacing:1px;font-family:var(--font-body);vertical-align:-1px}
+.rvstars .rvs-bg{color:var(--line-2)}
+.rvstars .rvs-fg{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:var(--gold)}
+.rvstars.big{font-size:20px}
+button.rvchip{display:inline-flex;align-items:center;gap:5px;margin-top:2px;padding:2px 9px;border-radius:999px;font-size:12.5px;border-color:var(--line-2)}
+button.rvchip:hover{border-color:var(--gold)}
+select.rvsort{font-size:13px;padding:3px 8px}
+.rvsum{display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:12px 0 4px}
+.rvavg{min-width:150px}
+.rvavg>b{font-family:var(--font-display);font-size:34px;line-height:1;margin-right:8px;color:var(--gold)}
+.rvdist{flex:1;min-width:210px;display:grid;gap:3px}
+.rvbar{display:grid;grid-template-columns:28px 1fr 24px;gap:8px;align-items:center;font-size:12px}
+.rvbar>i{display:block;height:8px;border-radius:4px;background:var(--ink-3);overflow:hidden}
+.rvbar>i>b{display:block;height:100%;background:var(--gold)}
+.rvmine{border:1px solid var(--line-2);border-radius:8px;padding:10px 12px;margin:12px 0 0;background:rgba(0,0,0,.22)}
+.rvmine textarea{width:100%;min-height:76px;margin-top:6px}
+.rvpick{display:flex;align-items:center;gap:1px;margin-top:6px;flex-wrap:wrap}
+.rvbox button.rvstarbtn{border:0;background:none;box-shadow:none;font-size:27px;line-height:1;padding:1px 3px;color:var(--line-2)}
+.rvbox button.rvstarbtn.on,.rvbox button.rvstarbtn:hover{color:var(--gold)}
+.rvbox .rvclear{margin-left:8px}
+.rvblk{margin-top:12px}
+.rvlist{display:grid;gap:8px;margin-top:8px}
+.rvitem{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:rgba(0,0,0,.2)}
+.rvitem.me{border-color:rgba(212,168,74,.55)}
+.rvhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rvhead .rvname{overflow-wrap:anywhere}
+.rvhead .rvdate{margin-left:auto;font-size:12px}
+.rvtext{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13.5px}
 </style>
 </head>
 <body class="bg-study">
@@ -4619,7 +4648,7 @@ function renderPeers(){ const p = document.getElementById('peers'); if (!p) retu
 /* v1.18: คอลเลกชัน maps เก็บรายการของคลัง NPC / Asset ด้วย (แยกด้วยฟิลด์ type ดู npcs.js) คลังแผนที่จึงรับเฉพาะเอกสารที่ไม่มี type หรือ type เป็น map */
 function isMapDoc(m){ return !!m && (!m.type || m.type==='map'); }
 const MapLib = {
-  mine: [], pub: [], unsub: [], loaded: false, tab: 'mine', q: '', localKey: 'kirana.maps.v1',
+  mine: [], pub: [], unsub: [], loaded: false, tab: 'mine', q: '', sort: 'new', localKey: 'kirana.maps.v1',
   loadLocal(){ try { return JSON.parse(localStorage.getItem(this.localKey)||'[]'); } catch(e){ return []; } },
   saveLocal(list){ try { localStorage.setItem(this.localKey, JSON.stringify(list)); } catch(e){} },
   isMine(m){ return !!m && (!Store.db || m.ownerId===Store.me || !m.ownerId); },
@@ -4689,7 +4718,7 @@ function confirmPublish(m){ if (m.published) return true; if (!m.image) return t
 /* ---- หน้า #maps: คลังของฉัน + ค้นหาแผนที่ที่เผยแพร่ ---- */
 function renderMaps(){
   const root = clearKeep($('#v-maps'));
-  root.append(h('div',{class:'stephead'}, h('div',null, h('h2',{text:'สร้างและค้นหาแผนที่'}), h('p',{text:'GM เตรียมด่านและสถานที่ไว้ก่อนเปิดโต๊ะ วาดพื้น ตั้งระดับแสง วาง NPC แล้วเก็บไว้ในคลังส่วนตัว แผนที่จะยังเป็นส่วนตัวจนกว่าจะกดเผยแพร่ ผู้เล่นคนอื่นค้นหาแผนที่ที่เผยแพร่แล้วเก็บสำเนาไปใช้ในโต๊ะของตัวเองได้'})),
+  root.append(h('div',{class:'stephead'}, h('div',null, h('h2',{text:'สร้างและค้นหาแผนที่'}), h('p',{text:'GM เตรียมด่านและสถานที่ไว้ก่อนเปิดโต๊ะ วาดพื้น ตั้งระดับแสง วาง NPC แล้วเก็บไว้ในคลังส่วนตัว แผนที่จะยังเป็นส่วนตัวจนกว่าจะกดเผยแพร่ ผู้เล่นคนอื่นค้นหาแผนที่ที่เผยแพร่แล้วเก็บสำเนาไปใช้ในโต๊ะของตัวเองได้ และให้ดาวกับคอมเมนต์บอกผู้สร้างได้ว่าใช้แล้วเป็นอย่างไร'})),
     h('div',{class:'row'}, h('button',{class:'primary',onclick:async()=>{ const m = MapLib.newMap(); if (await MapLib.save(m)) location.hash = '#mapedit-'+m.id; },text:'+ สร้างแผนที่ใหม่'}))));
   if (!Store.db) root.append(h('div',{class:'warnbox',style:'margin-bottom:12px'}, 'โหมดออฟไลน์: แผนที่เก็บในเบราว์เซอร์นี้เท่านั้น เผยแพร่ให้คนอื่นเห็นไม่ได้จนกว่าจะเชื่อมต่อ'));
   const tabs = h('div',{class:'row tabs',style:'margin-bottom:10px'},
@@ -4697,6 +4726,9 @@ function renderMaps(){
     h('button',{class:'small'+(MapLib.tab==='pub'?' primary':''),onclick:async()=>{ MapLib.tab='pub'; renderMaps(); await MapLib.loadPublished(); if (location.hash==='#maps') renderMaps(); },text:'ค้นหาแผนที่ที่เผยแพร่'}));
   const q = h('input',{placeholder:'ค้นหาชื่อ สถานที่ หรือคำอธิบาย',style:'min-width:240px',value:MapLib.q}); q.oninput = ()=>{ MapLib.q = q.value; drawList(); };
   tabs.append(q);
+  // v1.19: ดาวและคอมเมนต์ของแผนที่ที่เผยแพร่ (ตัวเลือกการเรียงอยู่ในแท็บค้นหา ปุ่มรีวิวของฉันอยู่ทั้งสองแท็บ)
+  const rvSort = MapLib.tab==='pub' ? rvSortSelect(MapLib, ()=>drawList()) : null; if (rvSort) tabs.append(rvSort);
+  const rvMine = rvMineButton(()=>{ if (location.hash==='#maps') renderMaps(); }); if (rvMine) tabs.append(rvMine);
   root.append(tabs);
   const host = h('div'); root.append(host);
   function drawList(){
@@ -4711,19 +4743,20 @@ function renderMaps(){
       else host.append(h('div',{class:'grid wide'}, mine.map(m=>mapCard(m, true))));
       if (others.length){ host.append(h('h3',{style:'margin:18px 0 8px',text:'แผนที่ของผู้ใช้คนอื่น (มุมมองผู้พัฒนา)'})); host.append(h('div',{class:'grid wide'}, others.map(m=>mapCard(m, false)))); }
     } else {
-      const pub = filt(MapLib.pub);
+      const pub = ReviewLib.sorted(filt(MapLib.pub), MapLib.sort);
       if (!pub.length) host.append(h('div',{class:'card dim',text: MapLib.q ? 'ไม่พบแผนที่ที่ตรงกับคำค้น' : 'ยังไม่มีใครเผยแพร่แผนที่ (หรือกำลังโหลด)'}));
       else host.append(h('div',{class:'grid wide'}, pub.map(m=>mapCard(m, MapLib.isMine(m)))));
     }
   }
   MapLib.subscribe(()=>{ if (location.hash==='#maps') drawList(); });
   if (MapLib.tab==='pub' && !MapLib.pub.length) MapLib.loadPublished().then(()=>{ if (location.hash==='#maps') drawList(); });
+  if (Store.db){ const before = ReviewLib.at, wasLoaded = ReviewLib.loaded; ReviewLib.load().then(()=>{ if ((ReviewLib.at === before && wasLoaded) || location.hash!=='#maps') return; if (rvMine) rvMine.textContent = rvMineLabel(); drawList(); }); }
   drawList();
 }
 function mapCard(m, mine){
   const card = h('div',{class:'card mapcard'});
   card.append(h('div',{class:'row',style:'gap:12px;align-items:flex-start'}, h('div',{class:'thumbwrap',onclick:()=>previewMap(m)}, mapCanvas(m, 6)),
-    h('div',{style:'flex:1;min-width:160px'}, h('h3',{style:'margin:0',text:m.name||'(ไม่มีชื่อ)'}), h('div',{class:'dim',style:'font-size:12px',text:(m.ownerName? 'โดย '+m.ownerName+' · ' : '') + new Date(m.updatedAt||0).toLocaleDateString('th-TH')}), mapMeta(m), m.desc ? h('p',{class:'desc',style:'margin:6px 0 0;font-size:13px',text:m.desc.slice(0,160)}) : null)));
+    h('div',{style:'flex:1;min-width:160px'}, h('h3',{style:'margin:0',text:m.name||'(ไม่มีชื่อ)'}), h('div',{class:'dim',style:'font-size:12px',text:(m.ownerName? 'โดย '+m.ownerName+' · ' : '') + new Date(m.updatedAt||0).toLocaleDateString('th-TH')}), mapMeta(m), rvChip(m, ()=>{ if (location.hash==='#maps') renderMaps(); }), m.desc ? h('p',{class:'desc',style:'margin:6px 0 0;font-size:13px',text:m.desc.slice(0,160)}) : null)));
   const row = h('div',{class:'row',style:'margin-top:8px'});
   row.append(h('button',{class:'small ghost',onclick:()=>previewMap(m),text:'ดู'}));
   if (mine){
@@ -4738,7 +4771,7 @@ function mapCard(m, mine){
   return card;
 }
 function previewMap(m){
-  modal(h('div',null, h('h3',{text:m.name||'(ไม่มีชื่อ)'}), h('div',{class:'dim',style:'font-size:12px',text:(m.ownerName? 'โดย '+m.ownerName : '')}), mapMeta(m), m.desc ? h('p',{class:'desc',text:m.desc}) : null,
+  modal(h('div',null, h('h3',{text:m.name||'(ไม่มีชื่อ)'}), h('div',{class:'dim',style:'font-size:12px',text:(m.ownerName? 'โดย '+m.ownerName : '')}), mapMeta(m), rvChip(m, ()=>{ if (location.hash==='#maps') renderMaps(); }), m.desc ? h('p',{class:'desc',text:m.desc}) : null,
     h('div',{style:'margin-top:8px'}, mapCanvas(m, 16)),
     (m.npcs||[]).length ? h('div',{style:'margin-top:8px'}, h('b',{text:'NPC และ Asset ที่เตรียมไว้: '}), (m.npcs||[]).map(n=>n.kind==='asset' ? `${n.icon||'📦'} ${n.name}${n.hidden?' (ซ่อน)':''}` : `${n.name} (HP ${n.hp}${n.hidden?' ซ่อน':''})`).join(' · ')) : null));
 }
@@ -4879,7 +4912,7 @@ function libClean(x){
   return o;
 }
 const NpcLib = {
-  mine: [], pub: [], unsub: [], waiters: [], onChange: null, loaded: false, tab: 'mine', q: '', type: 'all', pickHidden: true, localKey: 'kirana.npcs.v1', images: {},
+  mine: [], pub: [], unsub: [], waiters: [], onChange: null, loaded: false, tab: 'mine', q: '', type: 'all', sort: 'new', pickHidden: true, localKey: 'kirana.npcs.v1', images: {},
   isItem(m){ return !!m && (m.type==='npc' || m.type==='asset'); },
   typeLabel(t){ return t==='asset' ? 'Asset' : 'NPC'; },
   loadLocal(){ try { return JSON.parse(localStorage.getItem(this.localKey)||'[]').map(libClean).filter(Boolean); } catch(e){ return []; } },
@@ -4966,14 +4999,14 @@ function libMeta(it){ const a = it.type==='asset';
     a ? (+it.hp > 0 ? tag(`HP ${+it.hp}`) : null) : tag(`HP ${+it.hp||0}`), a ? null : tag(`Init ${signed(+it.init||0)}`), !a && +it.tgh > 0 ? tag(`Toughness ${+it.tgh}`) : null,
     !a && it.nv ? tag('👁 Dark Vision') : null, !a && it.aquatic ? tag('🐟 สัตว์น้ำ','stat') : null, it.torch ? tag('🔥 แหล่งแสง','prop') : null,
     it.published ? tag('เผยแพร่แล้ว','ok') : tag('ส่วนตัว'), it.fromName ? tag('จาก '+it.fromName,'prop') : null, it.image ? tag('🖼 มีภาพหมาก (เฉพาะเจ้าของ)') : null); }
-function libConfirmPublish(it){ if (it.published) return true; const lines = [`เผยแพร่ "${it.name||'รายการนี้'}"?`, '', 'ทุกคนจะค้นหาเจอและเก็บสำเนาไปใช้ได้ สำเนานั้นได้คำอธิบายและบันทึกของ GM ไปด้วย']; if (it.image) lines.push('ภาพหมากจะไม่ติดไปกับการเผยแพร่ ยังอยู่ในคลังของคุณคนเดียว'); return confirm(lines.join('\n')); }
+function libConfirmPublish(it){ if (it.published) return true; const lines = [`เผยแพร่ "${it.name||'รายการนี้'}"?`, '', 'ทุกคนจะค้นหาเจอและเก็บสำเนาไปใช้ได้ สำเนานั้นได้คำอธิบายและบันทึกของ GM ไปด้วย', 'ผู้ใช้ที่เข้าสู่ระบบด้วย Google ให้ดาวและคอมเมนต์รายการนี้ได้']; if (it.image) lines.push('ภาพหมากจะไม่ติดไปกับการเผยแพร่ ยังอยู่ในคลังของคุณคนเดียว'); return confirm(lines.join('\n')); }
 function libMatches(it, k){ return !k || (it.name||'').toLowerCase().includes(k) || (it.desc||'').toLowerCase().includes(k) || (it.ownerName||'').toLowerCase().includes(k) || NpcLib.typeLabel(it.type).toLowerCase().includes(k); }
 
 /* ---- หน้า #npcs: คลังของฉัน + ค้นหาที่เผยแพร่ ---- */
 function renderNpcs(){
   const root = clearKeep($('#v-npcs'));
   const create = async (type)=>{ const it = NpcLib.newItem(type); if (await NpcLib.save(it)) location.hash = '#npcedit-'+it.id; };
-  root.append(h('div',{class:'stephead'}, h('div',null, h('h2',{text:'สร้างและค้นหา NPC กับ Asset'}), h('p',{text:'GM เตรียมตัวละครรอง ศัตรู และสิ่งของประกอบฉาก (Asset) เช่น หีบ ประตู กับดัก กองไฟ ไว้ก่อนเปิดโต๊ะ ตั้งค่าพลัง เขียนคำอธิบาย ใส่ภาพหมาก แล้วเก็บไว้ในคลังส่วนตัว ในห้องที่คุณเป็น GM กด "📚 คลัง NPC / Asset" เพื่อวางลงบอร์ด รายการจะยังเป็นส่วนตัวจนกว่าจะกดเผยแพร่ GM คนอื่นค้นหารายการที่เผยแพร่แล้วเก็บสำเนาไปใช้ในโต๊ะของตัวเองได้'})),
+  root.append(h('div',{class:'stephead'}, h('div',null, h('h2',{text:'สร้างและค้นหา NPC กับ Asset'}), h('p',{text:'GM เตรียมตัวละครรอง ศัตรู และสิ่งของประกอบฉาก (Asset) เช่น หีบ ประตู กับดัก กองไฟ ไว้ก่อนเปิดโต๊ะ ตั้งค่าพลัง เขียนคำอธิบาย ใส่ภาพหมาก แล้วเก็บไว้ในคลังส่วนตัว ในห้องที่คุณเป็น GM กด "📚 คลัง NPC / Asset" เพื่อวางลงบอร์ด รายการจะยังเป็นส่วนตัวจนกว่าจะกดเผยแพร่ GM คนอื่นค้นหารายการที่เผยแพร่แล้วเก็บสำเนาไปใช้ในโต๊ะของตัวเองได้ และให้ดาวกับคอมเมนต์บอกผู้สร้างได้ว่าใช้แล้วเป็นอย่างไร'})),
     h('div',{class:'row'}, h('button',{class:'primary newnpc',onclick:()=>create('npc'),text:'+ สร้าง NPC'}), h('button',{class:'primary newasset',onclick:()=>create('asset'),text:'+ สร้าง Asset'}))));
   if (!Store.db) root.append(h('div',{class:'warnbox',style:'margin-bottom:12px'}, 'โหมดออฟไลน์: คลังเก็บในเบราว์เซอร์นี้เท่านั้น เผยแพร่ให้คนอื่นเห็นไม่ได้จนกว่าจะเชื่อมต่อ'));
   const tabs = h('div',{class:'row tabs',style:'margin-bottom:10px'},
@@ -4983,6 +5016,9 @@ function renderNpcs(){
     [['all','ทั้งหมด'], ...LIB_TYPES].map(([k,l])=>h('button',{class:'small typef'+(NpcLib.type===k?' on':''),dataset:{type:k},onclick:()=>{ NpcLib.type = k; renderNpcs(); },text:l})));
   const q = h('input',{placeholder:'ค้นหาชื่อ คำอธิบาย หรือชื่อผู้สร้าง',style:'min-width:240px',value:NpcLib.q}); q.oninput = ()=>{ NpcLib.q = q.value; drawList(); };
   tabs.append(q);
+  // v1.19: ดาวและคอมเมนต์ของ NPC และ Asset ที่เผยแพร่
+  const rvSort = NpcLib.tab==='pub' ? rvSortSelect(NpcLib, ()=>drawList()) : null; if (rvSort) tabs.append(rvSort);
+  const rvMine = rvMineButton(()=>{ if (location.hash==='#npcs') renderNpcs(); }); if (rvMine) tabs.append(rvMine);
   root.append(tabs);
   const host = h('div'); root.append(host);
   function drawList(){
@@ -4998,19 +5034,20 @@ function renderNpcs(){
       else host.append(h('div',{class:'grid wide'}, mine.map(it=>libCard(it, true))));
       if (others.length){ host.append(h('h3',{style:'margin:18px 0 8px',text:'รายการของผู้ใช้คนอื่น (มุมมองผู้พัฒนา)'})); host.append(h('div',{class:'grid wide'}, others.map(it=>libCard(it, false)))); }
     } else {
-      const pub = filt(NpcLib.pub);
+      const pub = ReviewLib.sorted(filt(NpcLib.pub), NpcLib.sort);
       if (!pub.length) host.append(h('div',{class:'card dim',text: (NpcLib.q || NpcLib.type!=='all') ? 'ไม่พบรายการที่ตรงกับตัวกรอง' : 'ยังไม่มีใครเผยแพร่ NPC หรือ Asset (หรือกำลังโหลด)'}));
       else host.append(h('div',{class:'grid wide'}, pub.map(it=>libCard(it, NpcLib.isMine(it)))));
     }
   }
   NpcLib.subscribe(()=>{ if (location.hash==='#npcs') drawList(); });
   if (NpcLib.tab==='pub' && !NpcLib.pub.length) NpcLib.loadPublished().then(()=>{ if (location.hash==='#npcs') drawList(); });
+  if (Store.db){ const before = ReviewLib.at, wasLoaded = ReviewLib.loaded; ReviewLib.load().then(()=>{ if ((ReviewLib.at === before && wasLoaded) || location.hash!=='#npcs') return; if (rvMine) rvMine.textContent = rvMineLabel(); drawList(); }); }
   drawList();
 }
 function libCard(it, mine){
   const card = h('div',{class:'card mapcard npccard',dataset:{id:it.id,type:it.type}});
   card.append(h('div',{class:'row',style:'gap:12px;align-items:flex-start'}, h('div',{class:'thumbwrap',onclick:()=>previewLibItem(it)}, libAvatar(it, 72)),
-    h('div',{style:'flex:1;min-width:160px'}, h('h3',{style:'margin:0',text:it.name||'(ไม่มีชื่อ)'}), h('div',{class:'dim',style:'font-size:12px',text:(it.ownerName? 'โดย '+it.ownerName+' · ' : '') + new Date(it.updatedAt||0).toLocaleDateString('th-TH')}), libMeta(it), it.desc ? h('p',{class:'desc',style:'margin:6px 0 0;font-size:13px',text:it.desc.slice(0,160)}) : null)));
+    h('div',{style:'flex:1;min-width:160px'}, h('h3',{style:'margin:0',text:it.name||'(ไม่มีชื่อ)'}), h('div',{class:'dim',style:'font-size:12px',text:(it.ownerName? 'โดย '+it.ownerName+' · ' : '') + new Date(it.updatedAt||0).toLocaleDateString('th-TH')}), libMeta(it), rvChip(it, ()=>{ if (location.hash==='#npcs') renderNpcs(); }), it.desc ? h('p',{class:'desc',style:'margin:6px 0 0;font-size:13px',text:it.desc.slice(0,160)}) : null)));
   const row = h('div',{class:'row',style:'margin-top:8px'});
   row.append(h('button',{class:'small ghost',onclick:()=>previewLibItem(it),text:'ดู'}));
   if (mine){
@@ -5026,7 +5063,7 @@ function libCard(it, mine){
 }
 function previewLibItem(it){
   const mine = NpcLib.isMine(it) || Store.isDevUid;
-  modal(h('div',null, h('div',{class:'row',style:'gap:14px;align-items:flex-start'}, libAvatar(it, 120), h('div',{style:'flex:1;min-width:180px'}, h('h3',{text:it.name||'(ไม่มีชื่อ)'}), h('div',{class:'dim',style:'font-size:12px',text:(it.ownerName? 'โดย '+it.ownerName : '')}), libMeta(it))),
+  modal(h('div',null, h('div',{class:'row',style:'gap:14px;align-items:flex-start'}, libAvatar(it, 120), h('div',{style:'flex:1;min-width:180px'}, h('h3',{text:it.name||'(ไม่มีชื่อ)'}), h('div',{class:'dim',style:'font-size:12px',text:(it.ownerName? 'โดย '+it.ownerName : '')}), libMeta(it), rvChip(it, ()=>{ if (location.hash==='#npcs') renderNpcs(); }))),
     it.desc ? h('div',{style:'margin-top:10px'}, h('div',{class:'kicker',text:'คำอธิบาย (ผู้เล่นเห็น)'}), h('p',{class:'desc',style:'white-space:pre-wrap;margin:4px 0 0',text:it.desc})) : null,
     mine && it.note ? h('div',{style:'margin-top:10px'}, h('div',{class:'kicker',text:'บันทึก GM (ลับ)'}), h('p',{class:'desc',style:'white-space:pre-wrap;margin:4px 0 0',text:it.note})) : null,
     !mine && it.note ? h('p',{class:'dim',style:'font-size:12px;margin:10px 0 0',text:'รายการนี้มีบันทึกของ GM แนบมาด้วย จะเห็นเมื่อเก็บสำเนาเข้าคลังของคุณ'}) : null));
@@ -5225,6 +5262,277 @@ function tokenIconModal(t){
   modal(body);
 }
 
+/* ===== ดาวและคอมเมนต์ของผลงานที่เผยแพร่: แผนที่ NPC และ Asset (v1.19 ผู้ใช้สั่ง 12 พ.ย. 2026) =====
+ * หนึ่งบัญชีมีสมุดรีวิวหนึ่งเล่ม เก็บทุกรีวิวที่บัญชีนั้นเขียน:
+ *   maps/rvbook-<uid> = {id, type:'reviews', published:true, ownerId, ownerName, items:{<รหัสผลงาน>:{t, s, x, n, o, at, ed?}}, createdAt, updatedAt}
+ *   t ชนิดผลงาน (map | npc | asset) · s ดาว 0 ถึง 5 (0 คือไม่ให้ดาว) · x ข้อความ · n ชื่อผลงานตอนรีวิว · o เจ้าของผลงานตอนรีวิว · at เวลาเขียนครั้งแรก · ed เวลาแก้ล่าสุด
+ * เหตุที่เก็บเป็นสมุดของคนรีวิว:
+ *   1) Rules ของ maps ให้แต่ละบัญชีเขียนได้เฉพาะเอกสารของตัวเอง คนให้ดาวจึงเขียนลงเอกสารของผลงานโดยตรงไม่ได้ ส่วนสมุดของตัวเองเขียนได้ทันทีโดยไม่ต้องเผยแพร่ Rules ชุดใหม่
+ *   2) published:true ทำให้ทุกคนที่ล็อกอินอ่านได้ตาม Rules เดิม · type:'reviews' ทำให้คลังแผนที่ (isMapDoc) กับคลัง NPC / Asset (libClean) มองข้ามเอกสารนี้
+ *   3) รวมคะแนนทั้งเว็บด้วยคำค้นเดียว จำนวนเอกสารที่อ่านเท่ากับจำนวนคนที่เคยรีวิว
+ * ทุกอย่างที่อ่านจากฐานข้อมูลถือเป็นข้อมูลที่ไม่น่าไว้ใจ (Rules ไม่ตรวจชนิดข้อมูล): rvCleanBook บังคับชนิด ความยาว และจำนวนก่อนใช้ ข้อความแสดงด้วย textContent เท่านั้น
+ * หน้าเว็บกันคะแนนเพี้ยนไว้สี่ชั้น: หนึ่งบัญชีนับหนึ่งสมุด · หนึ่งสมุดมีหนึ่งรายการต่อผลงาน · รีวิวของเจ้าของผลงานไม่นับ · บัญชีนิรนามให้ดาวไม่ได้
+ *   คนที่เขียนโปรแกรมยิงฐานข้อมูลตรง ๆ ยังปลอม ownerId ของสมุดได้ เพราะ Rules ปัจจุบันไม่ผูกรหัสเอกสารกับบัญชี (ร่างแก้อยู่ในบันทึกโปรเจกต์ รอผู้ใช้เคาะ)
+ * โหมดออฟไลน์ไม่มีรีวิว เพราะไม่มีผลงานของคนอื่นให้รีวิว */
+const RV_TEXT_MAX = 400;   // ความยาวคอมเมนต์สูงสุด (ตัวอักษร)
+const RV_BOOK_MAX = 300;   // จำนวนรีวิวสูงสุดต่อสมุดหนึ่งเล่ม เอกสาร Firestore มีเพดาน 1 MiB
+const RV_PRIOR = { n: 3, mean: 3 }; // "ดาวสูงสุด" เรียงด้วยคะแนนถ่วง: ทุกผลงานเริ่มจากดาว 3 จำนวน 3 เสียงสมมติ ผลงานที่มีคนให้ดาวน้อยจึงยังไม่แซงผลงานที่มีคนให้ดาวมาก
+const RV_CACHE_MS = 60000; // อายุแคชของสมุดทั้งเว็บ
+const RV_DEV_LIST = 60;    // จำนวนรีวิวล่าสุดที่หน้าต่างของผู้พัฒนาแสดง
+const RV_ID_RX = /^(?!__)[A-Za-z0-9_-]{1,64}$/; // รหัสผลงานที่รับ (Firestore สงวนชื่อฟิลด์แบบ __x__ จึงไม่รับรหัสที่ขึ้นต้นด้วยขีดล่างสองตัว)
+const RV_SORTS = [['new','เรียง: ล่าสุด'], ['top','เรียง: ดาวสูงสุด'], ['most','เรียง: รีวิวมากสุด']];
+function rvStr(v){ return typeof v === 'string' ? v : ''; }
+function rvTime(v){ const n = +v; return Number.isFinite(n) && n > 0 && n < 8.64e15 ? n : 0; }
+function rvType(x){ return x && (x.type === 'npc' || x.type === 'asset') ? x.type : 'map'; }
+function rvTypeLabel(t){ return t === 'npc' ? 'NPC' : t === 'asset' ? 'Asset' : 'แผนที่'; }
+function rvBookId(u){ return 'rvbook-' + u; }
+/* รหัสสมุดที่ยอมรับ: rvbook-<ownerId> หรือรหัสสำรอง rvbook-<ownerId>~<สุ่ม> (ใช้เมื่อรหัสตามแบบมีคนอื่นสร้างเอกสารทับไว้) */
+function rvIsBookId(id, owner){ if (typeof id !== 'string' || typeof owner !== 'string' || !owner) return false; const base = rvBookId(owner); return id === base || (id.startsWith(base + '~') && /^[a-z0-9]{1,12}$/.test(id.slice(base.length + 1))); }
+function rvCleanEntry(e){
+  if (!e || typeof e !== 'object') return null;
+  const s = libInt(e.s, 0, 5); const x = rvStr(e.x).trim().slice(0, RV_TEXT_MAX);
+  if (!s && !x) return null;
+  const o = { t: e.t === 'npc' || e.t === 'asset' ? e.t : 'map', s, x, n: rvStr(e.n).slice(0, 80), o: rvStr(e.o).slice(0, 128), at: rvTime(e.at) };
+  const ed = rvTime(e.ed); if (ed) o.ed = ed;
+  return o;
+}
+function rvCleanBook(b){
+  if (!b || typeof b !== 'object' || b.type !== 'reviews' || b.published !== true) return null;
+  const owner = rvStr(b.ownerId); if (!owner || owner.length > 128 || !rvIsBookId(b.id, owner)) return null;
+  const items = Object.create(null); let k = 0; // ไม่มีต้นแบบ: รหัสผลงานอย่าง __proto__ จากเอกสารปลอมจึงเป็นแค่คีย์ธรรมดา
+  if (b.items && typeof b.items === 'object' && !Array.isArray(b.items)) for (const tid of Object.keys(b.items)){ if (k >= RV_BOOK_MAX) break; if (!RV_ID_RX.test(tid)) continue; const c = rvCleanEntry(b.items[tid]); if (c){ items[tid] = c; k++; } }
+  return { id: b.id, ownerId: owner, ownerName: rvStr(b.ownerName).trim().slice(0, 80), items, createdAt: rvTime(b.createdAt), updatedAt: rvTime(b.updatedAt) };
+}
+function rvPermDenied(e){ return /permission/i.test(String((e && (e.code || e.message)) || '')); }
+
+const ReviewLib = {
+  books: [], byTarget: new Map(), loaded: false, failed: false, at: 0, p: null,
+  isAnon(){ return Store.backend === 'firebase' && !!Store.authUser && !!Store.authUser.isAnonymous; },
+  /* ใครให้ดาวหรือคอมเมนต์ได้: ต้องออนไลน์ ผลงานต้องเผยแพร่อยู่ ต้องเป็นผลงานของคนอื่น และบัญชีต้องเป็นบัญชี Google
+   * (บัญชีนิรนามสร้างใหม่ได้ไม่จำกัด ถ้ารับไว้คะแนนจะปั๊มได้) คืน null เมื่อให้ได้ หรือ {code, text} บอกเหตุที่ให้ไม่ได้ */
+  blocker(target){
+    if (!Store.db) return { code:'offline', text:'ดาวและคอมเมนต์ใช้ได้เมื่อเชื่อมต่อกับเว็บ' };
+    if (!Store.me) return { code:'nouser', text:'ยังไม่ได้เข้าสู่ระบบ' };
+    if (!target || !target.published) return { code:'private', text:'ผลงานนี้ยังไม่ได้เผยแพร่ จึงยังไม่มีดาวหรือคอมเมนต์' };
+    if (!RV_ID_RX.test(rvStr(target.id))) return { code:'badid', text:'ผลงานนี้รับดาวและคอมเมนต์ไม่ได้ รหัสของผลงานไม่ตรงรูปแบบที่ระบบใช้' };
+    if (target.ownerId === Store.me) return { code:'own', text:'นี่คือผลงานของคุณ ผู้สร้างให้ดาวหรือคอมเมนต์ผลงานตัวเองไม่ได้ อ่านเสียงตอบรับได้ด้านล่าง' };
+    if (this.isAnon()) return { code:'anon', text:'เข้าสู่ระบบด้วย Google ก่อน จึงจะให้ดาวหรือคอมเมนต์ได้ บัญชีนิรนามอ่านได้อย่างเดียว' };
+    return null;
+  },
+  /* โหลดสมุดของทุกคน (แคชหนึ่งนาที) · ฐานข้อมูลที่ไม่รับเงื่อนไขซ้อนจะถอยไปใช้คำค้นเดียวกับคลังแผนที่แล้วกรองเอง */
+  async load(force){
+    if (!Store.db){ this.books = []; this.index(); this.loaded = true; return this.books; }
+    if (!force && this.loaded && Date.now() - this.at < RV_CACHE_MS) return this.books;
+    if (this.p) return this.p;
+    this.p = (async ()=>{
+      let docs = null;
+      try { docs = snapDocs(await Store.db.collection('maps').where('published','==',true).where('type','==','reviews').limit(1000).get()); }
+      catch(e){ try { docs = snapDocs(await Store.db.collection('maps').where('published','==',true).limit(1000).get()); } catch(e2){ console.warn('reviews', e2); } }
+      if (docs){ this.books = docs.map(rvCleanBook).filter(Boolean); this.at = Date.now(); this.failed = false; this.index(); } else this.failed = true;
+      this.loaded = true; this.p = null; return this.books;
+    })();
+    return this.p;
+  },
+  /* หนึ่งบัญชีนับหนึ่งสมุด: ถ้าบัญชีเดียวมีหลายเล่ม (รหัสสำรอง) ใช้เล่มที่แก้ล่าสุด */
+  index(){
+    const best = new Map();
+    for (const b of this.books){ const cur = best.get(b.ownerId); if (!cur || b.updatedAt > cur.updatedAt) best.set(b.ownerId, b); }
+    const by = new Map();
+    for (const b of best.values()) for (const tid of Object.keys(b.items)){ const e = b.items[tid]; if (!by.has(tid)) by.set(tid, []); by.get(tid).push({ uid: b.ownerId, name: b.ownerName || 'ผู้เล่น', bookId: b.id, tid, t: e.t, n: e.n, s: e.s, x: e.x, at: e.at, ed: e.ed || 0 }); }
+    this.byTarget = by;
+  },
+  /* รีวิวของผลงานหนึ่งชิ้น: ไม่นับของเจ้าของผลงานเอง · ของฉันขึ้นก่อน แล้วเรียงจากใหม่ไปเก่า */
+  list(target){
+    if (!target) return [];
+    const me = Store.me; const when = (r)=> r.ed || r.at;
+    return (this.byTarget.get(target.id) || []).filter(r => r.uid !== target.ownerId).sort((a,b)=> ((b.uid===me) - (a.uid===me)) || (when(b) - when(a)));
+  },
+  summary(target){
+    const dist = [0,0,0,0,0,0]; let sum = 0, n = 0, comments = 0; const l = this.list(target);
+    for (const r of l){ if (r.s){ dist[r.s]++; sum += r.s; n++; } if (r.x) comments++; }
+    return { total: l.length, n, sum, avg: n ? sum / n : 0, comments, dist };
+  },
+  /* คะแนนถ่วงสำหรับการเรียง: (3 เสียงสมมติ × ดาว 3 + ดาวจริงรวม) ÷ (3 + จำนวนคนให้ดาว) · ผลงานที่ยังไม่มีดาวได้ 3 พอดี */
+  score(target){ const s = this.summary(target); return (RV_PRIOR.n * RV_PRIOR.mean + s.sum) / (RV_PRIOR.n + s.n); },
+  sorted(arr, mode){
+    const byNew = (a,b)=> (b.updatedAt||0) - (a.updatedAt||0);
+    if (mode === 'top'){ const sc = new Map(arr.map(x => [x.id, this.score(x)])); return arr.slice().sort((a,b)=> (sc.get(b.id) - sc.get(a.id)) || byNew(a,b)); }
+    if (mode === 'most'){ const n = new Map(arr.map(x => [x.id, this.summary(x).total])); return arr.slice().sort((a,b)=> (n.get(b.id) - n.get(a.id)) || byNew(a,b)); }
+    return arr.slice().sort(byNew);
+  },
+  myBook(){ const me = Store.me; if (!me) return null; let best = null; for (const b of this.books) if (b.ownerId === me && (!best || b.updatedAt > best.updatedAt)) best = b; return best; },
+  mine(target){ const b = this.myBook(); return (b && target && b.items[target.id]) || null; },
+  myCount(){ const b = this.myBook(); return b ? Object.keys(b.items).length : 0; },
+  /* อ่านสมุดของฉันจากฐานข้อมูลก่อนเขียนทุกครั้ง กันทับการแก้จากอีกเครื่อง · ใช้คำค้นด้วย ownerId เพราะ Rules ไม่ให้เปิดเอกสารที่ยังไม่มีอยู่ตรง ๆ */
+  async freshMyBook(){
+    const me = Store.me; let docs;
+    try { docs = snapDocs(await Store.db.collection('maps').where('ownerId','==',me).where('type','==','reviews').get()); }
+    catch(e){ docs = snapDocs(await Store.db.collection('maps').where('ownerId','==',me).get()); }
+    let best = null; for (const b of docs.map(rvCleanBook).filter(Boolean)) if (b.ownerId === me && (!best || b.updatedAt > best.updatedAt)) best = b;
+    return best;
+  },
+  bookDoc(book, id, touch){ return { id, type:'reviews', published:true, ownerId: book.ownerId, ownerName: book.ownerName || '', items: JSON.parse(JSON.stringify(book.items)), createdAt: book.createdAt || Date.now(), updatedAt: touch ? Date.now() : (book.updatedAt || Date.now()) }; },
+  /* เขียนสมุดของฉัน · สมุดเล่มแรกใช้รหัสตามแบบ ถ้าเขียนไม่ได้เพราะมีเอกสารของคนอื่นใช้รหัสนั้นอยู่ จะสร้างด้วยรหัสสำรองแทน */
+  async putBook(book, isNew){
+    let doc = this.bookDoc(book, book.id, true);
+    try { await Store.db.doc('maps/' + doc.id).set(doc); }
+    catch(e){ if (!isNew || doc.id !== rvBookId(book.ownerId) || !rvPermDenied(e)) throw e;
+      doc = this.bookDoc(book, rvBookId(book.ownerId) + '~' + uid().slice(0, 8), true); await Store.db.doc('maps/' + doc.id).set(doc); }
+    return doc;
+  },
+  adopt(doc){ const b = rvCleanBook(doc); this.books = this.books.filter(x => x.ownerId !== doc.ownerId); if (b) this.books.push(b); this.index(); },
+  async save(target, stars, text){
+    const blk = this.blocker(target); if (blk){ toast(blk.text); return false; }
+    const s = libInt(stars, 0, 5), x = rvStr(text).trim().slice(0, RV_TEXT_MAX);
+    if (!s && !x){ toast('ให้ดาวอย่างน้อยหนึ่งดวง หรือเขียนคอมเมนต์ก่อนบันทึก'); return false; }
+    try {
+      const me = Store.me; let book = await this.freshMyBook(); const isNew = !book;
+      if (!book) book = { id: rvBookId(me), ownerId: me, ownerName: '', items: Object.create(null), createdAt: Date.now(), updatedAt: 0 };
+      const prev = book.items[target.id]; const now = Date.now();
+      if (!prev && Object.keys(book.items).length >= RV_BOOK_MAX){ toast(`สมุดรีวิวของคุณเต็มแล้ว (${RV_BOOK_MAX} รายการ) ลบรีวิวเก่าออกก่อน`); return false; }
+      const e = { t: rvType(target), s, x, n: rvStr(target.name).slice(0, 80), o: rvStr(target.ownerId).slice(0, 128), at: prev && prev.at ? prev.at : now }; if (prev) e.ed = now;
+      book.items[target.id] = e; book.ownerName = Store.displayName || book.ownerName || '';
+      this.adopt(await this.putBook(book, isNew)); return true;
+    } catch(err){ console.warn('save review', err); toast('บันทึกดาวและคอมเมนต์ไม่ได้ (สิทธิ์ไม่พอ หรือการเชื่อมต่อมีปัญหา)'); return false; }
+  },
+  /* ลบรีวิวของฉันออกจากผลงานหนึ่งชิ้น (ใช้ได้แม้ผลงานนั้นเลิกเผยแพร่หรือโดนลบไปแล้ว) · สมุดที่ว่างแล้วลบทั้งเล่ม */
+  async remove(targetId){
+    if (!Store.db || !Store.me) return false;
+    try { const book = await this.freshMyBook();
+      if (book && book.items[targetId]){ delete book.items[targetId];
+        if (!Object.keys(book.items).length){ await Store.db.doc('maps/' + book.id).delete(); this.books = this.books.filter(x => x.ownerId !== book.ownerId); this.index(); }
+        else this.adopt(await this.putBook(book, false)); }
+      else if (book) this.adopt(this.bookDoc(book, book.id, false));
+      else { this.books = this.books.filter(x => x.ownerId !== Store.me); this.index(); }
+      return true;
+    } catch(e){ console.warn('remove review', e); toast('ลบดาวและคอมเมนต์ไม่ได้'); return false; }
+  },
+  /* ผู้พัฒนาลบรีวิวของคนอื่น (Rules ให้ผู้พัฒนาแก้เอกสารใน maps ได้ทุกฉบับ) */
+  async devRemove(rv){
+    if (!Store.db || !Store.isDevUid || !rv) return false;
+    try { const book = rvCleanBook(docData(await Store.db.doc('maps/' + rv.bookId).get()));
+      if (book && book.items[rv.tid]){ delete book.items[rv.tid];
+        if (!Object.keys(book.items).length) await Store.db.doc('maps/' + book.id).delete();
+        else await Store.db.doc('maps/' + book.id).set(this.bookDoc(book, book.id, false)); }
+      await this.load(true); return true;
+    } catch(e){ console.warn('dev remove review', e); toast('ลบรีวิวนี้ไม่ได้'); return false; }
+  },
+};
+
+/* ---- ชิ้นส่วนหน้าจอ ---- */
+/* แถบดาวห้าดวง เติมสีตามค่าเฉลี่ย (ชั้นทองซ้อนบนชั้นจาง ตัดความกว้างตามสัดส่วน) */
+function rvStarsEl(avg, cls){ const v = Math.max(0, Math.min(5, +avg || 0));
+  return h('span',{class:'rvstars' + (cls ? ' ' + cls : ''), role:'img', 'aria-label':`${v.toFixed(1)} จาก 5 ดาว`}, h('span',{class:'rvs-bg','aria-hidden':'true',text:'★★★★★'}), h('span',{class:'rvs-fg','aria-hidden':'true',style:`width:${(v / 5 * 100).toFixed(1)}%`,text:'★★★★★'})); }
+function rvDate(r){ const t = r.ed || r.at; return t ? new Date(t).toLocaleDateString('th-TH') + (r.ed ? ' (แก้ไข)' : '') : ''; }
+/* ป้ายสรุปบนการ์ดของผลงานที่เผยแพร่: กดเพื่อเปิดหน้าต่างดาวและคอมเมนต์ */
+function rvChip(target, onChange){
+  if (!Store.db || !target || !target.published) return null;
+  const b = h('button',{class:'small ghost rvchip', type:'button', dataset:{id: target.id}, title:'เปิดดูดาวและคอมเมนต์ของผลงานนี้', onclick:(e)=>{ e.stopPropagation(); openReviews(target, onChange); }});
+  const fill = ()=>{ clear(b);
+    if (!ReviewLib.loaded){ b.append(h('span',{class:'dim',text:'★ กำลังโหลด…'})); return; }
+    if (ReviewLib.failed && !ReviewLib.at){ b.append(h('span',{class:'dim',text:'★ โหลดดาวไม่ได้'})); return; }
+    const s = ReviewLib.summary(target);
+    if (s.n) b.append(rvStarsEl(s.avg), h('b',{class:'num',text: s.avg.toFixed(1)}), h('span',{class:'dim num',text:`(${s.n})`}));
+    else b.append(h('span',{class:'dim',text:'☆ ยังไม่มีดาว'}));
+    if (s.comments) b.append(h('span',{class:'dim num',text:`· 💬 ${s.comments}`})); };
+  fill();
+  if (!ReviewLib.loaded) ReviewLib.load().then(()=>{ if (b.isConnected) fill(); }); // หน้าที่ไม่ได้โหลดรีวิวเอง (เช่นดูภาพย่อจากตัวแก้ไขแผนที่) ป้ายจะเติมตัวเองเมื่อโหลดเสร็จ
+  return b;
+}
+/* ตัวเลือกการเรียงของแท็บค้นหา (lib = MapLib หรือ NpcLib จำค่าไว้ใน lib.sort) */
+function rvSortSelect(lib, redraw){
+  if (!Store.db) return null;
+  const sel = h('select',{class:'rvsort','aria-label':'เรียงลำดับ',title:'ดาวสูงสุดเรียงตามดาวเฉลี่ยที่ถ่วงด้วยจำนวนคนให้ดาว ผลงานที่มีคนให้ดาวน้อยจะยังไม่แซงผลงานที่มีคนให้ดาวมาก'}, RV_SORTS.map(([k,l])=>h('option',{value:k,selected:(lib.sort||'new')===k,text:l})));
+  sel.onchange = ()=>{ lib.sort = sel.value; redraw(); };
+  return sel;
+}
+function rvMineLabel(){ const n = ReviewLib.myCount(); return n ? `รีวิวของฉัน (${n})` : 'รีวิวของฉัน'; }
+function rvMineButton(onChange){ if (!Store.db) return null; return h('button',{class:'small ghost rvminebtn',type:'button',title:'ดู แก้ หรือลบดาวและคอมเมนต์ทั้งหมดที่คุณเคยให้',onclick:()=>openMyReviews(onChange),text: rvMineLabel()}); }
+function rvModalOpenFor(id){ const b = $('#modal .rvbox'); return !!b && !$('#modal').classList.contains('hidden') && b.dataset.id === id; }
+
+/* ---- หน้าต่างดาวและคอมเมนต์ของผลงานหนึ่งชิ้น ---- */
+function openReviews(target, onChange){
+  const st = { stars: 0, text: '', touched: false, busy: false };
+  const seed = ()=>{ const m = ReviewLib.mine(target); st.stars = m ? m.s : 0; st.text = m ? m.x : ''; };
+  seed();
+  const changed = ()=>{ if (typeof onChange === 'function') try { onChange(); } catch(e){ console.warn(e); } };
+  const draw = ()=>{
+    const sum = ReviewLib.summary(target), list = ReviewLib.list(target), mine = ReviewLib.mine(target), blk = ReviewLib.blocker(target);
+    const box = h('div',{class:'rvbox',dataset:{id: target.id}});
+    box.append(h('h3',{text:'ดาวและคอมเมนต์'}), h('div',{class:'dim',style:'font-size:12.5px',text:`${rvTypeLabel(rvType(target))} "${target.name || '(ไม่มีชื่อ)'}"${target.ownerName ? ' โดย ' + target.ownerName : ''}`}));
+    box.append(h('div',{class:'rvsum'},
+      h('div',{class:'rvavg'}, sum.n ? h('b',{class:'num',text: sum.avg.toFixed(1)}) : null, rvStarsEl(sum.avg, 'big'),
+        h('div',{class:'dim',style:'font-size:12.5px',text: !ReviewLib.loaded ? 'กำลังโหลดดาวและคอมเมนต์…' : ReviewLib.failed ? 'โหลดดาวและคอมเมนต์ไม่ได้ ลองเปิดใหม่อีกครั้ง' : sum.n ? `${sum.n} คนให้ดาว · ${sum.comments} คอมเมนต์` : sum.comments ? `ยังไม่มีดาว · ${sum.comments} คอมเมนต์` : 'ยังไม่มีใครให้ดาว'})),
+      h('div',{class:'rvdist'}, [5,4,3,2,1].map(k=>h('div',{class:'rvbar'}, h('span',{class:'num',text: k + '★'}), h('i',null, h('b',{style:`width:${sum.n ? Math.round(sum.dist[k] / sum.n * 100) : 0}%`})), h('span',{class:'num dim',text: String(sum.dist[k])}))))));
+    if (blk){
+      box.append(h('div',{class:'infobox rvblk',dataset:{code: blk.code}}, blk.text, blk.code === 'anon' && Store.login ? h('div',{style:'margin-top:6px'}, h('button',{class:'small primary',onclick:()=>Store.login(),text:'เข้าสู่ระบบ Google'})) : null));
+    } else {
+      const label = h('span',{class:'dim rvpicked',style:'font-size:12.5px;margin-left:6px'});
+      const clearBtn = h('button',{class:'small ghost rvclear',type:'button',onclick:()=>{ st.stars = 0; st.touched = true; paint(); },text:'ล้างดาว'});
+      const btns = [1,2,3,4,5].map(k=>h('button',{class:'rvstarbtn',type:'button',dataset:{s: k},'aria-label':`ให้ ${k} ดาว`,onclick:()=>{ st.stars = k; st.touched = true; paint(); }}));
+      const paint = ()=>{ btns.forEach((b,i)=>{ const on = i < st.stars; b.classList.toggle('on', on); b.textContent = on ? '★' : '☆'; b.setAttribute('aria-pressed', String(i + 1 === st.stars)); }); label.textContent = st.stars ? `${st.stars} ดาว` : 'ยังไม่ให้ดาว'; clearBtn.style.visibility = st.stars ? 'visible' : 'hidden'; };
+      const count = h('span',{class:'dim num rvcount',style:'font-size:12px'});
+      const ta = h('textarea',{class:'rvtextin',maxlength: RV_TEXT_MAX,placeholder:'เล่าว่าใช้ที่โต๊ะแล้วเป็นอย่างไร จุดไหนดี จุดไหนควรแก้ (ไม่บังคับ)','aria-label':'คอมเมนต์'}); ta.value = st.text;
+      const tick = ()=>{ count.textContent = `${ta.value.length}/${RV_TEXT_MAX}`; }; ta.oninput = ()=>{ st.text = ta.value; st.touched = true; tick(); };
+      const saveBtn = h('button',{class:'primary small rvsave',type:'button',text: mine ? 'บันทึกการแก้ไข' : 'บันทึก'});
+      saveBtn.onclick = async ()=>{ if (st.busy) return; st.busy = true; saveBtn.disabled = true;
+        const okSave = await ReviewLib.save(target, st.stars, ta.value); st.busy = false;
+        if (okSave){ st.touched = false; seed(); toast('บันทึกดาวและคอมเมนต์แล้ว'); changed(); if (rvModalOpenFor(target.id)) draw(); } else saveBtn.disabled = false; };
+      const delBtn = mine ? h('button',{class:'small ghost rvdel',type:'button',onclick:async()=>{ if (st.busy || !confirm('ลบดาวและคอมเมนต์ของคุณออกจากผลงานนี้?')) return; st.busy = true; const okDel = await ReviewLib.remove(target.id); st.busy = false; if (okDel){ st.touched = false; seed(); toast('ลบดาวและคอมเมนต์ของคุณแล้ว'); changed(); if (rvModalOpenFor(target.id)) draw(); } },text:'ลบของฉัน'}) : null;
+      box.append(h('div',{class:'rvmine'}, h('div',{class:'kicker',text: mine ? 'ดาวและคอมเมนต์ของคุณ' : 'ให้ดาวและคอมเมนต์'}),
+        h('div',{class:'rvpick',role:'group','aria-label':'ให้ดาว'}, btns, label, clearBtn), ta,
+        h('div',{class:'row',style:'margin-top:6px'}, saveBtn, delBtn, count),
+        h('div',{class:'dim',style:'font-size:12px;margin-top:6px',text:`ทุกคนที่เข้าสู่ระบบเห็นดาวและคอมเมนต์นี้พร้อมชื่อที่แสดงของคุณ (${Store.displayName || 'ผู้เล่น'}) แก้หรือลบได้ทุกเมื่อ`})));
+      paint(); tick();
+    }
+    const lst = h('div',{class:'rvlist'});
+    if (!list.length && ReviewLib.loaded && !ReviewLib.failed) lst.append(h('div',{class:'dim rvempty',style:'font-size:13px',text: blk ? 'ยังไม่มีใครให้ดาวหรือคอมเมนต์ผลงานนี้' : 'ยังไม่มีใครให้ดาวหรือคอมเมนต์ เป็นคนแรกได้เลย'}));
+    for (const r of list) lst.append(h('div',{class:'rvitem' + (r.uid === Store.me ? ' me' : ''),dataset:{uid: r.uid}},
+      h('div',{class:'rvhead'}, h('b',{class:'rvname',title: Store.isDevUid ? 'UID ' + r.uid : null,text: r.name}), r.uid === Store.me ? tag('ของคุณ','prop') : null, r.s ? rvStarsEl(r.s) : h('span',{class:'dim',style:'font-size:12px',text:'ไม่ได้ให้ดาว'}), h('span',{class:'dim rvdate',text: rvDate(r)}),
+        Store.isDevUid && r.uid !== Store.me ? h('button',{class:'small ghost rvmod',type:'button',title:'ลบรีวิวนี้ในฐานะผู้พัฒนา',onclick:async()=>{ if (!confirm(`ลบดาวและคอมเมนต์ของ "${r.name}" ออกจากผลงานนี้?`)) return; if (await ReviewLib.devRemove(r)){ toast('ลบรีวิวนั้นแล้ว'); changed(); if (rvModalOpenFor(target.id)) draw(); } },text:'ลบ (ผู้พัฒนา)'}) : null),
+      r.x ? h('p',{class:'rvtext',text: r.x}) : null));
+    box.append(h('div',{class:'kicker',style:'margin-top:12px',text:`เสียงตอบรับ (${list.length})`}), lst);
+    modal(box);
+  };
+  draw();
+  // แคชเก่าหรือยังไม่เคยโหลด: โหลดแล้ววาดใหม่ เว้นแต่ผู้ใช้เริ่มพิมพ์ไปแล้ว (ไม่วาดทับสิ่งที่กำลังพิมพ์ รายการจะสดอีกครั้งเมื่อกดบันทึก)
+  const before = ReviewLib.at, wasLoaded = ReviewLib.loaded;
+  ReviewLib.load().then(()=>{ const fresh = ReviewLib.at !== before; if (fresh) changed(); if (!rvModalOpenFor(target.id) || st.touched) return; if (!fresh && wasLoaded && !ReviewLib.failed) return; seed(); draw(); });
+}
+
+/* ---- หน้าต่างรีวิวของฉัน: ทุกรายการในสมุด รวมถึงผลงานที่เลิกเผยแพร่หรือโดนลบไปแล้ว (ลบข้อมูลของตัวเองได้เสมอ) ---- */
+function rvFindTarget(id){ return (typeof MapLib !== 'undefined' && (MapLib.pub.find(x=>x.id===id) || MapLib.mine.find(x=>x.id===id))) || (typeof NpcLib !== 'undefined' && (NpcLib.pub.find(x=>x.id===id) || NpcLib.mine.find(x=>x.id===id))) || null; }
+function openMyReviews(onChange){
+  const changed = ()=>{ if (typeof onChange === 'function') try { onChange(); } catch(e){ console.warn(e); } };
+  const draw = ()=>{
+    const book = ReviewLib.myBook(); const rows = book ? Object.keys(book.items).map(tid => Object.assign({ tid }, book.items[tid])).sort((a,b)=> (b.ed || b.at) - (a.ed || a.at)) : [];
+    const box = h('div',{class:'rvbox rvmybox',dataset:{id:'@mine'}}, h('h3',{text:'รีวิวของฉัน'}), h('div',{class:'dim',style:'font-size:12.5px',text:'ดาวและคอมเมนต์ทั้งหมดที่คุณเคยให้ ลบได้ทุกรายการ รวมถึงของผลงานที่เลิกเผยแพร่ไปแล้ว'}));
+    const lst = h('div',{class:'rvlist'});
+    if (!ReviewLib.loaded) lst.append(h('div',{class:'dim',text:'กำลังโหลด…'}));
+    else if (!rows.length) lst.append(h('div',{class:'dim rvempty',style:'font-size:13px',text: ReviewLib.isAnon() ? 'บัญชีนิรนามยังให้ดาวหรือคอมเมนต์ไม่ได้ เข้าสู่ระบบด้วย Google ก่อน' : 'คุณยังไม่เคยให้ดาวหรือคอมเมนต์ผลงานไหน'}));
+    for (const r of rows){ const target = rvFindTarget(r.tid); const live = !!(target && target.published && target.ownerId !== Store.me);
+      lst.append(h('div',{class:'rvitem',dataset:{tid: r.tid}},
+        h('div',{class:'rvhead'}, tag(rvTypeLabel(r.t), r.t === 'map' ? null : r.t === 'asset' ? 'prop' : 'neg'), h('b',{class:'rvname',text: r.n || '(ไม่มีชื่อ)'}), r.s ? rvStarsEl(r.s) : h('span',{class:'dim',style:'font-size:12px',text:'ไม่ได้ให้ดาว'}), h('span',{class:'dim rvdate',text: rvDate(r)}),
+          live ? h('button',{class:'small ghost rvopen',type:'button',onclick:()=>openReviews(target, onChange),text:'แก้'}) : null,
+          h('button',{class:'small ghost rvdel',type:'button',onclick:async()=>{ if (!confirm(`ลบดาวและคอมเมนต์ที่คุณให้ "${r.n || 'ผลงานนี้'}"?`)) return; if (await ReviewLib.remove(r.tid)){ toast('ลบแล้ว'); changed(); if (rvModalOpenFor('@mine')) draw(); } },text:'ลบ'})),
+        r.x ? h('p',{class:'rvtext',text: r.x}) : null)); }
+    box.append(lst);
+    if (Store.isDevUid && ReviewLib.loaded){ // ผู้พัฒนา: รีวิวล่าสุดของทุกคนในที่เดียว จะได้ไม่ต้องเปิดดูทีละผลงาน
+      const all = []; for (const arr of ReviewLib.byTarget.values()) for (const r of arr) if (r.uid !== Store.me) all.push(r);
+      all.sort((a,b)=> (b.ed || b.at) - (a.ed || a.at)); const shown = all.slice(0, RV_DEV_LIST);
+      const dl = h('div',{class:'rvlist rvall'});
+      for (const r of shown) dl.append(h('div',{class:'rvitem',dataset:{uid: r.uid, tid: r.tid}},
+        h('div',{class:'rvhead'}, tag(rvTypeLabel(r.t), r.t === 'map' ? null : r.t === 'asset' ? 'prop' : 'neg'), h('b',{class:'rvname',title:'UID ' + r.uid,text: r.name}), h('span',{class:'dim rvto',style:'font-size:12.5px',text:`ถึง "${r.n || r.tid}"`}), r.s ? rvStarsEl(r.s) : h('span',{class:'dim',style:'font-size:12px',text:'ไม่ได้ให้ดาว'}), h('span',{class:'dim rvdate',text: rvDate(r)}),
+          h('button',{class:'small ghost rvmod',type:'button',title:'ลบรีวิวนี้ในฐานะผู้พัฒนา',onclick:async()=>{ if (!confirm(`ลบดาวและคอมเมนต์ของ "${r.name}" ที่ให้ "${r.n || r.tid}"?`)) return; if (await ReviewLib.devRemove(r)){ toast('ลบรีวิวนั้นแล้ว'); changed(); if (rvModalOpenFor('@mine')) draw(); } },text:'ลบ (ผู้พัฒนา)'})),
+        r.x ? h('p',{class:'rvtext',text: r.x}) : null));
+      box.append(h('div',{class:'kicker',style:'margin-top:14px',text:'รีวิวล่าสุดทั้งเว็บ (มุมมองผู้พัฒนา)'}), h('div',{class:'dim rvallnote',style:'font-size:12px',text: all.length > shown.length ? `แสดง ${shown.length} รายการล่าสุด จากทั้งหมด ${all.length} รายการ` : `ทั้งหมด ${all.length} รายการ`}), dl);
+    }
+    modal(box);
+  };
+  draw();
+  ReviewLib.load(true).then(()=>{ if (rvModalOpenFor('@mine')) draw(); });
+}
+
 /* ===== หน้านโยบายความเป็นส่วนตัว มารยาท และมาตรฐานการใช้งาน (#policy) ===== */
 const POLICY_UPDATED = '12 พฤศจิกายน 2026';
 const POLICY = [
@@ -5238,6 +5546,7 @@ const POLICY = [
     'โต๊ะเล่น: ห้องที่คุณสร้างหรือเข้าร่วม แผนที่ ตำแหน่งหมาก สถานะ ค่าพลังบนหมาก ข้อความแชต ผลทอยเต๋า ไอเทมที่ GM มอบ และรหัสเข้าห้องที่ GM ตั้ง (รหัสเก็บแยกและไม่มีใครอ่านผ่านเว็บได้ ระบบใช้เทียบตอนเข้าห้องเท่านั้น)',
     'คลังแผนที่: แผนที่ที่คุณสร้าง คำอธิบาย และ NPC ที่เตรียมไว้',
     'คลัง NPC และ Asset: รายการที่คุณสร้าง ชื่อ ค่าพลัง คำอธิบาย บันทึกของ GM และภาพหมากที่คุณอัปโหลด',
+    'ดาวและคอมเมนต์: ดาวที่คุณให้และข้อความที่คุณเขียนถึงแผนที่ NPC หรือ Asset ที่คนอื่นเผยแพร่ พร้อมชื่อที่แสดงของคุณและเวลาที่บันทึก',
     'สถานะออนไลน์: ขณะเปิดเว็บ ระบบบันทึกว่าคุณออนไลน์และอยู่ในห้องไหน เพื่อให้เพื่อนร่วมโต๊ะเห็นว่าใครอยู่ ข้อมูลนี้หมดอายุเองภายในไม่กี่นาทีหลังปิดหน้าเว็บ',
     'ในเครื่องของคุณ: เบราว์เซอร์เก็บสำเนาตัวละคร ตำแหน่งปุ่มลอยและหน้าปัด ความคืบหน้าบทสอนเล่น รหัส GM ของห้องที่คุณเป็น GM ผังชีทที่คุณจัดเอง และค่าการแสดงผล (ขนาด UI โหมดสีของชีท) ข้อมูลส่วนนี้อยู่ในเครื่องคุณเท่านั้น ลบได้ด้วยการออกจากระบบหรือล้างข้อมูลเว็บไซต์ในเบราว์เซอร์',
     'ที่อยู่ไอพี: ถ้าเว็บเปิดโหมดต้องเข้าสู่ระบบ ขณะโหลดหน้าแรกเว็บจะขอที่อยู่ไอพีสาธารณะของคุณจากบริการ api.ipify.org หนึ่งครั้ง เพื่อจำเครื่องของผู้พัฒนา ค่านี้ใช้เทียบในหน่วยความจำแล้วทิ้ง ไม่ได้บันทึกลงฐานข้อมูล',
@@ -5253,11 +5562,13 @@ const POLICY = [
     'รายชื่อห้องแสดงชื่อห้อง ชื่อ GM และฉากย่อให้ทุกคนที่เข้าสู่ระบบเห็น เพื่อให้หาโต๊ะเจอ',
     'แผนที่ในคลังเป็นส่วนตัว จนกว่าคุณจะกดเผยแพร่ แผนที่ที่เผยแพร่แล้วทุกคนค้นหาได้ เห็นชื่อผู้สร้าง และเก็บสำเนาไปแก้ใช้เองได้ การกดเผยแพร่จึงเท่ากับอนุญาตให้ผู้เล่นคนอื่นใช้แผนที่นั้นภายในเว็บนี้',
     'รายการในคลัง NPC และ Asset เป็นส่วนตัวแบบเดียวกัน เมื่อกดเผยแพร่ ทุกคนค้นหาได้ เห็นชื่อผู้สร้าง และเก็บสำเนาไปใช้ได้ สำเนานั้นได้คำอธิบายและบันทึกของ GM ไปด้วย ส่วนภาพหมากไม่ติดไปกับการเผยแพร่ คนอื่นเห็นภาพนั้นเฉพาะในห้องที่คุณวางหมากลงบอร์ด',
+    'ดาวและคอมเมนต์ที่คุณให้ ทุกคนที่เข้าสู่ระบบเห็นได้พร้อมชื่อที่แสดงของคุณ ส่วนผลงานที่คุณเผยแพร่ ผู้ใช้ที่เข้าสู่ระบบด้วย Google ให้ดาวและคอมเมนต์ได้ทุกคน ดาวเฉลี่ยกับคอมเมนต์จะขึ้นคู่กับผลงานในหน้าค้นหา เมื่อยกเลิกเผยแพร่ ดาวและคอมเมนต์ของผลงานนั้นจะหายจากหน้าเว็บ และกลับมาเมื่อเผยแพร่ชิ้นเดิมอีกครั้ง',
     'ปุ่ม "ออนไลน์" ที่มุมบนแสดงชื่อที่แสดงและห้องที่คุณอยู่ให้ผู้ใช้ที่เข้าสู่ระบบทุกคนเห็น',
     'บัญชีผู้พัฒนาเห็นข้อมูลทั้งหมดเพื่อการดูแลระบบ',
   ]},
   { id:'delete', title:'4. การลบและการควบคุมข้อมูล', body:[
     'ลบตัวละครได้ที่หน้า "ตัวละครของฉัน" ลบห้องได้ด้วยปุ่ม "ลบห้อง" ของ GM (ลบแชต บอร์ด และสำเนาชีททั้งหมดในห้อง) ลบแผนที่ได้ในคลังแผนที่ ลบ NPC และ Asset ได้ในคลัง NPC / Asset ทุกอย่างลบแล้วลบเลย ระบบไม่มีถังขยะ',
+    'แก้หรือลบดาวและคอมเมนต์ของคุณได้ทุกเมื่อ ที่หน้าต่างดาวและคอมเมนต์ของผลงานนั้น หรือที่ปุ่ม "รีวิวของฉัน" ในหน้าแผนที่และหน้า NPC / Asset ปุ่มนี้แสดงทุกรายการที่คุณเคยให้ รวมถึงของผลงานที่เลิกเผยแพร่ไปแล้ว',
     'การออกจากระบบจะล้างสำเนาในเครื่องนั้น แต่ข้อมูลบนเว็บยังอยู่ เข้าสู่ระบบใหม่ก็กลับมา',
     'ถ้าต้องการลบบัญชีพร้อมข้อมูลทั้งหมด หรือขอสำเนาข้อมูลของตัวเอง ติดต่อผู้พัฒนาตามช่องทางท้ายหน้า เราดำเนินการให้ภายในสิบสี่วัน',
   ]},
@@ -5275,14 +5586,15 @@ const POLICY = [
     'ซื่อสัตย์กับลูกเต๋า: การทอยทุกครั้งในห้องเด้งขึ้นให้ทุกคนเห็นอยู่แล้ว อย่าแก้ไขค่าบนหมากหรือชีทเพื่อให้ตัวเองได้เปรียบโดยที่ GM ไม่รับรู้',
     'รักษาความลับของโต๊ะ: รหัสเข้าห้องและรหัส GM เป็นของห้องนั้น อย่าส่งต่อให้คนนอก ข้อความแชต ชีท และเรื่องราวของผู้เล่นคนอื่น ขออนุญาตก่อนนำไปเผยแพร่ที่อื่น',
     'ตรงเวลาและบอกล่วงหน้า: ถ้ามาไม่ได้หรือต้องออกก่อน บอกโต๊ะล่วงหน้า หมากที่ค้างบนบอร์ดโดยเจ้าของหายไปทำให้ทุกคนเล่นยาก',
+    'ติชมผลงานอย่างให้เกียรติ: ดาวและคอมเมนต์มีไว้บอกผู้สร้างและ GM คนอื่นว่าผลงานใช้ที่โต๊ะแล้วเป็นอย่างไร ติที่ตัวงานพร้อมเหตุผล อย่าให้ดาวเพื่อกลั่นแกล้ง ตอบแทนกัน หรือปั่นคะแนน และอย่าใช้หลายบัญชีให้ดาวผลงานของตัวเอง',
   ]},
   { id:'standards', title:'8. มาตรฐานเนื้อหาและการใช้งาน', body:[
-    'ห้ามเนื้อหาที่ยั่วยุความเกลียดชังหรือลดทอนศักดิ์ศรีของกลุ่มคน เนื้อหาทางเพศที่เกี่ยวกับผู้เยาว์ในทุกรูปแบบ การคุกคามหรือเปิดเผยข้อมูลส่วนตัวของบุคคลจริง และเนื้อหาที่ผิดกฎหมาย ทั้งในชื่อตัวละคร รูปภาพ แชต คำอธิบายแผนที่ และทุกช่องที่พิมพ์ได้',
+    'ห้ามเนื้อหาที่ยั่วยุความเกลียดชังหรือลดทอนศักดิ์ศรีของกลุ่มคน เนื้อหาทางเพศที่เกี่ยวกับผู้เยาว์ในทุกรูปแบบ การคุกคามหรือเปิดเผยข้อมูลส่วนตัวของบุคคลจริง และเนื้อหาที่ผิดกฎหมาย ทั้งในชื่อตัวละคร รูปภาพ แชต คำอธิบายแผนที่ คอมเมนต์ และทุกช่องที่พิมพ์ได้',
     'ห้ามใช้เว็บเพื่อโฆษณา สแปม หรือหลอกลวง และห้ามพยายามเข้าถึงข้อมูลของผู้ใช้คนอื่น เจาะระบบ หรือใช้ช่องโหว่ หากพบช่องโหว่ กรุณาแจ้งผู้พัฒนาแทนการใช้ประโยชน์จากมัน',
     'ทรัพย์สินทางปัญญา: โลกคีรันนา ระบบกฎ ตัวละครเนเมสไซอาร์ และข้อความในเว็บเป็นของ Unilight Games ตัวละครและเรื่องราวที่คุณสร้างเป็นของคุณ รูปที่อัปโหลดต้องเป็นรูปที่คุณมีสิทธิ์ใช้',
   ]},
   { id:'enforce', title:'9. การรายงานและการดำเนินการ', body:[
-    'พบเนื้อหาหรือพฤติกรรมที่ละเมิดข้อใดข้างต้น แจ้งผู้พัฒนาพร้อมชื่อห้องและเวลาโดยประมาณ ผู้พัฒนาอาจลบเนื้อหา ยกเลิกการเผยแพร่แผนที่ NPC หรือ Asset ปิดห้อง หรือระงับบัญชีตามความร้ายแรง และจะแจ้งเหตุผลให้ผู้ถูกดำเนินการทราบ โต้แย้งได้ทางช่องทางเดียวกัน',
+    'พบเนื้อหาหรือพฤติกรรมที่ละเมิดข้อใดข้างต้น แจ้งผู้พัฒนาพร้อมชื่อห้องหรือชื่อผลงาน และเวลาโดยประมาณ ผู้พัฒนาอาจลบเนื้อหา ลบดาวและคอมเมนต์ ยกเลิกการเผยแพร่แผนที่ NPC หรือ Asset ปิดห้อง หรือระงับบัญชีตามความร้ายแรง และจะแจ้งเหตุผลให้ผู้ถูกดำเนินการทราบ โต้แย้งได้ทางช่องทางเดียวกัน',
   ]},
   { id:'changes', title:'10. การเปลี่ยนแปลงนโยบาย', body:[
     'เมื่อนโยบายเปลี่ยน วันที่ปรับปรุงด้านบนจะเปลี่ยนตาม และการเปลี่ยนแปลงที่กระทบสิทธิ์ของคุณจะแจ้งไว้ที่หน้าแรกอย่างน้อยเจ็ดวันก่อนมีผล',
