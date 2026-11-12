@@ -62,11 +62,21 @@ service cloud.firestore {
       // ไอเทมที่ GM มอบให้ (เจ้าของรับเข้ากระเป๋าแล้วลบ)
       match /gifts/{doc} { allow read, write: if canEnter(rid); }
     }
-    // คลังแผนที่ (v1.5): ส่วนตัวของเจ้าของ จนกว่าจะ published = true แล้วทุกคนที่ล็อกอินอ่านได้ (เก็บสำเนาเป็นเอกสารใหม่ของตัวเอง)
+    // คลังแผนที่ (v1.5) คลัง NPC / Asset (v1.18) และสมุดรีวิว (v1.19) อยู่ในคอลเลกชันเดียวกัน แยกด้วยฟิลด์ type
+    // ส่วนตัวของเจ้าของ จนกว่าจะ published = true แล้วทุกคนที่ล็อกอินอ่านได้
+    // v1.7: ownerId กับ type แก้ภายหลังไม่ได้ · สมุดรีวิว (type == 'reviews') ต้องใช้รหัส rvbook-<uid> ของตัวเอง และเขียนได้เฉพาะบัญชีที่ไม่ใช่นิรนาม · เอกสารชนิดอื่นใช้รหัสที่ขึ้นต้นด้วย rvbook- ไม่ได้
     match /maps/{id} {
+      function isBook(d) { return d.get('type', '') == 'reviews'; }
+      function realAccount() { return request.auth.token.firebase.sign_in_provider != 'anonymous'; }
+      function ownBookId() { return id.matches('rvbook-' + request.auth.uid + '(~[a-z0-9]{1,12})?'); }
       allow read: if signedIn() && (isDev() || resource.data.published == true || resource.data.ownerId == request.auth.uid);
-      allow create: if signedIn() && (isDev() || request.resource.data.ownerId == request.auth.uid);
-      allow update, delete: if signedIn() && (isDev() || resource.data.ownerId == request.auth.uid);
+      allow create: if signedIn() && (isDev() || (request.resource.data.ownerId == request.auth.uid
+        && (isBook(request.resource.data) ? (ownBookId() && realAccount()) : !id.matches('rvbook-.*'))));
+      allow update: if signedIn() && (isDev() || (resource.data.ownerId == request.auth.uid
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.get('type', '') == resource.data.get('type', '')
+        && (!isBook(request.resource.data) || realAccount())));
+      allow delete: if signedIn() && (isDev() || resource.data.ownerId == request.auth.uid);
     }
     // ภาพประกอบแผนที่ (v1.6): ของเจ้าของเท่านั้น ไม่ติดไปกับการเผยแพร่
     match /mapimages/{id} {
