@@ -6088,12 +6088,15 @@ function vnFigure(spec){
 
 /* ===== หน้าสอนเล่นแบบ visual novel: เนเมสไซอาร์ ศาสดาสีชาด เป็นผู้สอน =====
  * นางเรียกตัวเองว่า "เรา" เรียกผู้เล่นว่า "เจ้า" หรือ "ลูกรัก" อ่อนโยน ขี้เล่น ชอบตั้งคำถาม ไม่ชอบคนเชื่อโดยไม่คิด
- * ภาพจาก assets/nem-<mood>.webp (ask explain guilty mad panic shush smile smirk surprise think) 360×432 กับฉบับขยาย 2 เท่า nem-<mood>-2x.webp พื้นหลัง assets/scene-study.webp
+ * ภาพจาก assets/nem-<mood>.webp (ask explain guilty mad panic shush smile smirk surprise think) 360×432 กับฉบับละเอียด nem-<mood>-2x.webp 1080×1296
+ * ทั้งสองชุดย่อจากต้นฉบับ PNG ของ Non ใน assets/Nemessiah/ ด้วย tools/nem_2x.py (ต้นฉบับไม่ได้ขึ้น GitHub) พื้นหลัง assets/scene-study.webp
  * แต่ละบทเป็นลำดับ "บรรทัด" [mood, ข้อความ] คลิก/Space/→ เพื่อไปต่อ ตัวอักษรค่อย ๆ ปรากฏ คลิกซ้ำเพื่อโชว์ทั้งบรรทัด */
 const NEM = { name: 'เนเมสไซอาร์', title: 'ศาสดาสีชาด', moods: ['smile','explain','ask','think','smirk','guilty','shush','surprise','panic','mad'] };
 function nemSrc(mood){ return 'assets/nem-' + (NEM.moods.includes(mood) ? mood : 'smile') + '.webp'; }
 /* v1.20 (Non แจ้ง 13 พ.ย. 2026 ว่ารูปในหน้าสอนเล่นไม่ชัด): ไฟล์ต้นฉบับ 360×432 เล็กกว่าขนาดที่หน้าเว็บวาด (สูงราว 594 px คูณขนาด UI และการขยายจอ)
- * เบราว์เซอร์จึงยืดรูป 1.6 ถึง 2.4 เท่า · รูปใหญ่ใช้ไฟล์ขยายล่วงหน้า 2 เท่า assets/nem-<สีหน้า>-2x.webp (tools/nem_2x.py) ถ้าโหลดไม่ได้ถอยไปใช้ไฟล์เดิม */
+ * เบราว์เซอร์จึงยืดรูป 1.6 ถึง 2.4 เท่า · รูปใหญ่ใช้ไฟล์ assets/nem-<สีหน้า>-2x.webp ถ้าโหลดไม่ได้ถอยไปใช้ไฟล์ 360×432
+ * v1.21 (Non สั่ง 13 พ.ย. 2026 ให้ใช้รูปในโฟลเดอร์ Nemessiah): ไฟล์ -2x เปลี่ยนจากรูปขยายของไฟล์เล็กเป็นรูป 1080×1296 ที่ย่อจากต้นฉบับ
+ * กรอบภาพและสัดส่วน 5:6 เท่าเดิม CSS กำหนดความสูงของรูปไว้ทุกจุด เลย์เอาต์จึงไม่เปลี่ยน โค้ดส่วนนี้ไม่ได้แก้ */
 function nemSrcHd(mood){ return 'assets/nem-' + (NEM.moods.includes(mood) ? mood : 'smile') + '-2x.webp'; }
 function nemSet(img, mood){ img.dataset.mood = mood; delete img.dataset.fb; img.style.visibility = ''; img.src = nemSrcHd(mood); }
 function nemImg(mood, cls){ const img = h('img',{class:'nem-img '+(cls||''), alt:NEM.name, draggable:'false'});
