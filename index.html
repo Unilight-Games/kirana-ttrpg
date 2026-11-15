@@ -4117,7 +4117,7 @@ function renderBagWin(c, d, body, head, o){
     if (!isB) slotSel.onchange = ()=>{ if (!slotSel.value) return; wearItem(c, selIdx, slotSel.value); HUD.sel.bag=null; o.refresh(); };
     // ย้ายของข้ามกระเป๋าของแฝด (ทั้งกอง) รวมกองถ้าเป็นของเดียวกัน
     const otherKey = isB ? 'A' : 'B';
-    const moveBtn = o.twin ? h('button',{class:'small movebtn',title:`ย้ายของชิ้นนี้ไปกระเป๋าของ${bodyName(c, otherKey)}`,onclick:()=>{ const dst = bagOf(c, otherKey); const same = dst.find(x=>x.name===row.name && (x.effect||'')===(row.effect||'') && +x.weight===+row.weight); if (same) same.qty = (same.qty||1) + (row.qty||1); else dst.push(row); inv.splice(selIdx,1); HUD.sel.bag=null; o.refresh(); },text:`⇄ ย้ายไปร่าง ${otherKey}`}) : null;
+    const moveBtn = o.twin ? h('button',{class:'small movebtn',title:`ย้ายของชิ้นนี้ไปกระเป๋าของ${bodyName(c, otherKey)}`,onclick:()=>{ const dst = bagOf(c, otherKey); const same = dst.find(x=>x.name===row.name && (x.effect||'')===(row.effect||'') && +x.weight===+row.weight && durSig(x)===durSig(row)); /* v1.25.1: ของที่ความทนทานต่างกันไม่รวมกอง */ if (same) same.qty = (same.qty||1) + (row.qty||1); else dst.push(row); inv.splice(selIdx,1); HUD.sel.bag=null; o.refresh(); },text:`⇄ ย้ายไปร่าง ${otherKey}`}) : null;
     detailHost.append(h('div',{class:'hud-detail top'}, h('div',{class:'kicker',text:'ของที่เลือก'}),
       h('div',{class:'row',style:'gap:6px;align-items:center'}, o.txt(row,'name','ชื่อไอเทม'), h('label',{class:'dim',text:'×'}), h('input',{type:'number',value:row.qty,style:'width:58px',onchange:(e)=>{row.qty=+e.target.value||0; o.refresh();}}), h('label',{class:'dim',text:'กก.'}), h('input',{type:'number',step:'0.1',value:row.weight,style:'width:70px',onchange:(e)=>{row.weight=+e.target.value||0; o.refresh();}})),
       o.grow(o.txt(row,'effect','คุณสมบัติ / ผลของไอเทม',true)),
@@ -4803,7 +4803,7 @@ function applyGift(rid, g, force){
   if (!c.inventory) ensureSheetState(c, compute(c)); // ชีทที่ยังไม่เคยเปิด: เติมชุดเริ่มต้นก่อน ไม่งั้นของเริ่มต้นจะหาย
   c.inventory = c.inventory || [];
   const toB = g.body==='B' && isTwinborn(c); const bag = bagOf(c, toB ? 'B' : 'A'); // แฝด: ของลงกระเป๋าของร่างที่ GM กดให้
-  const it = g.item||{}; const ex = bag.find(x=>x.name===it.name && (x.effect||'')===(it.effect||''));
+  const it = g.item||{}; const ex = bag.find(x=>x.name===it.name && (x.effect||'')===(it.effect||'') && durSig(x)===durSig(it)); // v1.25.1: ของใหม่ไม่รวมกองกับชิ้นที่สึกหรือพัง
   if (ex) ex.qty = (ex.qty||1) + (it.qty||1); else bag.push({name:it.name, effect:it.effect||'', qty:it.qty||1, weight:it.weight||0});
   Store.upsert(c);
   toast(`${g.from||'GM'} ให้ ${it.name}${it.qty>1?' ×'+it.qty:''} แก่ ${toB ? bodyName(c,'B') : c.name} แล้ว (อยู่ในกระเป๋า${toB ? 'ของร่าง B' : ''})`);
