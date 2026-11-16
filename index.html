@@ -45459,10 +45459,10 @@ const Combat = {
       const text = isPc ? (c ? ((bodyOf(t) === 'B' ? c.armor2 : c.armor) || {})[part] : '') : ((this.isNpc(t) && typeof npcArmor === 'function') ? npcArmor(t.equip)[part] : '');
       const all = (this.isNpc(t) && typeof npcAllArmor === 'function') ? Math.max(0, npcAllArmor(t)) : 0; // All Armor และโบนัสขนาดของ NPC นับเป็นเกราะหลักทุกส่วน
       const cut = cbArmorCut(text, o.dtype, physical, all); armored = cut.any; arm = cut.v;
-      const where = partLabel(part) + (o.viaTorso ? ' (ไม่มีตำแหน่งที่โดน ใช้เกราะลำตัว)' : '');
+      const where = partLabel(part); const via = o.viaTorso ? ' (ทักษะที่ไม่มีตำแหน่งที่โดน ใช้เกราะลำตัว)' : '';
       const how = cut.sec ? ` (เกราะหลัก ${cut.main} บวกเกราะรองกัน${cut.key === 'Sorceries Resistance' ? 'เวท' : ' ' + cut.key} ${cut.sec})` : '';
-      if (arm && o.ap){ const half = Math.floor(arm / 2); armNote = `เกราะ${where} ${arm}${how} เหลือ ${half} จาก Armor Penetrate`; arm = half; }
-      else if (arm) armNote = `เกราะ${where} ${arm}${how}`; else if (cut.known) armNote = `${where}ไม่มีเกราะ`;
+      if (arm && o.ap){ const half = Math.floor(arm / 2); armNote = `เกราะ${where} ${arm}${how}${via} เหลือ ${half} จาก Armor Penetrate`; arm = half; }
+      else if (arm) armNote = `เกราะ${where} ${arm}${how}${via}`; else if (cut.known) armNote = `${where}ไม่มีเกราะ${via}`;
       if (!cut.known) armNote = (armNote ? armNote + ' · ' : '') + `ช่องเกราะของ${partLabel(part)}จดไว้นอกรูปแบบ A/B (ชนิด) ระบบจึงไม่ได้หักส่วนที่จดเอง`; }
     else if (o.noArmor) armNote = 'ความเสียหายนี้ไม่หักเกราะ';
     if (part && !o.noArmor && isPc && !c) armNote = 'ระบบอ่านชีทของเป้าไม่ได้ จึงไม่ได้หักเกราะให้ ใช้ช่อง ลดเพิ่ม แทนได้';
