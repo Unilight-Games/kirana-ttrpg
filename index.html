@@ -1394,6 +1394,92 @@ table.npceq-armor{margin-top:6px;font-size:12.5px;width:auto}table.npceq-armor t
 .cedit-bar{margin:0 0 12px}
 @media (max-width:900px){.cedit-wrap{grid-template-columns:minmax(0,1fr)}.cedit-preview{border-left:0;padding-left:0;border-top:1px dashed rgba(212,168,74,.25);padding-top:12px}}
 @media (max-width:900px){.cx-layout{grid-template-columns:1fr}.cx-toc{position:static;max-height:190px}.cx-grid,.cx-sets{grid-template-columns:1fr}}
+/* v1.28: ระบบโจมตีแบบมีขั้นตอน (หน้าต่างโจมตี หน้าต่างป้องกัน ป๊อปอัปเต๋าชนกัน) แถบสกิลลากลงแผนที่ และเอฟเฟกต์บนแผนที่ (fx.js combat.js skilluse.js) */
+#fx-layer{position:fixed;inset:0;pointer-events:none;z-index:48;overflow:hidden}
+.fx{position:absolute;pointer-events:none;--fx:#e6e1d6;--s:30px;will-change:transform,opacity}
+.fx-float{transform:translate(-50%,-60%);font-family:var(--font-display);font-weight:700;font-size:22px;color:var(--gold);white-space:nowrap;text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.9),0 0 2px #000}
+.fx-float.dmg{color:#ff6a58;font-size:28px}.fx-float.heal{color:#6fe39a;font-size:26px}.fx-float.miss{color:#8fe9e0}.fx-float.info{color:var(--gold);font-size:17px}
+.fx-ring{width:var(--s);height:var(--s);border-radius:50%;border:3px solid var(--fx);box-shadow:0 0 14px var(--fx),inset 0 0 10px var(--fx);transform:translate(-50%,-50%)}
+.fx-ring.fx-aura{border-width:2px;border-style:double;border-width:5px}
+.fx-spark{width:var(--s);height:var(--s);border-radius:50%;background:var(--fx);box-shadow:0 0 8px var(--fx);transform:translate(-50%,-50%)}
+.fx-slash{width:var(--s);height:var(--s);border-radius:50%;border:0 solid transparent;border-top:5px solid var(--fx);filter:drop-shadow(0 0 6px var(--fx));transform:translate(-50%,-50%)}
+.fx-orb{width:var(--s);height:var(--s);border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff 0 22%,var(--fx) 60%,transparent 72%);box-shadow:0 0 14px var(--fx),0 0 4px #fff;transform:translate(-50%,-50%)}
+.fx-trail{width:var(--s);height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--fx));transform-origin:0 50%;opacity:0}
+.fx-plus{font-family:var(--font-display);font-weight:700;font-size:var(--s);line-height:1;color:var(--fx);text-shadow:0 0 6px var(--fx);transform:translate(-50%,-50%)}
+.fx-shield{font-size:var(--s);line-height:1;filter:drop-shadow(0 0 8px var(--fx));transform:translate(-50%,-50%)}
+.fx-zone{width:var(--s);height:var(--s);border-radius:6px;border:2px dashed var(--fx);background:radial-gradient(circle,transparent 30%,var(--fx) 240%);box-shadow:0 0 18px var(--fx);transform:translate(-50%,-50%);opacity:.6}
+/* ป๊อปอัปเต๋าชนกัน */
+.clashbox{min-width:min(600px,94vw);padding:18px 22px}
+.cl-arena{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.cl-side{transition:transform .3s cubic-bezier(.5,0,.9,.4),opacity .3s,filter .3s}
+.cl-side .dice-row{gap:8px;margin:4px 0 6px;flex-wrap:wrap}
+.cl-side .bigdie{width:56px;height:56px;font-size:30px;border-radius:12px}
+.cl-atk .bigdie{box-shadow:inset 0 -5px 0 rgba(0,0,0,.18),0 0 0 3px var(--blood-2),0 6px 14px rgba(0,0,0,.4)}
+.cl-def .bigdie{box-shadow:inset 0 -5px 0 rgba(0,0,0,.18),0 0 0 3px var(--mana),0 6px 14px rgba(0,0,0,.4)}
+.cl-name{font-family:var(--font-display);font-size:15px;color:var(--bone)}.cl-atk .cl-name{color:var(--blood-2)}.cl-def .cl-name{color:var(--mana)}
+.cl-sum{font-size:13px;color:var(--bone-dim);min-height:20px}
+.cl-none{font-size:44px;line-height:1.3}
+.cl-spark{font-size:38px;color:var(--gold);opacity:0;transform:scale(.3);transition:transform .22s,opacity .22s;text-shadow:0 0 16px var(--gold)}
+.clashbox.charge .cl-atk{transform:translateX(30px)}.clashbox.charge .cl-def{transform:translateX(-30px)}
+.clashbox.impact .cl-spark{opacity:1;transform:scale(1.5) rotate(45deg)}
+.clashbox.impact{animation:clshake .36s}
+.clashbox.hit .cl-def{opacity:.5;filter:grayscale(.7)}.clashbox.blocked .cl-atk{opacity:.5;filter:grayscale(.7)}
+.clashbox.hit{border-color:var(--blood-2)}.clashbox.blocked{border-color:var(--mana)}.clashbox.pdef{box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(79,209,197,.45)}
+.cl-verdict{font-family:var(--font-display);font-size:26px;font-weight:700;min-height:36px;margin-top:8px;opacity:0;transform:scale(.8);transition:all .25s}
+.cl-verdict.show{opacity:1;transform:none}
+.cl-lines{font-size:13.5px;color:var(--bone-dim);max-width:560px;margin:6px auto 0;text-align:left;opacity:0;transition:opacity .3s .15s;display:grid;gap:2px}
+.cl-lines.show{opacity:1}
+@keyframes clshake{0%,100%{transform:translate(0,0)}20%{transform:translate(-6px,2px)}40%{transform:translate(6px,-2px)}60%{transform:translate(-4px,1px)}80%{transform:translate(3px,0)}}
+@media (prefers-reduced-motion:reduce){.cl-side,.cl-spark,.cl-verdict,.cl-lines{transition:none}.clashbox.impact{animation:none}}
+/* หน้าต่างโจมตี: ลอยข้างแผนที่ ไม่บังการคลิกหมาก */
+.atkc{position:fixed;right:14px;top:78px;width:410px;max-width:calc(100vw - 20px);max-height:calc(100vh - 100px);overflow:auto;z-index:55;border-radius:12px;border:1px solid #5a4a22;background:linear-gradient(180deg,#171d26,#0e1319);box-shadow:0 24px 60px rgba(0,0,0,.7),0 0 0 1px rgba(212,168,74,.15);padding:12px 14px;font-size:13.5px}
+.atkc-head{display:flex;align-items:center;gap:6px;margin-bottom:8px}.atkc-head b{font-family:var(--font-gothic);font-size:17px}.atkc-head .dim{font-size:12px}.atkc-x{margin-left:auto}
+.atkc-grid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 10px;align-items:center}.atkc-grid>select,.atkc-grid>input{width:100%}.atkc-grid select,.atkc-grid input{padding:4px 8px;font-size:13px}
+.atkc-range,.atkc-note{margin-top:8px;padding:5px 9px;border-radius:6px;font-size:13px;border:1px solid var(--line-2)}
+.atkc-range.ok{border-color:var(--ok);color:var(--ok)}.atkc-range.warn,.atkc-note.warn{border-color:var(--warn);color:var(--warn)}.atkc-range.bad,.atkc-note.bad{border-color:var(--bad);color:var(--bad)}
+.atkc-reasons{margin-top:8px;display:grid;gap:3px}
+.fld.chk.rs-adv span{color:var(--ok)}.fld.chk.rs-dis span{color:var(--bad)}.fld.chk.rs-perfect span,.fld.chk.rs-cv span{color:var(--gold)}.fld.chk.rs-gb span{color:var(--warn)}
+.atkc .fld,.defbox .fld,.subox .fld{font-size:12.5px}.atkc .fld span,.defbox .fld span{white-space:normal}
+.atkc-opts{margin-top:8px}.atkc-opts select,.atkc-opts input{padding:4px 8px;font-size:13px}
+.atkc-props{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}.atkc-props .pp.off{opacity:.6}
+.atkc-eff{margin-top:6px;font-size:12.5px}.atkc-eff summary{cursor:pointer;color:var(--bone-dim)}
+.atkc-sum{margin-top:10px;font-size:13px;padding:6px 9px;background:var(--ink);border:1px solid var(--line);border-radius:6px}
+body.cb-picking .gridmap .cell,body.cb-picking .gridmap .gtok{cursor:crosshair}
+body.cb-picking .gridmap .gtok{box-shadow:0 0 0 2px var(--gold),0 2px 6px rgba(0,0,0,.6)}
+.gridmap .gtok.cb-tgt{box-shadow:0 0 0 3px var(--blood-2),0 0 14px var(--blood-2)!important}
+.pickhint{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:56;display:flex;gap:10px;align-items:center;background:var(--ink-3);border:1px solid var(--gold);border-radius:999px;padding:6px 14px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.6);max-width:92vw}
+@media (max-width:760px){.atkc{left:6px;right:6px;top:auto;bottom:6px;width:auto;max-height:62vh}}
+/* หน้าต่างป้องกัน */
+.defbox h3{text-align:center}
+.def-atk{text-align:center;background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;margin:8px 0}
+.def-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.def-col{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:6px;align-content:start}
+.def-col>button{width:100%;font-size:16px;padding:10px}.def-col>button:disabled{opacity:.45;cursor:not-allowed}
+.def-how{font-size:12.5px}
+.def-sk{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line);padding:6px 0}
+.def-adj{margin-top:10px;font-size:13px}.def-adj summary,.def-more summary{cursor:pointer;color:var(--bone-dim)}
+@media (max-width:620px){.def-cols{grid-template-columns:1fr}}
+/* การ์ดในแชต */
+.chat .e.clashmsg{border-left:3px solid var(--blood-2);padding-left:8px}.chat .e.clashmsg.blocked{border-left-color:var(--mana)}
+.clash-lines{font-size:12.5px;color:var(--bone-dim);margin-top:3px;display:grid;gap:1px}
+.chat .e.skillmsg{border-left:3px solid var(--fx,var(--gold));padding-left:8px}.skillmsg .sk-name{color:var(--fx,var(--gold))}
+.sk-follow select.sk-mode{font-size:12px;padding:2px 4px}
+.tag .cadj{font-size:11px;line-height:1;padding:1px 5px;margin-left:5px;border-radius:999px;border:1px solid var(--line-2);background:var(--ink-2);color:var(--bone);cursor:pointer}
+/* แถบสกิล */
+.skillbar{position:sticky;bottom:6px;z-index:6;margin-top:12px;padding:8px 12px;box-shadow:0 -8px 20px rgba(0,0,0,.55);border-color:#5a4a22;background:linear-gradient(180deg,#171d26,#10161d)}
+.skillbar h3{margin:0;font-size:15px}.skillbar .skb-hint{font-size:11.5px;margin:2px 0 6px}
+.skillbar .skchips{max-height:116px;overflow:auto;padding:2px 2px 4px}
+.skillbar .skb-who,.skillbar .skb-q{font-size:13px;padding:3px 8px;font-family:var(--font-body);font-weight:400}
+.skchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.skchip{--fx:var(--gold);display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-left:4px solid var(--fx);background:var(--ink-3);color:var(--bone);border-radius:8px;padding:5px 9px;font-size:13px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.skchip:hover,.skchip:focus-visible{border-color:var(--fx);box-shadow:0 0 10px -2px var(--fx)}
+.skchip.passive{opacity:.62;border-style:dashed;border-left-style:solid}.skchip.custom{border-style:dashed;border-left-style:solid;color:var(--bone-dim)}
+.skchip .skdot{font-style:normal;color:var(--fx)}.skchip .skcost{font-size:11px;color:var(--mana);white-space:nowrap}
+.skghost{position:fixed;z-index:1000;pointer-events:none;background:var(--ink-2);border:1px solid var(--gold);border-radius:8px;padding:4px 10px;font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.6);white-space:nowrap}
+body.sk-dragging,body.sk-dragging *{cursor:grabbing!important}
+.subox .su-mech{margin-top:10px;font-size:13px;background:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:grid;gap:2px}
+.subox .su-cost{display:grid;gap:4px}.subox .su-costrow.off{opacity:.5}.subox .su-eff{margin-top:10px}.subox .su-eff summary{cursor:pointer;color:var(--bone-dim);font-size:13px}
+.cb-npc{margin-top:8px;font-size:13px}.cb-npc summary{cursor:pointer;color:var(--bone-dim)}
 </style>
 </head>
 <body class="bg-study">
@@ -40389,7 +40475,15 @@ function modal(content){ const m=$('#modal'); clear(m); if(!content){ m.classLis
   m.append(box); m.classList.remove('hidden'); m.onclick=(ev)=>{ if(ev.target===m) modal(null); }; }
 
 /* ---- Dice: 2d6 ตามไฟล์แกน, Advantage/Disadvantage = 3d6 เก็บ 2 ดี/แย่ ---- */
-function rollD6(){ return 1 + (crypto.getRandomValues(new Uint8Array(1))[0] % 6); }
+/* v1.28: สุ่มหน้าเต๋าแบบทิ้งค่าที่เกินช่วง (rejection sampling) ทุกหน้ามีโอกาสเท่ากันจริง
+ * รุ่นก่อนใช้ไบต์เดียว % 6 หน้า 1 ถึง 4 จึงออก 43/256 ส่วนหน้า 5 กับ 6 ออก 42/256 ค่าเฉลี่ย 2d6 เหลือ 6.97 แทน 7 */
+function rollDie(sides){
+  sides = Math.floor(+sides) || 6; if (sides < 2) return 1; if (sides > 100000) sides = 100000;
+  const lim = Math.floor(0x100000000 / sides) * sides; const buf = new Uint32Array(1);
+  for (let i = 0; i < 64; i++){ crypto.getRandomValues(buf); if (buf[0] < lim) return 1 + (buf[0] % sides); }
+  return 1 + (buf[0] % sides);
+}
+function rollD6(){ return rollDie(6); }
 function roll2d6(mode='normal'){
   const n = mode === 'normal' ? 2 : 3;
   const dice = Array.from({length:n}, rollD6);
@@ -40444,7 +40538,7 @@ function parseRollCommand(text){
   return out;
 }
 function rollDiceExpr(p){
-  const dice = Array.from({length:p.n}, ()=> 1 + Math.floor(Math.random()*p.sides));
+  const dice = Array.from({length:p.n}, ()=> rollDie(p.sides)); // v1.28: ใช้ตัวสุ่มเดียวกับเต๋าหลัก
   let keepCount = p.n, type = 'h';
   if (p.keep){ keepCount = p.keep.count; type = p.keep.type; }
   else if (p.mode==='adv' && p.n>1){ keepCount = p.n-1; type = 'h'; }
@@ -43712,14 +43806,14 @@ const Table = {
       this.unsub.push(u5);
       let q = Store.db.collection('rooms/'+id+'/chat');
       try { q = q.orderBy('ts','desc').limit(120); } catch(e){}
-      const u2 = q.onSnapshot(snap => { const docs = snapDocs(snap).filter(Boolean); docs.sort((a,b)=>(b.ts||0)-(a.ts||0)); this.chat = docs.slice(0,120); renderChatOnly(); this.detectNewRolls(); }, err=>console.warn('chat', err));
+      const u2 = q.onSnapshot(snap => { const docs = snapDocs(snap).filter(Boolean); docs.sort((a,b)=>(b.ts||0)-(a.ts||0)); this.chat = docs.slice(0,120); renderChatOnly(); this.detectNewRolls(); if (typeof Combat !== 'undefined') Combat.onChat(); }, err=>console.warn('chat', err));
       const u3 = Store.db.doc('rooms/'+id+'/meta/roll').onSnapshot(snap => { this.rollLock = docData(snap); updateRollLockUI(); }, err=>console.warn('rolllock', err));
       this.unsub.push(u1,u2,u3);
     } catch(e){ console.warn(e); toast('เชื่อมต่อห้องไม่ได้'); }
     if (Store.room){ try { const r = await Store.room.join('kirana-'+id); this.presence = r; const me = Store.me||'guest'; r.presence({who: me, name: Store.displayName||'', at: Date.now()}); r.onPeers(p=>{ this.peers = Array.isArray(p)? p : Object.values(p||{}); renderPeers(); }); } catch(e){ console.warn('room', e); } }
     renderTable();
   },
-  close(){ for (const u of this.unsub) try{ typeof u==='function' && u(); }catch(e){} this.unsub=[]; if (this.presence){ try{ this.presence.leave(); }catch(e){} this.presence=null; } this.roomId=null; this.room=null; this.chat=[]; this.peers=[]; this.roomChars=[]; this.sel=null; this.measure=null; this.brush=null; this.chatWho=null; this.diceWho=null; this.rollLock=null; this.rolling=false; this.seenRolls=new Set(); this.chatReady=false; DiceShow.clear(); updateRollLockUI(); clearTwins(); },
+  close(){ for (const u of this.unsub) try{ typeof u==='function' && u(); }catch(e){} this.unsub=[]; if (this.presence){ try{ this.presence.leave(); }catch(e){} this.presence=null; } this.roomId=null; this.room=null; this.chat=[]; this.peers=[]; this.roomChars=[]; this.sel=null; this.measure=null; this.brush=null; this.chatWho=null; this.diceWho=null; this.rollLock=null; this.rolling=false; this.seenRolls=new Set(); this.chatReady=false; DiceShow.clear(); updateRollLockUI(); clearTwins(); if (typeof Combat !== 'undefined') Combat.reset(); },
   /* ---- ด่านล็อกการทอย: ทอยได้ทีละคน ระหว่างเต๋าเด้งอยู่บนจอทุกคน คนอื่นกดทอยไม่ได้ ---- */
   lockActive(lk){ lk = lk===undefined ? this.rollLock : lk; return !!(lk && lk.at && (Date.now() - lk.at) < ROLL_LOCK_TTL); },
   lockedByOther(){ return this.lockActive() && this.rollLock.by !== (Store.me||'local'); },
@@ -43771,7 +43865,7 @@ const Table = {
   },
   async post(msg){
     msg.id = msg.fixedId || uid(); delete msg.fixedId; msg.ts = Date.now(); msg.authorId = Store.me||'local'; // fixedId: ผลของการเลือกเต๋าให้การโจมตีใช้ id ตายตัว สองคนกดพร้อมกันจึงเหลือผลเดียว
-    if (this.localMode){ this.chat.unshift(msg); this.chat = this.chat.slice(0,200); saveLocalChat(this.roomId, this.chat); renderChatOnly(); if (msg.kind==='roll') DiceShow.enqueue(msg); return; }
+    if (this.localMode){ this.chat.unshift(msg); this.chat = this.chat.slice(0,200); saveLocalChat(this.roomId, this.chat); renderChatOnly(); if (msg.kind==='roll') DiceShow.enqueue(msg); if (typeof Combat !== 'undefined') Combat.onChat(); return; }
     try { await Store.db.doc(`rooms/${this.roomId}/chat/${msg.id}`).set(JSON.parse(JSON.stringify(msg))); } catch(e){ console.warn(e); toast('ส่งข้อความไม่ได้ (สิทธิ์ไม่พอ?)'); } // ผ่าน JSON ก่อนเขียน: Firestore ไม่รับค่า undefined ในเอกสาร
   },
   /* v1.25: ทอยในนามหมาก NPC (ไม่มีชีท) · gmOnly = เห็นเฉพาะ GM */
@@ -43788,7 +43882,7 @@ const Table = {
     rollChoose(dice.length, 'dis', `${m.who||''}: ${m.text||'Attack Roll'} (เลือก 2 จาก ${dice.length} ลูกให้ผู้โจมตี)`, {kind:'attack', dice, cvMod:m.cvMod||0, loc:m.loc||null, forDefender:true}).then(r=>{
       if (this.pickDone(m)){ toast('มีคนเลือกเต๋าให้การโจมตีนี้ไปก่อนแล้ว'); return; }
       const av = attackVerdict(r, {cvMod:m.cvMod||0, loc:m.loc||null});
-      this.post({kind:'roll', who:m.who, text:`${m.text||'Attack Roll'} · ${by} เลือกให้`, roll:{dice:r.dice, kept:r.kept, keptIdx:r.keptIdx, sum:r.sum, crit:null, double:r.double, mode:'dis', chosen:true}, mod:m.cvMod||0, pm:0, total:av.cv, judge:{cls:av.cls, text:av.text}, atk:{sum:av.sum, cv:av.cv, part:av.part||null, precise:av.precise, cvMod:m.cvMod||0, pick:'def'}, pickOf:m.id, pickedBy:by, gmOnly:!!m.gmOnly, fixedId:'pick-'+m.id});
+      this.post({kind:'roll', who:m.who, text:`${m.text||'Attack Roll'} · ${by} เลือกให้`, roll:{dice:r.dice, kept:r.kept, keptIdx:r.keptIdx, sum:r.sum, crit:null, double:r.double, mode:'dis', chosen:true}, mod:m.cvMod||0, pm:0, total:av.cv, judge:{cls:av.cls, text:av.text}, atk:{sum:av.sum, cv:av.cv, part:av.part||null, precise:av.precise, cvMod:m.cvMod||0, pick:'def'}, pickOf:m.id, pickedBy:by, gmOnly:!!m.gmOnly, flow:m.flow||null, fixedId:'pick-'+m.id}); // v1.28: flow = การโจมตีจากหน้าต่างโจมตี ฝ่ายรับจะถูกถามวิธีป้องกันต่อ
     });
   },
   /* การทอยโจมตีล่าสุดในแชต (ที่ฉันมองเห็น) ใช้เติมช่องป้องกัน: ผลรวมเต๋า CV และตำแหน่งที่เล็ง */
@@ -43807,6 +43901,8 @@ const DiceShow = {
     const m = this.q.shift(); if (!m){ this.cur=null; return; }
     this.cur = m; const o = $('#dice-overlay'); if (!o) return;
     clear(o); o.classList.remove('hidden');
+    if (m.kind==='clash' && typeof clashBox === 'function'){ // v1.28: เต๋าของสองฝ่ายชนกัน แล้วเล่นเอฟเฟกต์บนแผนที่เมื่อป๊อปอัปปิด
+      o.append(clashBox(m)); this.timer = setTimeout(()=>{ o.classList.add('hidden'); clear(o); this.cur=null; try { if (m.fx) Fx.play(m.fx); } catch(e){} this.next(); }, Fx.calm() ? 3200 : CLASH_SHOW_MS); return; }
     const r = m.roll; const dice = r.dice||[]; const keptIdx = r.keptIdx||[];
     const dieEls = dice.map((v,i)=>h('div',{class:'bigdie tumble'+(keptIdx.includes(i)?'':' drop')}, h('span',{text:'?'})));
     const box = h('div',{class:'dicebox'}, h('div',{class:'dice-who'}, chatWho(m), ' ', h('b',{text:m.text||'ทอยเต๋า'}), r.mode&&r.mode!=='normal'? [' ', tag(r.mode==='adv'?'Advantage':'Disadvantage', r.mode==='adv'?'ok':'neg')]:null, (m.atk && m.atk.pick==='def') ? [' ', tag('ฝ่ายรับเลือก','neg')] : (r.chosen? [' ', tag('เลือกลูกเอง','prop')]:null), m.gmOnly? [' ', h('span',{class:'gm',text:'ลับ'})]:null),
@@ -44063,6 +44159,7 @@ function renderTableInner(){
   // ---- แผนที่ต่อสู้ 20×20 ----
   left.append(mapPanel(r, gm));
   left.append(h('p',{class:'dim',style:'font-size:12px;margin-top:8px',text:`หนึ่งช่องคือ ${CELL_M} เมตร ช่องที่ติดกัน (รวมทแยง) คือเขตปะทะ ไม่เกิน ${NEAR_MAX_M} เมตร (${NEAR_MAX_M/CELL_M} ช่อง) คือเขตใกล้เคียง ไกลกว่านั้นคือเขตไกล ยิงไปเขตไกลโดนลด CV ตามระยะ ระยะที่เดินได้ต่อ 1 Maneuver คือความเร็วของตัวละคร Dash (1 Swift) ไปได้เท่าความเร็ว Dash ของวงศา Run (1 Swift บวก 1 AP) ไปได้เท่าความเร็ววิ่งบวก AGI Mod คลิกหมากของคุณแล้วจุดกลางช่องจะบอกช่องที่ไปถึง จุดทึบคือ Dash วงแหวนคือ Run ถอยออกจากเขตปะทะโดนโจมตีฉวยโอกาส ช่องเดินช้า (น้ำตื้น หิมะ โคลน เศษหิน) นับเป็นสองช่อง น้ำลึกว่ายได้แต่เสียเทิร์นที่ลงไป และโจมตีไม่ได้จนกว่าจะขึ้นฝั่ง (สัตว์น้ำยกเว้น) · ต้นไม้ เสา เหว และขอบหน้าผาเข้าได้เฉพาะหมากที่ติ๊ก 🧗 ปีนป่าย เกาะขอบเหวหรือหน้าผาอยู่ = ติด Prone ตลอด · ลากหมากเพื่อย้าย คลิกหมากเพื่อดูโซนและระยะมองเห็น`}));
+  if (typeof SkillUse !== 'undefined'){ const sb = SkillUse.bar(r, gm); if (sb) left.append(sb); } // v1.28: แถบสกิล ลากลงแผนที่ได้
   // หน้าปัด: ลำดับเทิร์นและหมาก + หมากที่เลือก (ฝังคอลัมน์ขวา กด ⇱ ปลดลอยได้ ปิดไม่ได้)
   right.append(h('div',{style:'margin-bottom:12px'}, twinDock(r, gm)));
   // clocks
@@ -44086,6 +44183,7 @@ function renderTableInner(){
   root.append(h('div',{class:'table-wrap'}, left, right));
   renderChatOnly(); renderPeers();
   renderTwins(r, gm);
+  if (typeof Combat !== 'undefined') Combat.afterRender();
 }
 /* วางตัวละครของฉันลงบอร์ด: สร้างหมาก + แชร์สำเนาชีทเข้าห้อง (ผู้เล่นคนอื่นและ GM จึงเห็นชีทได้เฉพาะในแคมเปญนี้) */
 async function placeCharacter(c, r){
@@ -44094,7 +44192,7 @@ async function placeCharacter(c, r){
   const twin = isTwinborn(c); const have = r.tokens.filter(t=>t.charId===c.id).map(bodyOf);
   const need = (twin ? ['A','B'] : ['A']).filter(b=>!have.includes(b));
   if (!need.length){ toast(twin ? 'แฝดทั้งสองร่างอยู่บนบอร์ดแล้ว' : 'ตัวละครนี้อยู่บนบอร์ดแล้ว'); return; }
-  let d = compute(c); if (twin && Store.isMine(c)){ ensureSheetState(c, d); d = compute(c); }
+  let d = compute(c); if (Store.isMine(c)){ ensureSheetState(c, d); d = compute(c); } // v1.28: เตรียมค่าปัจจุบัน กระเป๋า และของสวมใส่ทุกตัวละครตั้งแต่ตอนวาง (เดิมทำเฉพาะแฝด) สำเนาชีทในห้องจึงมีอาวุธและเกราะให้ระบบโจมตีอ่านทันที
   const thumb = await makeThumb(c.portrait); const cur = c.current||{}; const st = twinbornState(c);
   if (twin) for (const t of r.tokens) if (t.charId===c.id && !t.body) t.body = 'A'; // หมากที่วางไว้ก่อน v1.14 ยังไม่มีป้ายร่าง
   for (const body of need){
@@ -44197,7 +44295,7 @@ function diceBody(r, gm){
   const whoName = ()=>{ const c=selChar(); return c? c.name : (gm?'GM':(Store.displayName||'ผู้เล่น')); };
   const onRoll = (e, c)=>{ Table.postRoll(e, c); diceBadge(e.total); };
   const qroll = (label, kind)=>{ const c=selChar(); if (kind==='attack' && c){ const blk = Table.attackBlocked(c); if (blk){ toast(blk); return; } } Table.guardedRoll(whoName(), ()=>onRoll(doRoll({label, kind, c}), c), label); };
-  const quick = h('div',{class:'row'}, h('button',{class:'small rollbtn',onclick:()=>qroll('2d6','check'),text:'2d6'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Attack Roll','attack'),text:'Attack (CV)'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Luck Saving Throw','luck'),text:'Luck'}),
+  const quick = h('div',{class:'row'}, h('button',{class:'small rollbtn',onclick:()=>qroll('2d6','check'),text:'2d6'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Attack Roll','attack'),text:'Attack (CV)'}), h('button',{class:'small primary cb-open',title:'เลือกเป้าหมาย อาวุธ และแบบการโจมตี แล้วให้ฝ่ายรับเลือกวิธีป้องกัน ระบบคิดความเสียหายให้',onclick:()=>{ const c0 = selChar(); const tk = c0 ? (r.tokens||[]).find(t=>t.charId===c0.id) : null; Combat.openAttack(tk ? tk.id : null, null); },text:'⚔ โจมตีเป้าหมาย'}), h('button',{class:'small rollbtn',onclick:()=>qroll('Luck Saving Throw','luck'),text:'Luck'}),
     ...(gm? [h('button',{class:'small ghost rollbtn',onclick:()=>{ Table.guardedRoll('GM', ()=>{ const e=doRoll({label:'ทอยลับของ GM'}); Table.post({kind:'roll',who:'GM',text:e.label,roll:{dice:e.r.dice,kept:e.r.kept,keptIdx:e.r.keptIdx,sum:e.r.sum,crit:e.r.crit,double:e.r.double,mode:e.mode},mod:0,pm:0,total:e.total,judge:e.judge,gmOnly:true}); diceBadge(e.total); }, 'ทอยลับ'); },text:'ทอยลับ (GM)'})] : []));
   // ช่องคำสั่งทอย (ผู้ใช้ขอ 9 พ.ย. 2026): พิมพ์ 3d6 dis · 2d6+3 · 1d20 · 4d6kh3 · dc10 แล้ว Enter · GM ติ๊ก "ลับ" ได้
   const cmd = h('input',{placeholder:'คำสั่งทอย เช่น 3d6 dis · 2d6+3 · attack cv+2 · parry 4 dc 9 · evade adv · 1d20 · dc 10 ชื่อการทอย',style:'flex:1;min-width:220px'});
@@ -44304,6 +44402,7 @@ function tokBody(r, gm){
     ctl.append(h('button',{class:'small ghost',style:'margin-left:auto',title: gm ? 'เอาออกจากบอร์ด (ลบสำเนาชีทในห้องด้วย)' : 'ถอนตัวละครออกจากบอร์ด (GM จะไม่เห็นชีทอีก)',onclick:()=>{ if (!confirm(`เอา ${t.name} ออกจากบอร์ด?`)) return; detachToken(r, t); passSharedTurn(r, t); r.tokens=r.tokens.filter(x=>x!==t); r.enc.order=(r.enc.order||[]).filter(x=>x!==t.id); if (Table.sel===t.id) Table.sel=null; dropTokenCopy(r, t); Table.save(); },text:'✕ เอาออก'}));
     box.append(ctl);
   }
+  if (typeof Combat !== 'undefined') box.append(...Combat.tokPanel(t, r, gm)); // v1.28: ปุ่มโจมตี และค่าต่อสู้ของ NPC
   // คำอธิบาย (ผู้เล่นเห็น) และบันทึก GM (ลับ)
   if (gm){
     const desc = h('textarea',{placeholder:'คำอธิบายหมากนี้ที่ผู้เล่นเห็น (รูปร่าง ท่าทาง สิ่งที่สังเกตได้)',style:'min-height:48px;font-size:12.5px'}); desc.value = t.desc||''; desc.onblur = ()=>{ if (desc.value !== (t.desc||'')){ t.desc = desc.value; Table.save(); } };
@@ -44486,6 +44585,7 @@ function npcModsModal(t){ const m = t.mods||{};
   modal(h('div',null, h('h3',{text:`ค่าพลังดัดแปลงของ ${t.name}`}), h('p',{class:'desc',text:'ใช้กับหมากตัวนี้ตัวเดียว ค่าในคลัง NPC ไม่เปลี่ยน'}), h('div',{class:'row npcmods'}, inputs),
     h('div',{class:'row',style:'margin-top:8px'}, h('button',{class:'primary small',onclick:()=>{ const nm = {}; for (const l of inputs){ const inp = l.querySelector('input'); nm[inp.dataset.st] = +inp.value||0; } const clean = npcModsClean(nm); if (clean) t.mods = clean; else delete t.mods; t.init = (clean && clean.PER) || 0; /* v1.27: Initiative = PER Mod */ modal(null); Table.save(); toast('บันทึกค่าพลังดัดแปลงแล้ว'); },text:'บันทึก'})))); }
 function selectToken(t, r, gm){
+  if (typeof Combat !== 'undefined' && Combat.onTokenClick(t)) return; // v1.28: ระหว่างเลือกเป้าของการโจมตีหรือของสกิล คลิกหมาก = เลือกเป้า
   const selTok = Table.sel ? r.tokens.find(x=>x.id===Table.sel) : null;
   if (Table.sel===t.id){ Table.sel = null; Table.measure = null; }
   else if (selTok && selTok.id!==t.id){ const dist = cellDist(selTok,t); const band = rangeBand(dist); const acc = rangeAccM(tokenRangeLv(selTok)); toast(`${selTok.name} → ${t.name}: ${dist} ช่อง (~${band.m} ม.) ${band.label}${band.id==='eng' ? '' : ' · ' + rangeShotText(band.m, acc)}`); Table.measure = {a: selTok.id, b: t.id}; Table.sel = t.id; } /* v1.24: เส้นวัดและวงระยะของหมากแรกค้างบนกระดานจนกว่าจะคลิกครั้งถัดไป */
@@ -44537,13 +44637,14 @@ function mapPanel(r, gm){
     if (origin && !(origin.x===x && origin.y===y)){ const dist = cellDist(origin,{x,y}); const band = rangeBand(dist); cell.classList.add('rng-'+band.id); const pen = rangePenalty(band.m, accM); if (pen) cell.classList.add('rng-p'+rangePenaltyTier(pen)); if (!fog) cell.title += ` · ห่าง ${origin.name} ${dist} ช่อง ~${band.m} ม. ${band.label}${band.id==='eng' ? '' : ' · ' + rangeShotText(band.m, accM)}`; if (sight && !fog) cell.classList.add(sight.has(x+','+y) ? 'insight' : 'nosight'); }
     if (reach && !fog && !(selTok.x===x && selTok.y===y) && !byPos[x+','+y]){ const cst = reach.get(x+','+y); if (cst != null && cst > 0 && !moveBlocked(r, selTok, {x,y})){ if (moveMs.dashCells != null && cst <= moveMs.dashCells) cell.classList.add('mv-dash'); else if (moveMs.runCells != null && cst <= moveMs.runCells) cell.classList.add('mv-run'); } }
     cell.onclick = ()=>{
+      if (typeof SkillUse !== 'undefined' && SkillUse.onCellClick(x, y)) return; // v1.28: เลือกช่องเป้าหมายของสกิล
       if (Table.brush && gm){ setMapCell(r.map, x, y, Table.brush); Table.save(); return; }
       if (byPos[x+','+y]) return; // หมากจัดการคลิกเอง (เลือก/ลาก)
       if (Table.sel || Table.measure){ Table.sel = null; Table.measure = null; renderTable(); }
     };
     const t = byPos[x+','+y];
     if (t){ const conds = (t.conds||[]); const inside = r.tokens.filter(o=>o.inside===t.id && canSee(o));
-      const tk = h('div',{class:`gtok ${t.kind}${t.hidden?' hid':''}${(cur===t.id || (cur && t.turnWith===cur))?' turn':''}${Table.sel===t.id?' sel':''}${(t.hp<=0 && (t.kind!=='asset' || t.hpMax>0))?' down':''}${t.torch?' torch':''}${t.inWater?' water':''}` + conds.map(c=>' c-'+condClass(c.id)).join(''),title:`${t.name}` + ((t.kind!=='asset' || t.hpMax>0) ? ` HP ${t.hp}/${t.hpMax}` : '') + (conds.length ? ' · ' + conds.map(c=>condLabel(c, r)).join(', ') : '') + (inside.length ? ' · ในท้อง: '+inside.map(o=>o.name).join(', ') : '') + (t.inWater ? ' · ในน้ำลึก' : '') + (t.gmRun ? ' · GM คุมหลังฉาก' : '') + ((gm || ownsTok(t)) ? ' · ลากเพื่อย้าย คลิกเพื่อดูโซนและระยะมองเห็น' : '')});
+      const tk = h('div',{class:`gtok ${t.kind}${t.hidden?' hid':''}${(cur===t.id || (cur && t.turnWith===cur))?' turn':''}${Table.sel===t.id?' sel':''}${(t.hp<=0 && (t.kind!=='asset' || t.hpMax>0))?' down':''}${t.torch?' torch':''}${t.inWater?' water':''}` + conds.map(c=>' c-'+condClass(c.id)).join(''),title:`${t.name}` + ((t.kind!=='asset' || t.hpMax>0) ? ` HP ${t.hp}/${t.hpMax}` : '') + (conds.length ? ' · ' + conds.map(c=>condLabel(c, r)).join(', ') : '') + (inside.length ? ' · ในท้อง: '+inside.map(o=>o.name).join(', ') : '') + (t.inWater ? ' · ในน้ำลึก' : '') + (t.gmRun ? ' · GM คุมหลังฉาก' : '') + ((gm || ownsTok(t)) ? ' · ลากเพื่อย้าย คลิกเพื่อดูโซนและระยะมองเห็น' : ''),dataset:{id:t.id}});
       // หน้าหมาก (รูป/อักษรย่อ + แถบ HP) ตัดเป็นวงกลมในกรอบ .face ส่วนป้าย (สถานะ ลำดับเทิร์น คบเพลิง ร่างแฝด) อยู่นอกกรอบตัด จะได้ไม่ถูกขอบวงกลมบัง (v1.14)
       const face = h('div',{class:'face'}); const ico = t.thumb ? null : icoClean(t.ico); if (t.thumb) face.append(h('img',{src:t.thumb,alt:t.name,draggable:'false'})); else if (ico){ face.classList.add('hasico'); face.style.background = ico.b; face.append(icoSvg(ico)); } else face.append(h('span',{class:'ini',text: tokInitials(t)}));
       const pct = t.hpMax? Math.max(0,Math.min(100,t.hp/t.hpMax*100)) : 0; if (t.kind!=='asset' || t.hpMax>0) face.append(h('i',{class:'hpbar',style:`--p:${pct}%`})); tk.append(face);
@@ -44589,7 +44690,7 @@ function mapImageOverlay(img, onEdit){
 }
 function rollInitiative(r){
   const lines=[]; const first = new Map(); // charId → หมากแรกของตัวละคร: แฝดสองร่างแชร์ Action Point จึงทอยครั้งเดียวและใช้เทิร์นร่วมกัน
-  for (const t of r.tokens){ delete t.turnWith;
+  for (const t of r.tokens){ delete t.turnWith; delete t.pd; // v1.28: เริ่มฉากใหม่ ล้างเครื่องหมาย Perfect Defense ของรอบก่อน
     if (t.kind==='asset'){ delete t.initRoll; continue; } // v1.18: สิ่งของไม่ทอย Initiative และไม่เข้าลำดับเทิร์น
     if (t.charId && first.has(t.charId)){ const a = first.get(t.charId); t.initRoll = a.initRoll; t.turnWith = a.id; continue; }
     const rr = roll2d6(); t.initRoll = rr.sum + (t.init||0); if (t.charId) first.set(t.charId, t);
@@ -44678,10 +44779,12 @@ function renderChatOnly(){
   if (!items.length) log.append(h('div',{class:'dim',text:'ยังไม่มีข้อความ'}));
   for (const m of items){
     const time = new Date(m.ts||0).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    const cx = (typeof Combat !== 'undefined') ? Combat.chatEl(m, time) : null; if (cx){ log.append(cx); continue; } // v1.28: การ์ดผลโจมตี การ์ดสกิล และการ์ดเลือกเต๋าของการโจมตีแบบมีขั้นตอน
     if (m.kind==='roll' && m.roll){
       const r = {dice:m.roll.dice||[], kept:m.roll.kept||[], keptIdx:m.roll.keptIdx||[], sum:m.roll.sum, crit:m.roll.crit, double:m.roll.double, mode:m.roll.mode||'normal'};
       log.append(h('div',{class:'e'}, h('div',{class:'row',style:'gap:6px'}, chatWho(m), h('b',{text:m.text||''}), r.mode!=='normal'? tag(r.mode==='adv'?'Advantage':'Disadvantage', r.mode==='adv'?'ok':'neg'):null, (m.atk && m.atk.pick==='def') ? tag('ฝ่ายรับเลือก','neg') : (m.roll.chosen? tag('เลือกลูกเอง','prop'):null), m.roll.sides && m.roll.sides!==6 ? tag('d'+m.roll.sides,'prop') : null, m.dc!=null? tag(isDefenseRollText(m.text) ? 'โจมตีมา '+m.dc : 'DC '+m.dc):null, (m.def && m.def.cv!=null && m.def.cv!==m.dc) ? tag('CV '+m.def.cv) : null, (m.def && m.def.loc) ? tag('เล็ง'+partLabel(m.def.loc)) : null, m.gmOnly? h('span',{class:'gm',text:'ลับ'}):null, h('span',{class:'dim',style:'font-size:11px;margin-left:auto',text:time})),
         h('div',{class:'row',style:'gap:8px;margin-top:2px'}, renderDice(r), h('span',{class:'dim num',text:r.kept.join('+') + (m.mod? ` ${signed(m.mod)}`:'') + (m.pm? ` ${m.persSide} ${signed(m.pm)}`:'')}), h('b',{class:'num',text:'= '+m.total}), m.judge? h('span',{class:m.judge.cls||'',text:m.judge.text||''}):null)));
+      if (m.flow && typeof Combat !== 'undefined'){ const fr = Combat.flowRow(m); if (fr) log.lastChild.append(fr); }
     } else if (m.kind==='pick'){
       const done = Table.pickDone(m); const can = !done && Table.canPick(m); const dice = m.dice||[];
       log.append(h('div',{class:'e pickmsg'+(done?' done':'')}, h('div',{class:'row',style:'gap:6px'}, chatWho(m), h('b',{text:m.text||'Attack Roll'}), tag('Disadvantage','neg'), m.gmOnly? h('span',{class:'gm',text:'ลับ'}):null, h('span',{class:'dim',style:'font-size:11px;margin-left:auto',text:time})),
@@ -44692,6 +44795,1171 @@ function renderChatOnly(){
   }
 }
 function renderPeers(){ const p = document.getElementById('peers'); if (!p) return; const n = Table.peers.length; const names = Table.peers.map(x=>x.name||'').filter(Boolean); p.textContent = n ? `ออนไลน์ในห้อง ${n} คน${names.length? ': '+names.join(', ') : ''}` : ''; }
+
+/* ===== v1.21 (ผู้ใช้สั่ง 13 พ.ย. 2026): เอฟเฟกต์บนแผนที่ และป๊อปอัปเต๋าชนกัน =====
+ * ชั้น #fx-layer อยู่ระดับ body (position: fixed) จึงไม่หายเมื่อโต๊ะวาดใหม่กลางแอนิเมชัน ตำแหน่งคิดจากช่องบนกริดตอนเริ่มเล่น
+ * ทุกเอฟเฟกต์เป็นของประดับ ไม่มีผลต่อกติกา เครื่องที่ตั้ง prefers-reduced-motion จะเห็นแบบนิ่ง (วาบสั้น ๆ กับตัวหนังสือ) */
+const FX_HUE = { fire:'#ff7a3d', plasma:'#9fe8ff', light:'#ffe9a6', electric:'#c9a6ff', wind:'#cfeee0', earth:'#c9a877', water:'#5fb6ff', frost:'#a9e4ff', nature:'#7ed67a', chaos:'#b46bff', blood:'#e0483e', ritual:'#d4a84a', steel:'#e6e1d6', qi:'#4fd1c5', stance:'#e0a53a', trick:'#9aa4b1', survival:'#a3b86c', kin:'#d4a84a', heal:'#5bb97a', necrotic:'#9a83c4', poison:'#8fbf3f', sonic:'#f2c14e' };
+/* สีตามสำนักของสกิล (subcategory ในข้อมูล) */
+function fxHueOfSkill(sk){
+  const s = (((sk && sk.subcategory) || '') + ' ' + ((sk && sk.category) || '')).toLowerCase();
+  const table = [['chaos','chaos'],['plasma','plasma'],['electric','electric'],['fire','fire'],['wind','wind'],['solid','earth'],['liquid','water'],['sylvian','nature'],['ritual','ritual'],['blood','blood'],['qi','qi'],['stance','stance'],['trick','trick'],['survival','survival'],['kins unique','kin'],['martial','steel']];
+  for (const [k, v] of table) if (s.includes(k)) return v;
+  return 'ritual';
+}
+/* สีตามประเภทความเสียหาย */
+function fxHueOfDamage(type){
+  const t = String(type || '').toLowerCase();
+  const table = [['fire','fire'],['burn','fire'],['plasma','plasma'],['electric','electric'],['frost','frost'],['necrotic','necrotic'],['sonic','sonic'],['acid','poison'],['corrode','poison'],['poison','poison'],['light','light'],['sanity','chaos'],['heal','heal']];
+  for (const [k, v] of table) if (t.includes(k)) return v;
+  return 'steel';
+}
+const Fx = {
+  calm(){ try { return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); } catch(e){ return false; } },
+  layer(){ let l = document.getElementById('fx-layer'); if (!l){ l = h('div',{id:'fx-layer','aria-hidden':'true'}); document.body.append(l); } return l; },
+  /* จุดกึ่งกลางของช่อง (x,y) บนกริดของห้อง เป็นพิกัดในระบบของ body (หารขนาด UI ออกแล้ว) · คืน null ถ้าไม่ได้เปิดหน้าโต๊ะอยู่ */
+  point(x, y){
+    const g = document.querySelector('#v-table .gridmap'); if (!g || !g.isConnected) return null;
+    const cell = g.querySelector('.cell[data-x="' + (+x) + '"][data-y="' + (+y) + '"]'); if (!cell) return null;
+    const rc = cell.getBoundingClientRect(); if (!rc.width) return null; const z = uiZoom();
+    return { x: (rc.left + rc.width / 2) / z, y: (rc.top + rc.height / 2) / z, s: rc.width / z };
+  },
+  tokenPoint(id){ const r = Table.room; const t = r && (r.tokens || []).find(k => k.id === id); return t ? this.point(t.x, t.y) : null; },
+  node(cls, pt, hue, size){
+    const el = h('div',{class:'fx ' + cls}); el.style.left = pt.x + 'px'; el.style.top = pt.y + 'px';
+    // สีมาจากข้อความในแชตได้ จึงรับเฉพาะชื่อสีในตาราง FX_HUE (ค่าอื่นใช้สีเหล็ก) กันการยัด url() เข้ามาใน CSS
+    el.style.setProperty('--fx', Object.prototype.hasOwnProperty.call(FX_HUE, hue) ? FX_HUE[hue] : FX_HUE.steel); el.style.setProperty('--s', Math.round(size || pt.s || 30) + 'px');
+    this.layer().append(el); return el;
+  },
+  gone(el, ms){ setTimeout(()=>{ try { el.remove(); } catch(e){} }, ms); },
+  anim(el, frames, opt){ try { return el.animate(frames, opt); } catch(e){ return null; } },
+  /* ตัวหนังสือลอยเหนือหมาก: ความเสียหาย การฟื้นฟู ผลป้องกัน */
+  float(pt, text, cls, delay){
+    if (!pt || !text) return;
+    setTimeout(()=>{ const el = this.node('fx-float ' + (['dmg','heal','miss','info'].includes(cls) ? cls : ''), pt); el.textContent = String(text);
+      if (this.calm()){ this.gone(el, 1300); return; }
+      this.anim(el, [{transform:'translate(-50%,-60%) scale(.7)',opacity:0},{transform:'translate(-50%,-130%) scale(1.15)',opacity:1,offset:.18},{transform:'translate(-50%,-190%) scale(1)',opacity:1,offset:.7},{transform:'translate(-50%,-230%) scale(1)',opacity:0}], {duration:1500,easing:'ease-out',fill:'forwards'});
+      this.gone(el, 1550); }, delay || 0);
+  },
+  burst(pt, hue, big){
+    if (!pt) return; const size = pt.s * (big ? 2.6 : 1.6);
+    const ring = this.node('fx-ring', pt, hue, size);
+    if (this.calm()){ this.gone(ring, 500); return; }
+    this.anim(ring, [{transform:'translate(-50%,-50%) scale(.2)',opacity:.95},{transform:'translate(-50%,-50%) scale(1)',opacity:0}], {duration:520,easing:'ease-out',fill:'forwards'}); this.gone(ring, 560);
+    for (let i = 0; i < 7; i++){ const a = (Math.PI * 2 * i) / 7 + Math.random() * .5; const d = size * (.45 + Math.random() * .35); const p = this.node('fx-spark', pt, hue, Math.max(4, pt.s * .14));
+      this.anim(p, [{transform:'translate(-50%,-50%)',opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px))`,opacity:0}], {duration:480 + Math.random() * 160,easing:'cubic-bezier(.1,.7,.3,1)',fill:'forwards'}); this.gone(p, 700); }
+  },
+  slash(pt, hue){
+    if (!pt) return; const el = this.node('fx-slash', pt, hue, pt.s * 1.9);
+    if (this.calm()){ this.gone(el, 400); return; }
+    this.anim(el, [{transform:'translate(-50%,-50%) rotate(-70deg) scale(.5)',opacity:0},{transform:'translate(-50%,-50%) rotate(-20deg) scale(1)',opacity:1,offset:.35},{transform:'translate(-50%,-50%) rotate(40deg) scale(1.1)',opacity:0}], {duration:380,easing:'ease-out',fill:'forwards'}); this.gone(el, 420);
+  },
+  /* ลูกพลังพุ่งจาก from ไป to แล้วเรียก then */
+  proj(from, to, hue, then){
+    if (!to){ if (then) then(); return; } if (!from || this.calm()){ if (then) then(); return; }
+    const dx = to.x - from.x, dy = to.y - from.y; const dist = Math.hypot(dx, dy); if (dist < 4){ if (then) then(); return; }
+    const el = this.node('fx-orb', from, hue, Math.max(10, from.s * .38)); const ms = Math.min(620, 220 + dist * .9);
+    const tr = this.node('fx-trail', from, hue, dist); tr.style.transform = `translate(0,-50%) rotate(${Math.atan2(dy, dx)}rad)`;
+    this.anim(tr, [{opacity:0,clipPath:'inset(0 100% 0 0)'},{opacity:.7,clipPath:'inset(0 0 0 0)',offset:.7},{opacity:0,clipPath:'inset(0 0 0 85%)'}], {duration:ms + 140,easing:'linear',fill:'forwards'}); this.gone(tr, ms + 180);
+    this.anim(el, [{transform:'translate(-50%,-50%)'},{transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`}], {duration:ms,easing:'cubic-bezier(.4,0,.8,.6)',fill:'forwards'});
+    setTimeout(()=>{ try { el.remove(); } catch(e){} if (then) then(); }, ms);
+  },
+  aura(pt, hue){
+    if (!pt) return; for (let i = 0; i < 2; i++){ const el = this.node('fx-ring fx-aura', pt, hue, pt.s * 1.7);
+      if (this.calm()){ this.gone(el, 500); continue; }
+      this.anim(el, [{transform:'translate(-50%,-50%) scale(.55)',opacity:0},{transform:'translate(-50%,-50%) scale(.9)',opacity:.95,offset:.3},{transform:'translate(-50%,-50%) scale(1.35)',opacity:0}], {duration:900,delay:i * 260,easing:'ease-out',fill:'both'}); this.gone(el, 1300); }
+  },
+  heal(pt){
+    if (!pt) return; this.aura(pt, 'heal'); if (this.calm()) return;
+    for (let i = 0; i < 4; i++){ const el = this.node('fx-plus', {x: pt.x + (Math.random() - .5) * pt.s * .9, y: pt.y, s: pt.s}, 'heal', pt.s * .42); el.textContent = '+';
+      this.anim(el, [{transform:'translate(-50%,-20%)',opacity:0},{transform:'translate(-50%,-90%)',opacity:1,offset:.3},{transform:'translate(-50%,-220%)',opacity:0}], {duration:1000,delay:i * 130,easing:'ease-out',fill:'both'}); this.gone(el, 1600); }
+  },
+  shield(pt, hue){
+    if (!pt) return; const el = this.node('fx-shield', pt, hue || 'qi', pt.s * 1.5); el.textContent = '🛡';
+    if (this.calm()){ this.gone(el, 600); return; }
+    this.anim(el, [{transform:'translate(-50%,-50%) scale(.4)',opacity:0},{transform:'translate(-50%,-50%) scale(1.15)',opacity:1,offset:.3},{transform:'translate(-50%,-50%) scale(1)',opacity:1,offset:.7},{transform:'translate(-50%,-50%) scale(1.2)',opacity:0}], {duration:800,easing:'ease-out',fill:'forwards'}); this.gone(el, 840);
+  },
+  /* พื้นที่สี่เหลี่ยม: cells = จำนวนช่องจากจุดกลางออกไปแต่ละด้าน */
+  zone(pt, cells, hue){
+    if (!pt) return; const el = this.node('fx-zone', pt, hue, pt.s * (cells * 2 + 1) + cells * 2);
+    if (this.calm()){ this.gone(el, 900); return; }
+    this.anim(el, [{transform:'translate(-50%,-50%) scale(.6)',opacity:0},{transform:'translate(-50%,-50%) scale(1)',opacity:.85,offset:.2},{transform:'translate(-50%,-50%) scale(1)',opacity:.55,offset:.7},{transform:'translate(-50%,-50%) scale(1.04)',opacity:0}], {duration:1300,easing:'ease-out',fill:'forwards'}); this.gone(el, 1350);
+  },
+  /* spec = {k: 'proj'|'slash'|'burst'|'aura'|'heal'|'shield'|'zone'|'float', from:{x,y}, to:{x,y}, hue, cells, text, cls, floats:[{x,y,text,cls}]} พิกัดเป็นช่องบนกริด */
+  play(spec){
+    if (!spec || typeof spec !== 'object') return;
+    const cellPt = (p)=> (p && isFinite(+p.x) && isFinite(+p.y)) ? this.point(+p.x, +p.y) : null;
+    const from = cellPt(spec.from), to = cellPt(spec.to) || from; const hue = spec.hue || 'steel';
+    if (!to) return;
+    const floats = ()=>{ for (const [i, f] of (Array.isArray(spec.floats) ? spec.floats : []).slice(0, 12).entries()) this.float(cellPt(f), String(f.text || '').slice(0, 24), f.cls, i * 90); if (spec.text) this.float(to, String(spec.text).slice(0, 24), spec.cls); };
+    switch (spec.k){
+      case 'slash': this.slash(to, hue); this.burst(to, hue); floats(); break;
+      case 'burst': this.burst(to, hue, true); floats(); break;
+      case 'aura': this.aura(to, hue); floats(); break;
+      case 'heal': this.heal(to); floats(); break;
+      case 'shield': this.shield(to, hue); floats(); break;
+      case 'zone': this.proj(from, to, hue, ()=>{ this.zone(to, Math.max(0, Math.min(8, +spec.cells || 1)), hue); this.burst(to, hue, true); floats(); }); break;
+      case 'float': floats(); break;
+      default: this.proj(from, to, hue, ()=>{ this.burst(to, hue); floats(); });
+    }
+  },
+};
+
+/* ---- ป๊อปอัปเต๋าชนกัน: เต๋าของผู้โจมตีอยู่ซ้าย ของฝ่ายรับอยู่ขวา พุ่งเข้าชนกันแล้วขึ้นผล (ข้อมูลมาจากข้อความ kind 'clash' ในแชตของห้อง) ---- */
+const CLASH_SHOW_MS = 5600;
+function clashDice(roll, side){
+  const dice = (roll && Array.isArray(roll.dice)) ? roll.dice.slice(0, 6) : []; const kept = (roll && Array.isArray(roll.keptIdx)) ? roll.keptIdx : [];
+  return dice.map((v, i)=>h('div',{class:'bigdie cl-die ' + side + (kept.includes(i) ? '' : ' drop'),dataset:{v:String(v)}}, h('span',{text:'?'})));
+}
+function clashBox(m){
+  const def = m.def || {}; const res = m.res || {}; const none = !def.roll;
+  const aDice = clashDice(m.atkRoll, 'atk'); const dDice = none ? [] : clashDice(def.roll, 'def');
+  const left = h('div',{class:'cl-side cl-atk'}, h('div',{class:'cl-name',text:(m.a && m.a.name) || 'ผู้โจมตี'}), h('div',{class:'dice-row'}, aDice), h('div',{class:'cl-sum',text:''}));
+  const right = h('div',{class:'cl-side cl-def'}, h('div',{class:'cl-name',text:(m.t && m.t.name) || 'ฝ่ายรับ'}), none ? h('div',{class:'cl-none',text: def.kind === 'skill' ? '✨' : '✋'}) : h('div',{class:'dice-row'}, dDice), h('div',{class:'cl-sum',text:''}));
+  const spark = h('div',{class:'cl-spark',text:'✦'});
+  const verdict = h('div',{class:'cl-verdict',text:''}); const lines = h('div',{class:'cl-lines'});
+  const box = h('div',{class:'dicebox clashbox'}, h('div',{class:'dice-who'}, h('b',{text:'⚔ ' + ((m.w && m.w.name) || 'โจมตี')}), m.gmOnly ? [' ', h('span',{class:'gm',text:'ลับ'})] : null), h('div',{class:'cl-arena'}, left, spark, right), verdict, lines);
+  const calm = Fx.calm();
+  const settle = (els)=>{ for (const el of els){ el.firstChild.textContent = el.dataset.v; el.classList.remove('tumble'); } };
+  const fill = ()=>{
+    left.querySelector('.cl-sum').textContent = m.atkRoll ? `${(m.atkRoll.kept || []).join('+')} = ${m.atkRoll.sum}${m.cv != null && m.cv !== m.atkRoll.sum ? ' → CV ' + m.cv : ''}${m.part ? ' · ' + partLabel(m.part) : ''}` : '';
+    right.querySelector('.cl-sum').textContent = none ? (def.text || 'ไม่ป้องกัน') : `${def.label || ''} ${(def.roll.kept || []).join('+')}${def.mod ? ' ' + signed(def.mod) : ''} = ${def.total}`;
+  };
+  const finish = ()=>{
+    box.classList.add(m.hit ? 'hit' : 'blocked'); if (m.perfect && m.hit) box.classList.add('crit'); if (def.perfect) box.classList.add('pdef');
+    verdict.textContent = m.headline || (m.hit ? 'โดน' : 'กันได้'); verdict.className = 'cl-verdict show ' + (m.hit ? 'res-fail' : (def.perfect ? 'res-crit' : 'res-full'));
+    for (const ln of (Array.isArray(res.lines) ? res.lines : []).slice(0, 7)) lines.append(h('div',{text:String(ln)})); lines.classList.add('show');
+  };
+  for (const el of aDice) el.classList.add('tumble'); for (const el of dDice) el.classList.add('tumble');
+  if (calm){ settle(aDice); settle(dDice); fill(); finish(); return box; }
+  let tick = 0; const spin = setInterval(()=>{ tick++; for (const el of [...aDice, ...dDice]) if (el.classList.contains('tumble')) el.firstChild.textContent = 1 + Math.floor(Math.random() * 6); if (tick === 6) settle(aDice); if (tick >= 12){ settle(dDice); clearInterval(spin); fill(); } }, 70);
+  setTimeout(()=>{ box.classList.add('charge'); }, 1150);
+  setTimeout(()=>{ box.classList.add('impact'); }, 1480);
+  setTimeout(finish, 1750);
+  return box;
+}
+
+/* ===== v1.28 (Non สั่ง 13 พ.ย. 2026 ต่อบนฐาน v1.27 เมื่อ 16 พ.ย. 2026): ระบบโจมตีแบบมีขั้นตอนในโต๊ะเล่น =====
+ * ลำดับ: ผู้โจมตีเปิดหน้าต่างโจมตี เลือกเป้า (คลิกหมากบนแผนที่ได้) อาวุธ และแบบการโจมตี หน้าต่างบอกระยะ ว่าไกลเกินหรือโดนลด CV
+ *        → ทอยโจมตี (ข้อความ kind 'roll' ที่มี flow) → ฝ่ายรับ (เจ้าของหมาก หรือ GM ถ้าเป็น NPC) เลือก Parry / Evade / ใช้ทักษะ / ไม่ป้องกัน
+ *        → เต๋าชนกัน (ข้อความ kind 'clash') → เครื่องของฝ่ายรับคิดความเสียหาย หักเกราะ ลง HP และ Toughness ให้
+ * กฎที่ใช้: ไฟล์แกน บท "ระบบการต่อสู้" ข้อ 2 ถึง 5 คุณสมบัติอาวุธในไฟล์ Item All และคำเคาะ 15 ถึง 16 พ.ย. 2026
+ *   (ยิงเกินระยะแม่น -1 CV ต่อ 1 ม. · เกราะหลักบวกเกราะรองของชนิดในวงเล็บ · เกราะหลักหักเวทด้วย · ของพังเหลือครึ่ง · NPC ใช้กฎเดียวกับผู้เล่น)
+ * ค่าของ NPC อ่านจากสิ่งที่หมากมีอยู่แล้ว: ค่าพลังดัดแปลง (t.mods) อาวุธและชุดเกราะ (t.equip) การโจมตีในสแตตบล็อก (t.attacks) วิธีป้องกัน (t.defend)
+ * ข้อความเอฟเฟกต์ของอาวุธที่เป็นเงื่อนไขเฉพาะ ระบบอ่านเป็นตัวเลือกให้ผู้โจมตีติ๊กเอง ไม่เดาแทน */
+
+/* ---------- 1. ตัวอ่านข้อความกฎ (ไม่แตะหน้าจอ) ---------- */
+const CB_PHYS = ['Slashing','Piercing','Blunt','Physical'];
+const CB_DTYPES = ['Slashing','Piercing','Blunt','Physical','Fire','Plasma','Electric','Frost','Necrotic','Sonic','Acid','Poison','Light'];
+const CB_PENDING_MS = 15 * 60 * 1000;        // การโจมตีที่ค้างเกินนี้ไม่เด้งถามฝ่ายรับอีก
+function cbInt(v, d){ const n = parseInt(v, 10); return isFinite(n) ? n : (d || 0); }
+function cbNormType(t){
+  const s = String(t || '').trim(); if (!s) return '';
+  const k = s.toLowerCase();
+  if (/^slash/.test(k)) return 'Slashing'; if (/^pierc/.test(k)) return 'Piercing'; if (/^(blunt|bludgeon)/.test(k)) return 'Blunt'; if (/^(phys|pdmg)/.test(k)) return 'Physical'; if (/^corrode/.test(k)) return 'Acid'; if (/^burn/.test(k)) return 'Fire';
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+function cbIsPhysical(t){ return CB_PHYS.includes(cbNormType(t)); }
+/* ทอยนิพจน์ความเสียหาย: "2" · "1d6" · "2d6+1" · "1d3" (อย่างอื่นนับเป็น 0) */
+const CB_DICE_RX = /^\s*(\d{1,2})\s*d\s*(\d{1,3})\s*(?:([+-])\s*(\d{1,3}))?\s*$/i;
+function cbRollExpr(expr){
+  const s = String(expr == null ? '' : expr).trim(); const m = CB_DICE_RX.exec(s);
+  if (!m){ const n = parseInt(s, 10); const v = isFinite(n) ? n : 0; return {total: v, rolls: [], add: 0, text: String(v)}; }
+  const cnt = Math.min(20, Math.max(1, +m[1])), sides = Math.min(100, Math.max(2, +m[2])); const add = m[3] ? (m[3] === '-' ? -1 : 1) * (+m[4]) : 0;
+  const rolls = Array.from({length: cnt}, ()=>rollDie(sides)); const total = rolls.reduce((a, b)=>a + b, 0) + add;
+  return {total, rolls, add, text: `${cnt}d${sides}${add ? signed(add) : ''} [${rolls.join(',')}]${add ? ' ' + signed(add) : ''} = ${total}`};
+}
+function cbExprOk(expr){ const s = String(expr == null ? '' : expr).trim(); return /^\d{1,3}$/.test(s) || CB_DICE_RX.test(s); }
+function cbExprAvg(expr){ const s = String(expr == null ? '' : expr).trim(); const m = CB_DICE_RX.exec(s); if (!m) return cbInt(s); return (+m[1]) * ((+m[2]) + 1) / 2 + (m[3] ? (m[3] === '-' ? -1 : 1) * (+m[4]) : 0); }
+/* สภาวะที่ข้อความเอ่ยถึง พร้อมระดับถ้าเขียนไว้ติดกัน ใช้เป็นปุ่มเสนอในการ์ดผล ไม่ใส่ให้เอง */
+const CB_COND_ALIAS = {Burn:'Burning', Stun:'Stunned', Poison:'Poisoned', Bleed:'Bleeding', Root:'Rooted', Blind:'Blinded'};
+/* สภาวะที่อาวุธใส่ให้เป้าได้ (ตัดสภาวะเชิงบวกและสภาวะจากสภาพแวดล้อมออกจากปุ่มเสนอของอาวุธ) */
+const CB_HIT_CONDS = new Set(['Stunned','Unbalanced','Prone','Bleeding','Deepwound','Burning','Poisoned','Rooted','Grappled','Blinded','Deafened','Frightened','Confused','Silenced','Sundered','Marked','Incapacitated']);
+function cbCondNames(){ if (!cbCondNames.list) cbCondNames.list = Object.entries(GLOSSARY).filter(([k, v])=>/Condition/.test((v && v.cat) || '')).map(([k])=>k); return cbCondNames.list; }
+function cbFindConds(text){
+  const out = []; const seen = new Set(); const s = String(text || '');
+  const tryAdd = (id, word)=>{ if (!id || seen.has(id)) return;
+    const rx = new RegExp('(?:(\\d+)\\s*)?["“”\']?\\b' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b["“”\']?(?:\\s*(\\d+)(?!\\s*(?:เมตร|รอบ|เทิร์น|นาที|ชั่วโมง|วินาที|ครั้ง|%|ม\\.)))?');
+    const m = rx.exec(s); if (!m) return; seen.add(id);
+    out.push({id, lv: (typeof COND_STACK !== 'undefined' && COND_STACK.has(id)) ? Math.max(1, Math.min(20, cbInt(m[1] || m[2], 1))) : null}); };
+  for (const id of cbCondNames()) tryAdd(id, id);
+  for (const [w, id] of Object.entries(CB_COND_ALIAS)) tryAdd(id, w);
+  return out;
+}
+/* อ่านอาวุธจากชื่อและข้อความเอฟเฟกต์: ความเสียหายตั้งต้น ประเภท คุณสมบัติ (on = อยู่ในรายการคุณสมบัติหลัก ไม่มีเงื่อนไขนำหน้า) */
+const CB_PROPS = [['rip',/\bRip\b/],['ap',/\bArmor Penetrate\b/],['gb',/\bGuard Break\b/],['impact',/\bImpact\b/],['headshot',/\bHead\s?[Ss]hot\b/],['impale',/\bImpale\b/],['cleave',/\bCleave\b/],['delay',/\bDelay\b/],['throwable',/\bThrowable\b/],['reach',/\bReach\b/],['reload',/\bReload\b/],['cone',/\bCone Attack\b/]];
+const CB_PROP_LABEL = {rip:'Rip', ap:'Armor Penetrate', gb:'Guard Break', impact:'Impact', headshot:'Headshot', impale:'Impale', cleave:'Cleave', delay:'Delay', throwable:'Throwable', reach:'Reach', reload:'Reload', cone:'Cone Attack'};
+const CB_COND_RX = /หาก|เมื่อ|สามารถ|เลือก|On-?[Hh]it|Perfect|มิฉะนั้น|ถ้า/;
+function cbItemCat(name){ if (!cbItemCat.map){ cbItemCat.map = {}; for (const it of DATA.items || []) cbItemCat.map[it.name] = it.cat || ''; } return cbItemCat.map[String(name || '')] || ''; }
+function cbParseWeapon(name, effect){
+  const raw = String(effect || '').replace(/\\/g, '');
+  const eff = (typeof weaponPropsText === 'function' ? weaponPropsText(raw) : raw).replace(/\(ต้องการ STR\s*\d+\)\s*/, '');
+  const w = {name: String(name || '').trim() || 'อาวุธ', text: raw, dmg: '0', dtypes: ['Physical'], physical: true, props: {}, sharpnel: 0, toughX: 0, toughOpt: 0, toughPerfect: 0, ranged: false, bomb: false, statKind: 'might', conds: [], strNeed: 0, found: false};
+  const dm = /(^|[^+\d])(\d+(?:d\d+)?)\s*(PDMG|Might|[A-Z][a-z]+ Damage)\s*(?:\(([^)]+)\)|(Slashing|Piercing|Blunt)\b)?/.exec(eff);
+  let headFrom = 0, headTo = eff.length;
+  if (dm && !/^(Tough|Toughness|Sanity)\b/.test(dm[3])){
+    w.found = true; w.dmg = dm[2]; headFrom = dm.index;
+    if (dm[3] === 'PDMG' || dm[3] === 'Might'){ const ts = (dm[4] || dm[5] || '').split(/[\/,]/).map(cbNormType).filter(t=>CB_DTYPES.includes(t)); w.dtypes = ts.length ? [...new Set(ts)] : ['Physical']; }
+    else w.dtypes = [cbNormType(dm[3].replace(/ Damage$/, ''))];
+    const after = dm.index + dm[0].length; const cm = CB_COND_RX.exec(eff.slice(after)); if (cm) headTo = after + cm.index;
+  } else { const cm = CB_COND_RX.exec(eff); if (cm) headTo = cm.index; }
+  w.physical = cbIsPhysical(w.dtypes[0]);
+  const head = eff.slice(headFrom, headTo);
+  for (const [k, rx] of CB_PROPS) if (rx.test(eff)) w.props[k] = {on: rx.test(head)};
+  const sh = /(\d+)\s*Sharpnel\b|\bSharpnel\s*(\d+)/.exec(eff); if (sh) w.sharpnel = Math.min(6, cbInt(sh[1] || sh[2]));
+  const tp = /Perfect Strike[^,.·]{0,24}?\+\s*(\d+)\s*Tough(?:ness)?\s*Damage/.exec(eff); if (tp) w.toughPerfect = Math.min(6, cbInt(tp[1]));
+  const th = /\+\s*(\d+)\s*Tough(?:ness)?\s*Damage/.exec(head); if (th) w.toughX = Math.min(6, cbInt(th[1]));
+  // "On-Hit ... +N Toughness Damage" ที่ไม่มีเงื่อนไขอื่นนำหน้าในประโยคเดียวกัน = เข้าทุกครั้งที่โดน (เช่น ขวานศึก)
+  const oh = !th ? /(?:Attack\s+)?On-?[Hh]it[^.·]{0,40}?\+\s*(\d+)\s*Tough(?:ness)?\s*Damage/.exec(eff) : null;
+  if (oh){ const before = eff.slice(0, oh.index); const sent = before.slice(Math.max(before.lastIndexOf('.'), before.lastIndexOf('·')) + 1); if (!/หาก|เมื่อ|ถ้า|Perfect|เลือก/.test(sent)) w.toughX = Math.min(6, cbInt(oh[1])); }
+  if (w.toughX){ /* มีค่าแน่นอนแล้ว */ } else { const to = /\+\s*(\d+)\s*Tough(?:ness)?\s*Damage/.exec(eff.replace(/Perfect Strike[^,.·]{0,24}?\+\s*\d+\s*Tough(?:ness)?\s*Damage/, '')); if (to) w.toughOpt = Math.min(6, cbInt(to[1])); }
+  w.bomb = /ชนิด:[^·]*ระเบิด/.test(eff);
+  w.ranged = !!w.props.reload || /ชนิด:[^·]*(ธนู|ปืน|หน้าไม้|อาวุธเป่า|อาวุธปา|ระเบิด)/.test(eff) || cbItemCat(w.name) === 'อาวุธระยะไกล';
+  w.statKind = (w.props.reload || /ชนิด:[^·]*(ปืน|หน้าไม้)/.test(eff)) ? 'sight' : (w.bomb ? 'none' : 'might'); // ไฟล์แกน: หน้าไม้และปืนบวก Sight อาวุธที่ใช้แรง (รวมธนู) บวก Might
+  w.strNeed = (typeof weaponStrNeed === 'function' ? weaponStrNeed(raw) : 0) || cbInt((/ต้องการ STR\s*(\d+)/.exec(raw) || [])[1]);
+  w.conds = cbFindConds(eff).filter(x=>CB_HIT_CONDS.has(x.id));
+  return w;
+}
+/* ของพัง (Durability 0): PDMG เหลือครึ่งปัดลง และคุณสมบัติพิเศษหาย (ไฟล์แกน บทเศรษฐศาสตร์ ข้อ 3 · คำเคาะ 15 พ.ย. 2026) */
+function cbBrokenWeapon(w){
+  w.broken = true; if (/^\d+$/.test(w.dmg)) w.dmg = String(Math.floor(+w.dmg / 2)); else w.halve = true;
+  for (const k of Object.keys(w.props)) w.props[k] = {on: false, lost: true};
+  w.sharpnel = 0; w.toughX = 0; w.toughOpt = 0; w.toughPerfect = 0; w.conds = []; return w;
+}
+function cbBaseName(name){ const m = /\(([^()]+)\)\s*$/.exec(String(name || '')); return (m ? m[1] : String(name || '')).trim().toLowerCase(); }
+/* การโจมตีในสแตตบล็อกของ NPC (เอกสาร Fauna, Enemy & Companion) เช่น "CV Bonus +2, Damage 1d6 + Might Piercing (มีคุณสมบัติ Rip)"
+ * อ่าน CV Bonus · Range Attack · สูตรความเสียหาย (ตัวเลข เต๋า หรือ N PDMG) · ค่าพลังที่บวก · ชนิด · คุณสมบัติอาวุธ
+ * บรรทัดที่เขียน N PDMG โดยไม่บอกค่าพลัง ใช้กฎเดียวกับผู้เล่น: บวก Might ส่วนหน้าไม้และปืนบวก Sight
+ * บรรทัดที่ให้ทอย Saving Throw โดยไม่มี CV Bonus คือความสามารถที่ไม่ได้ทอยโจมตี (save:true) ใช้ทางแถบสกิล */
+const CB_NPC_TYPES = '(?:Slashing|Slash|Piercing|Blunt|Physical|Fire|Plasma|Electric|Frost|Necrotic|Sonic|Acid|Corrode|Poison|Light)';
+const CB_NPC_DMG_RX = new RegExp('(?:Damage\\s*)?(\\d{1,2}d\\d{1,3}(?:\\s*[+-]\\s*\\d{1,2})?|[Xx]d\\d{1,3}|\\d{1,3})\\s*(?:\\+\\s*(Might|Sight)\\s*)?(?:(PDMG)\\s*|Damage\\s*)?\\(?\\s*(' + CB_NPC_TYPES + '(?:\\s*/\\s*' + CB_NPC_TYPES + ')*)');
+function cbParseNpcAttack(name, text){
+  const raw = String(text || '').replace(/\\/g, '').slice(0, 600);
+  const w = cbParseWeapon(name, raw); w.src = 'npc'; w.text = raw;
+  const cvb = /CV\s*Bonus\s*\+?\s*(-?\d{1,2})/i.exec(raw); w.cvBonus = cvb ? Math.max(-9, Math.min(9, +cvb[1])) : 0;
+  w.save = /Saving Throw/i.test(raw) && !cvb;
+  const m = CB_NPC_DMG_RX.exec(raw.replace(/CV\s*Bonus\s*\+?\s*-?\d{1,2}\s*,?/i, ' '));
+  if (m){
+    w.found = true; w.dmg = m[1].replace(/\s+/g, ''); const ts = [...new Set(m[4].split('/').map(cbNormType).filter(t=>CB_DTYPES.includes(t)))]; w.dtypes = ts.length ? ts : ['Physical'];
+    w.physical = cbIsPhysical(w.dtypes[0]); const gun = !!w.props.reload || /หน้าไม้|Crossbow|ปืน|Musket|Gun\b/i.test(w.name);
+    w.statKind = m[2] ? m[2].toLowerCase() : (m[3] ? (gun ? 'sight' : 'might') : 'none');
+  } else { w.found = false; w.dmg = '0'; w.statKind = 'none'; }
+  w.ranged = !!w.ranged || /Rang(?:e|ed)\s+(?:Sorcery\s+)?Attack/i.test(raw);
+  w.bomb = /ระเบิด|Bomb\b/i.test(w.name); w.thrown = w.bomb || /ขว้าง|\bThrow/i.test(w.name);
+  return w;
+}
+/* เกราะที่หักจริงของหนึ่งส่วน อ่านด้วยตัวอ่านเดียวกับชีท (armorHits) ตามคำเคาะ 15 พ.ย. 2026:
+ * โดนชนิดที่อยู่ในวงเล็บหักเกราะหลักบวกเกราะรองของชนิดนั้น · ชนิดอื่นหักเกราะหลักอย่างเดียว · ความเสียหายเวทหักเกราะหลักบวก Sorceries Resistance ของส่วนนั้น
+ * extra = เกราะที่มีทั้งตัว (All Armor ของ NPC) นับเป็นเกราะหลัก · ข้อความที่จดเองนอกรูปแบบคืน known:false (ไม่เดา)
+ * ค่าอัตโนมัติรุ่นก่อน v1.25 เขียน A/B ไม่มีวงเล็บ หมายถึงเกราะรองกัน Blunt (ชีทจะแปลงเป็น A/B (Blunt) เมื่อเจ้าของเปิดอีกครั้ง) จึงอ่านแบบเดียวกัน */
+function cbArmorCut(text, dtype, physical, extra){
+  const add = Math.max(0, cbInt(extra)); const s = String(text || '').trim();
+  let r = s ? ((typeof armorHits === 'function') ? armorHits(s) : null) : {main: 0, sec: {}};
+  if (!r){ const old = /^(\d+)\s*\/\s*(\d+)$/.exec(s); if (old) r = {main: +old[1], sec: {Blunt: +old[2]}}; }
+  if (!r) return {known: false, main: add, sec: 0, v: add, any: add > 0, key: ''};
+  const key = physical ? cbNormType(dtype) : 'Sorceries Resistance'; const sec = r.sec[key] || 0; const main = r.main + add;
+  return {known: true, main, sec, v: main + sec, any: main > 0 || Object.values(r.sec).some(v=>v > 0), key};
+}
+/* ระยะกับแบบการโจมตี: ประชิดต้องอยู่เขตปะทะ (Reach เอื้อมได้อีกหนึ่งช่อง) · ขว้างได้ถึงเขตใกล้เคียง · ยิงเกินระยะแม่นหัก 1 CV ต่อทุก 1 เมตรที่เกิน (rangePenalty ของ map.js) */
+function cbRangeVerdict(o){
+  const cells = Math.max(0, o.cells | 0); const m = cells * CELL_M; const band = rangeBand(cells);
+  if (o.mode === 'melee'){ const max = o.reach ? 2 : 1; const ok = cells <= max;
+    return {ok, cv: 0, m, band, cls: ok ? 'ok' : 'bad', text: ok ? (cells > 1 ? `เป้าห่าง ${m} ม. เอื้อมถึงด้วย Reach` : `เป้าอยู่ในเขตปะทะ (${m} ม.) โจมตีประชิดได้`) : `ไกลเกิน: เป้าห่าง ${m} ม. (${band.label}) ต้องเข้าเขตปะทะก่อน`}; }
+  if (o.mode === 'thrown'){ const ok = band.id !== 'far';
+    return {ok, cv: 0, m, band, cls: ok ? 'ok' : 'bad', text: ok ? `เป้าห่าง ${m} ม. (${band.label}) ขว้างถึง` : `ไกลเกิน: อาวุธขว้างไปได้ถึงเขตใกล้เคียง (${NEAR_MAX_M} ม.) เป้าห่าง ${m} ม.`}; }
+  const acc = o.acc || rangeAccM(0); const over = Math.max(0, m - acc); const cv = -rangePenalty(m, acc);
+  return {ok: true, cv, m, band, acc, cls: cv ? 'warn' : 'ok', text: cv ? `เป้าห่าง ${m} ม. เกินระยะแม่น ${acc} ม. ไป ${over} ม. โดนลด CV ${cv} (ลด 1 ต่อทุก 1 ม. ที่เกิน)` : `เป้าห่าง ${m} ม. อยู่ในระยะแม่น ${acc} ม. ไม่โดนลด CV`};
+}
+
+/* ---------- 2. ตัวช่วยสร้างช่องกรอก ---------- */
+function cbSelect(opts, val, on, attrs){ const el = h('select', attrs || null, opts.map(([v, l, dis])=>{ const o = h('option',{value:String(v), text:l}); if (dis) o.disabled = true; return o; })); el.value = String(val == null ? '' : val); el.onchange = ()=>on(el.value); return el; }
+function cbNum(val, on, attrs, live){ const el = h('input', Object.assign({type:'number'}, attrs || {})); el.value = (val == null || val === '') ? '' : String(val); const fire = ()=>on(el.value === '' ? null : +el.value); if (live) el.oninput = fire; else el.onchange = fire; return el; }
+function cbCheck(label, checked, on, attrs){ const box = h('input',{type:'checkbox'}); box.checked = !!checked; box.onchange = ()=>on(box.checked); return h('label', Object.assign({class:'fld chk'}, attrs || {}), box, h('span',{text:label})); }
+/* ลูกของ Element.append: แตกอาร์เรย์และข้ามค่าว่าง (append ของเบราว์เซอร์พิมพ์ null กับอาร์เรย์ออกมาเป็นข้อความ) */
+function cbKids(...a){ return a.flat(4).filter(x=>x != null && x !== false && x !== ''); }
+function cbRollOf(r){ return {dice: (r.dice || []).slice(), kept: (r.kept || []).slice(), keptIdx: (r.keptIdx || []).slice(), sum: r.sum, double: !!r.double}; }
+
+/* ---------- 3. Combat: สถานะและกติกา ---------- */
+const Combat = {
+  comp: null, ready: false, seen: new Set(), snooze: new Set(), timers: {}, prompting: null, done: new Set(), inited: new Set(),
+  reset(){ this.closeComposer(); this.ready = false; this.seen = new Set(); this.snooze = new Set(); this.prompting = null; this.done = new Set(); for (const k of Object.keys(this.timers)) clearTimeout(this.timers[k]); this.timers = {}; if (typeof SkillUse !== 'undefined') SkillUse.reset(); },
+  tok(id){ const r = Table.room; return r ? ((r.tokens || []).find(t=>t.id === id) || null) : null; },
+  controls(t){ return !!t && (Table.localMode || Table.isGM() || ownsTok(t)); },
+  charOf(t){ const c = t && t.charId ? Store.get(t.charId) : null;
+    // ชีทของฉันที่ยังไม่เคยเปิด (หมากที่วางไว้ตั้งแต่รุ่นก่อน): เตรียมค่าปัจจุบัน กระเป๋า และของสวมใส่ก่อนเหมือนตอนเปิดชีท แล้วส่งสำเนาเข้าห้อง
+    if (c && c.done && Store.isMine(c) && Store.chars.includes(c) && (!c.current || !c.equip || !c.inventory) && !this.inited.has(c.id)){ this.inited.add(c.id); try { ensureSheetState(c, compute(c)); Store.upsert(c); } catch(e){ console.warn('sheet init', e); } }
+    return c; },
+  derived(c){ try { return c ? compute(c) : null; } catch(e){ return null; } },
+  levels(c){ try { return c ? knowledgeLevels(c) : {}; } catch(e){ return {}; } },
+  has(t, id){ return !!t && (t.conds || []).some(c=>c.id === id); },
+  side(t){ return t && t.kind === 'pc' ? 'pc' : 'npc'; },
+  alive(t){ return !!t && t.kind !== 'asset' && !t.inside && (t.hp == null || t.hp > 0); },
+  visible(r){ const gm = Table.isGM(); const vis = gm ? null : computeVisibility(r, Store.me); return (r.tokens || []).filter(t=>(gm || !t.hidden || ownsTok(t)) && (!vis || ownsTok(t) || vis.has(t.x + ',' + t.y)) && !t.inside); },
+  myTokens(r){ return (r.tokens || []).filter(t=>t.kind !== 'asset' && !t.inside && this.controls(t)); },
+  /* ค่าของผู้โจมตีและฝ่ายรับ: ตัวละครที่มีชีทอ่านจากชีท · NPC คิดจากค่าพลังดัดแปลงบนหมากด้วยสูตรเดียวกับผู้เล่น (Non เคาะ 16 พ.ย. 2026 ไม่มีช่องแก้เอง) */
+  isNpc(t){ return !!t && !t.charId && t.kind === 'npc'; },
+  npcDer(t){ return (this.isNpc(t) && typeof npcDerived === 'function') ? npcDerived(t.mods) : null; },
+  atkStats(t){ const c = this.charOf(t); const d = this.derived(c); const nd = d ? null : this.npcDer(t);
+    return {might: d ? d.might : (nd ? nd.might : 0), sight: d ? d.sight : (nd ? nd.sight : 0), rangeLv: (typeof tokenRangeLv === 'function') ? tokenRangeLv(t) : 0, sheet: !!d, npc: !!nd}; },
+  defStats(t){ const c = this.charOf(t); const d = this.derived(c); const nd = d ? null : this.npcDer(t); const lv = this.levels(c);
+    return {reflex: d ? d.reflex : (nd ? nd.reflex : 0), pd: Math.max(0, d ? cbInt(d.parryDice) : ((nd && typeof npcParryDice === 'function') ? npcParryDice(t.equip) : 0)), meleeLv: d ? (lv.melee || 0) : 0, sheet: !!d, npc: !!nd}; },
+  weaponsOf(t){
+    const out = []; const c = this.charOf(t); const d = this.derived(c);
+    if (c && c.equip && !(c.shareMode === 'min' && !Store.isMine(c))){
+      const slots = [...new Set([...(typeof WEAPON_SLOTS !== 'undefined' ? WEAPON_SLOTS : ['weapon1','weapon2','shield']), ...Object.keys(c.equip)])];
+      for (const k of slots){ const e = c.equip[k]; if (!e || !(e.name || '').trim()) continue; const w = cbParseWeapon(e.name, e.effect); if (!w.found) continue; w.src = k; w.strShort = !!(w.strNeed && d && d.raw && (d.raw.STR || 0) < w.strNeed);
+        if (typeof durBroken === 'function' && durBroken(e)) cbBrokenWeapon(w); out.push(w); }
+      try { if (typeof hasFleshforge === 'function' && hasFleshforge(c) && c.fleshforge && c.fleshforge.item){ const w = cbParseWeapon(c.fleshforge.item, c.fleshforge.effect); if (w.found){ w.src = 'fleshforge'; out.push(w); } } } catch(e){}
+    }
+    if (this.isNpc(t)){ // การโจมตีในสแตตบล็อกก่อน แล้วตามด้วยอาวุธที่สวมซึ่งยังไม่มีบรรทัดโจมตีชื่อเดียวกัน
+      const seen = new Set();
+      for (const a of (Array.isArray(t.attacks) ? t.attacks : []).slice(0, 12)){ if (!a || typeof a !== 'object') continue; const w = cbParseNpcAttack(String(a.name || 'การโจมตี').slice(0, 80), a.text); if (w.save) continue; seen.add(cbBaseName(w.name)); out.push(w); }
+      for (const e of (Array.isArray(t.equip) ? t.equip : []).slice(0, 16)){ if (!e || (e.slot !== 'weapon' && e.slot !== 'shield') || !(e.name || '').trim()) continue; const w = cbParseWeapon(e.name, e.effect); if (!w.found || seen.has(cbBaseName(w.name))) continue; w.src = 'npceq'; seen.add(cbBaseName(w.name)); out.push(w); }
+    }
+    out.push(Object.assign(cbParseWeapon('มือเปล่า (Unarmed)', '0 PDMG (Blunt)'), {src:'unarmed'}));
+    out.push(Object.assign(cbParseWeapon('กำหนดเอง', ''), {src:'custom', found: true, dmg: '1', dtypes: CB_DTYPES.slice()}));
+    return out;
+  },
+  /* ศัตรู (คนละฝั่ง pc กับ npc) ที่ยืนติดหมากนี้ */
+  foesNear(r, t){ return (r.tokens || []).filter(o=>o !== t && this.alive(o) && !o.hidden && this.side(o) !== this.side(t) && cellDist(o, t) <= 1); },
+  alliesNear(r, t){ return (r.tokens || []).filter(o=>o !== t && this.alive(o) && !o.hidden && this.side(o) === this.side(t) && cellDist(o, t) <= 1); },
+  /* เหตุที่ทำให้ได้ Advantage ติด Disadvantage นับเป็น Perfect Strike หรือได้บวก CV: อ่านจากสภาวะบนหมากและตำแหน่งบนแผนที่ ผู้โจมตีติ๊กออกได้ทุกข้อ */
+  atkReasons(r, a, t, w, mode, impact){
+    const out = []; const add = (key, kind, label)=>out.push({key, kind, label}); const melee = mode === 'melee';
+    if (t){
+      if (this.has(t, 'Stunned') && melee) add('stun', 'adv', 'เป้าติด Stunned: โจมตีประชิดได้ Advantage');
+      if (this.has(t, 'Prone')) add('prone', melee ? 'adv' : 'dis', melee ? 'เป้าติด Prone: โจมตีประชิดได้ Advantage' : 'เป้าติด Prone: โจมตีระยะไกลติด Disadvantage');
+      if (this.has(t, 'Blinded')) add('tblind', 'adv', 'เป้าติด Blinded: การโจมตีใส่เป้าได้ Advantage');
+      if (this.has(t, 'Invisible')) add('tinvis', 'dis', 'เป้า Invisible: การโจมตีใส่เป้าติด Disadvantage');
+      if (this.has(t, 'Cover') && !melee) add('cover', 'dis', 'เป้ามี Cover: โจมตีระยะไกลติด Disadvantage');
+      if (this.has(t, 'Incapacitated')) add('incap', 'perfect', 'เป้า Incapacitated: นับเป็น Perfect Strike');
+      if (this.has(t, 'Marked')) add('marked', 'cv', 'เป้าติด Marked: CV บวกตาม Sight ของผู้โจมตี');
+      if (melee && cellDist(a, t) <= 1 && this.side(a) !== this.side(t)){ const foes = this.foesNear(r, t).length; if (foes >= 2 && !this.alliesNear(r, t).length) add('gang', 'adv', `รุม: ศัตรู ${foes} ตัวอยู่ในเขตปะทะของเป้า และเป้าไม่มีพันธมิตรติดตัว`); }
+      if (impact && melee && (this.has(t, 'Prone') || this.has(t, 'Stunned'))) add('impactp', 'perfect', 'Impact ใส่เป้าที่ติด Prone หรือ Stunned: Perfect Strike และความเสียหาย +1d3');
+    }
+    if (this.has(a, 'Prone')) add('aprone', 'dis', 'ผู้โจมตีติด Prone: Attack ติด Disadvantage');
+    if (this.has(a, 'Poisoned')) add('apois', 'dis', 'ผู้โจมตีติด Poisoned: Attack ติด Disadvantage');
+    if (this.has(a, 'Frightened')) add('afear', 'dis', 'ผู้โจมตีติด Frightened: Attack ติด Disadvantage');
+    if (this.has(a, 'Blinded')) add('ablind', 'dis', 'ผู้โจมตีติด Blinded: Attack ติด Disadvantage');
+    const gr = (a.conds || []).find(c=>c.id === 'Grappled'); if (gr && t && gr.by && gr.by !== t.id) add('agrap', 'dis', 'ผู้โจมตีถูกจับอยู่: โจมตีเป้าอื่นติด Disadvantage');
+    if (this.has(a, 'Invisible')) add('ainvis', 'adv', 'ผู้โจมตี Invisible: Attack ได้ Advantage');
+    if (this.has(a, 'Hidden')){ add('ahid', 'adv', 'โจมตีจากการซ่อนตัว: Advantage'); add('ahidp', 'perfect', 'โจมตีจากการซ่อนตัว: นับเป็น Perfect Strike'); }
+    if (mode === 'ranged' && this.foesNear(r, a).length) add('reng', 'dis', 'ใช้อาวุธระยะไกลขณะมีศัตรูอยู่ในเขตปะทะ: Disadvantage');
+    if (w && w.strShort) add('str', 'dis', `STR ไม่ถึง ${w.strNeed}: โจมตีด้วยอาวุธนี้ติด Disadvantage`);
+    else if (w && w.strNeed && w.src === 'npceq') add('strq', 'dis', `อาวุธนี้ต้องมี STR ${w.strNeed}: ติ๊กเมื่อ STR ของ NPC ไม่ถึง (Disadvantage)`);
+    return out;
+  },
+
+  /* ---------- 4. หน้าต่างโจมตี ---------- */
+  openAttack(aid, tid, preset){
+    const r = Table.room; if (!r){ toast('เปิดห้องก่อนจึงจะโจมตีได้'); return; }
+    const mine = this.myTokens(r); if (!mine.length){ toast('ไม่มีหมากที่คุณบังคับได้บนบอร์ด วางตัวละครลงบอร์ดก่อน'); return; }
+    let a = mine.find(t=>t.id === aid) || null;
+    if (!a){ const sel = mine.find(t=>t.id === Table.sel); a = sel || mine[0]; }
+    this.comp = {a: a.id, t: (tid && tid !== a.id) ? tid : null, wi: 0, off: {}, advX: false, disX: false, perfectX: false, dice: 2, cvX: 0, aim: '', hideName: !!a.hidden, nonLethal: false, far: false, cname: '', remember: false, preset: preset || null};
+    this.syncWeapon(true);
+    if (preset && preset.pick){ const key = cbBaseName(preset.pick); const i = this.comp.list.findIndex(x=>cbBaseName(x.name) === key); if (i >= 0){ this.comp.wi = i; this.syncWeapon(); } }
+    document.body.classList.add('cb-picking'); this.drawComposer();
+  },
+  closeComposer(){ const had = !!this.comp; this.comp = null; if (!(typeof SkillUse !== 'undefined' && SkillUse.pick)) document.body.classList.remove('cb-picking'); const el = document.getElementById('atkc'); if (el) el.remove(); if (had && Table.room) setTimeout(()=>this.checkPrompts(), 60); },
+  /* คลิกหมากบนแผนที่ระหว่างเปิดหน้าต่างโจมตี = เลือกเป้า (คืน true เมื่อรับคลิกไว้) */
+  onTokenClick(t){
+    if (typeof SkillUse !== 'undefined' && SkillUse.onTokenClick(t)) return true;
+    const s = this.comp; if (!s) return false; if (t.id === s.a) return false;
+    if (t.kind === 'asset' && !(t.hpMax > 0)){ toast('สิ่งของนี้ไม่ได้ตั้งค่าความทนทาน จึงเลือกเป็นเป้าไม่ได้'); return true; }
+    s.t = t.id; this.drawDyn(); return true;
+  },
+  syncWeapon(first){
+    const s = this.comp; const a = this.tok(s.a); if (!a) return; const list = this.weaponsOf(a);
+    if (first && s.preset && s.preset.weapon){ list.unshift(s.preset.weapon); s.wi = 0; }
+    s.list = list; if (s.wi >= list.length) s.wi = 0; const w = list[s.wi]; const st = this.atkStats(a);
+    s.dmg = w.dmg; s.dtype = w.src === 'custom' ? 'Physical' : w.dtypes[0]; s.statKind = w.statKind; s.bonus = 0; s.toughX = w.toughX || 0; s.off.strq = true; // STR ของ NPC ไม่มีค่าดิบให้เทียบ เหตุข้อนี้จึงเริ่มแบบไม่ติ๊ก
+    s.props = {ap: !!(w.props.ap && w.props.ap.on), gb: !!(w.props.gb && w.props.gb.on), impact: !!(w.props.impact && w.props.impact.on), headshot: !!(w.props.headshot && w.props.headshot.on), impale: !!(w.props.impale && w.props.impale.on), rip: false, wall: false, sharpnel: w.sharpnel || 0};
+    s.mode = (s.preset && s.preset.mode && first) ? s.preset.mode : ((w.bomb || w.thrown) ? 'thrown' : (w.ranged ? 'ranged' : 'melee'));
+    s.cname = w.src === 'custom' ? (s.cname || '') : ''; s.stats = st;
+  },
+  current(){
+    const s = this.comp; const r = Table.room; if (!s || !r) return null; const a = this.tok(s.a); if (!a) return null; const t = s.t ? this.tok(s.t) : null;
+    const w = s.list[s.wi] || s.list[0]; const st = this.atkStats(a);
+    const cells = t ? cellDist(a, t) : 0; const reach = !!(w.props.reach) && !w.broken;
+    const range = t ? cbRangeVerdict({mode: s.mode, cells, reach, acc: rangeAccM(st.rangeLv)}) : null;
+    const reasons = this.atkReasons(r, a, t, w, s.mode, !!s.props.impact).map(x=>Object.assign(x, {on: !s.off[x.key]}));
+    const act = (k)=>reasons.some(x=>x.kind === k && x.on);
+    const adv = act('adv') || s.advX, dis = act('dis') || s.disX; const mode = adv && dis ? 'normal' : adv ? 'adv' : dis ? 'dis' : 'normal';
+    const perfect = act('perfect') || s.perfectX; const impactX = (reasons.some(x=>x.key === 'impactp' && x.on) || s.props.wall) && s.props.impact;
+    const statVal = s.statKind === 'none' ? 0 : (s.statKind === 'sight' ? st.sight : st.might);
+    const cvParts = []; if (w.cvBonus) cvParts.push({label: 'CV Bonus', n: w.cvBonus}); if (range && range.cv) cvParts.push({label: 'ระยะ', n: range.cv}); if (s.aim) cvParts.push({label: 'Focus (Precise) Sight', n: st.sight}); if (reasons.some(x=>x.key === 'marked' && x.on)) cvParts.push({label: 'Marked', n: st.sight}); if (s.cvX) cvParts.push({label: 'ตัวปรับ', n: s.cvX});
+    const cvMod = cvParts.reduce((x, p)=>x + p.n, 0);
+    const base = Math.max(2, Math.min(4, s.dice | 0)); const n = base + (mode === 'normal' ? 0 : 1);
+    let block = null; const c = this.charOf(a);
+    if (!t) block = 'เลือกเป้าหมายก่อน (คลิกหมากบนแผนที่ หรือเลือกจากรายการ)';
+    else if (range && !range.ok && !s.far) block = range.text;
+    else if (/^x\s*d/i.test(String(s.dmg || '').trim())) block = 'สูตรความเสียหายของการโจมตีนี้มี X ที่ต้องนับเอง ใส่จำนวนลูกเต๋าแทน X ในช่องความเสียหาย (เช่น 3d3)';
+    else if (!cbExprOk(s.dmg)) block = 'ความเสียหายของอาวุธต้องเป็นตัวเลขหรือรูปแบบเต๋า เช่น 2 หรือ 1d6+1';
+    else if (c && Table.attackBlocked && Table.attackBlocked(c)) block = Table.attackBlocked(c);
+    const los = (t && s.mode !== 'melee') ? losClear(r.map, a, t) : true;
+    return {s, r, a, t, w, st, cells, range, reasons, mode, perfect, impactX, statVal, cvParts, cvMod, n, block, los};
+  },
+  /* วาดหน้าต่างโจมตี: ส่วนคงที่ (ช่องกรอก) วาดใหม่เมื่อโครงเปลี่ยน ส่วนที่คำนวณ (ระยะ เหตุ Advantage สรุป ปุ่มทอย) วาดใหม่ทุกครั้งที่ค่าเปลี่ยน
+   * ช่องพิมพ์อัปเดตด้วย input แล้ววาดเฉพาะส่วนคำนวณ ช่องที่กำลังพิมพ์จึงไม่ถูกทำลายกลางคัน */
+  drawComposer(){
+    if (this.drawing){ this.redrawAgain = true; return; }
+    const cur = this.current(); if (!cur){ this.closeComposer(); return; }
+    this.drawing = true;
+    try {
+      const {s, r, a, w, st, statVal} = cur;
+      let root = document.getElementById('atkc'); if (!root){ root = h('div',{id:'atkc',class:'atkc',role:'dialog','aria-label':'หน้าต่างโจมตี'}); document.body.append(...cbKids(root)); }
+      const keepScroll = root.scrollTop; clear(root); const redraw = ()=>this.drawComposer(); const dyn = ()=>this.drawDyn(); const gm = Table.isGM() || Table.localMode;
+      root.append(...cbKids(h('div',{class:'atkc-head'}, h('b',{text:'⚔ โจมตี'}), h('span',{class:'dim',text:' คลิกหมากบนแผนที่เพื่อเลือกเป้า'}), h('button',{class:'small ghost atkc-x',title:'ปิดหน้าต่างโจมตี',onclick:()=>this.closeComposer(),text:'✕'}))));
+      const mine = this.myTokens(r);
+      const tgts = this.visible(r).filter(x=>x.id !== a.id && (x.kind !== 'asset' || x.hpMax > 0));
+      const grid = h('div',{class:'atkc-grid'});
+      grid.append(...cbKids(h('label',{text:'ผู้โจมตี'}), mine.length > 1 ? cbSelect(mine.map(x=>[x.id, x.name]), a.id, (v)=>{ s.a = v; if (s.t === v) s.t = null; s.wi = 0; s.hideName = !!(this.tok(v) || {}).hidden; this.syncWeapon(); redraw(); }, {class:'atkc-a'}) : h('b',{class:'atkc-a',text:a.name})));
+      grid.append(...cbKids(h('label',{text:'เป้าหมาย'}), cbSelect([['', 'เลือกเป้า หรือคลิกหมากบนแผนที่'], ...tgts.map(x=>[x.id, `${x.name} (${cellDist(a, x) * CELL_M} ม.)`])], s.t || '', (v)=>{ s.t = v || null; dyn(); }, {class:'atkc-t'})));
+      grid.append(...cbKids(h('label',{text:'อาวุธ'}), cbSelect(s.list.map((x, i)=>[i, x.name + (x.found && x.src !== 'custom' ? ` · ${x.dmg} ${x.dtypes.join('/')}` : '')]), s.wi, (v)=>{ s.wi = +v; this.syncWeapon(); redraw(); }, {class:'atkc-w'})));
+      if (w.src === 'custom'){ const nm = h('input',{class:'atkc-cname',placeholder:'ชื่อการโจมตี เช่น กรงเล็บ',maxlength:60}); nm.value = s.cname || ''; nm.oninput = ()=>{ s.cname = nm.value.trim().slice(0, 60); }; grid.append(...cbKids(h('label',{text:'ชื่อ'}), nm)); }
+      const dmgInp = h('input',{class:'atkc-dmg',title:'ความเสียหายตั้งต้นของอาวุธ ตัวเลขหรือรูปแบบเต๋า เช่น 2 หรือ 1d6+1',style:'width:74px'}); dmgInp.value = s.dmg; dmgInp.oninput = ()=>{ s.dmg = dmgInp.value.trim(); dyn(); };
+      const types = (w.src === 'custom' || (w.src === 'npc' && !w.found)) ? CB_DTYPES : w.dtypes;
+      grid.append(...cbKids(h('label',{text:'ความเสียหาย'}), h('div',{class:'row',style:'gap:6px'}, dmgInp, types.length > 1 ? cbSelect(types.map(x=>[x, x]), s.dtype, (v)=>{ s.dtype = v; dyn(); }, {class:'atkc-dtype',title:'ประเภทความเสียหายของการโจมตีครั้งนี้'}) : tag(s.dtype, 'prop'),
+        cbSelect([['might', `+ Might ${signed(st.might)}`], ['sight', `+ Sight ${signed(st.sight)}`], ['none', 'ไม่บวกค่าพลัง']], s.statKind, (v)=>{ s.statKind = v; redraw(); }, {class:'atkc-stat',title:'อาวุธประชิดหรืออาวุธที่ใช้แรงบวก Might ส่วนหน้าไม้และปืน (Reload) บวก Sight' + (st.npc ? ' · ค่าของ NPC คิดจากค่าพลังดัดแปลงบนหมาก' : '')}),
+        h('span',{class:'dim',text:'โบนัส'}), cbNum(s.bonus || '', (v)=>{ s.bonus = v || 0; dyn(); }, {class:'atkc-bonus',style:'width:56px',placeholder:'0',title:'ความเสียหายเพิ่มจากสกิล ท่ายืน หรือ Proficiency'}, true))));
+      const modeBtn = (k, label, tip)=>h('button',{class:'small atkc-mode' + (s.mode === k ? ' primary' : ''),dataset:{mode:k},title:tip,onclick:()=>{ s.mode = k; redraw(); },text:label});
+      grid.append(...cbKids(h('label',{text:'แบบการโจมตี'}), h('div',{class:'row',style:'gap:6px'}, modeBtn('melee', 'ประชิด', 'ต้องอยู่เขตปะทะ อาวุธ Reach เอื้อมได้อีกหนึ่งช่อง'), modeBtn('thrown', 'ขว้าง', 'ขว้างได้ถึงเขตใกล้เคียง ไม่ติด Disadvantage จากการมีศัตรูประชิด'), modeBtn('ranged', 'ยิง', 'เกินระยะแม่นหัก 1 CV ต่อทุก 1 เมตรที่เกิน มีศัตรูในเขตปะทะติด Disadvantage'))));
+      root.append(...cbKids(grid, h('div',{class:'atkc-dyn1'})));
+      // ตัวเลือกการทอย
+      root.append(...cbKids(h('div',{class:'row atkc-opts',style:'gap:6px'}, cbSelect([[2, 'Combat Dice 2 ลูก'], [3, 'Combat Dice 3 ลูก'], [4, 'Combat Dice 4 ลูก']], s.dice, (v)=>{ s.dice = +v; dyn(); }, {class:'atkc-dice',title:'ปกติ 2 ลูก สกิลหรืออาวุธบางอย่างเพิ่มให้'}),
+        cbNum(s.cvX || '', (v)=>{ s.cvX = v || 0; dyn(); }, {class:'atkc-cvx',style:'width:92px',placeholder:'ตัวปรับ CV',title:'ตัวปรับ CV อื่น เช่น ปืนที่ไม่ได้ Focus ก่อนยิง'}, true),
+        cbSelect([['', 'ไม่เล็ง (ตำแหน่งตามเต๋า)'], ...DATA.meta.bodyParts.map(([k, l])=>[k, 'เล็ง' + l])], s.aim, (v)=>{ s.aim = v; dyn(); }, {class:'atkc-aim',title:'Focus (Precise): ได้บวก CV ตาม Sight และตำแหน่งไม่เปลี่ยนตามเต๋า'}))));
+      // คุณสมบัติของการโจมตีครั้งนี้
+      const pr = h('div',{class:'atkc-props'}); const propBox = (k, label, tip, full)=>cbCheck(label, s.props[k], (v)=>{ s.props[k] = v; if (full) redraw(); else dyn(); }, {class:'fld chk pp' + (w.props[k] ? '' : ' off'),title:tip,dataset:{prop:k}});
+      pr.append(...cbKids(propBox('ap', 'Armor Penetrate', 'เกราะของจุดที่โดนเหลือครึ่งเดียว (ปัดลง)'), propBox('gb', 'Guard Break', 'ฝ่ายรับ Parry แบบ Advantage ไม่ได้ และไม่ได้ Parry Dice'), propBox('impact', 'Impact', 'โดนเป้าที่ติด Prone หรือ Stunned หรือผลักไปชนกำแพง = Perfect Strike และ +1d3', true), propBox('headshot', 'Headshot', 'เต๋าออกตำแหน่งศีรษะ (ไม่ได้เล็ง) = Perfect Strike'), propBox('impale', 'Impale', 'โดนแล้วเป้าติด Rooted')));
+      if (s.props.impact) pr.append(...cbKids(cbCheck('ผลักไปชนกำแพง', s.props.wall, (v)=>{ s.props.wall = v; dyn(); }, {class:'fld chk pp',dataset:{prop:'wall'}})));
+      if (w.props.rip || w.src === 'custom') pr.append(...cbKids(cbCheck('Rip: เปลี่ยนเป็น Bleeding ถ้าจุดที่โดนไม่มีเกราะ', s.props.rip, (v)=>{ s.props.rip = v; }, {class:'fld chk pp',dataset:{prop:'rip'},title:'เป้าติด Bleeding เท่ากับความเสียหายที่จะเข้า HP แทนการเสีย HP'})));
+      pr.append(...cbKids(h('label',{class:'fld'}, h('span',{text:'Toughness Damage เพิ่ม'}), cbNum(s.toughX || '', (v)=>{ s.toughX = Math.max(0, Math.min(6, v || 0)); }, {class:'atkc-toughx',style:'width:52px',placeholder:'0',min:0,max:6}, true)), h('label',{class:'fld'}, h('span',{text:'Sharpnel'}), cbNum(s.props.sharpnel || '', (v)=>{ s.props.sharpnel = Math.max(0, Math.min(6, v || 0)); }, {class:'atkc-sharp',style:'width:52px',placeholder:'0',min:0,max:6}, true)),
+        cbCheck('Non-Lethal', s.nonLethal, (v)=>{ s.nonLethal = v; }, {class:'fld chk pp',dataset:{prop:'nl'},title:'Focus (Non-Lethal): ทำความเสียหายกับ HP อย่างเดียว ไม่ลด Toughness ไม่ติดสภาวะทางกาย'})));
+      if (w.toughOpt) pr.append(...cbKids(h('span',{class:'dim',style:'font-size:11.5px',text:`อาวุธนี้มี +${w.toughOpt} Toughness Damage แบบมีเงื่อนไข ใส่ตัวเลขเองเมื่อเข้าเงื่อนไข`})));
+      root.append(...cbKids(pr));
+      if (a.hidden) root.append(...cbKids(cbCheck('ปกปิดชื่อผู้โจมตีในแชต (หมากนี้ซ่อนอยู่)', s.hideName, (v)=>{ s.hideName = v; }, {class:'fld chk atkc-hide'})));
+      if (gm && st.npc && w.src === 'custom') root.append(...cbKids(cbCheck('จำการโจมตีนี้ไว้ในสแตตบล็อกของหมาก', s.remember, (v)=>{ s.remember = v; }, {class:'fld chk atkc-rem',title:'เพิ่มเป็นบรรทัดการโจมตีของหมากตัวนี้ แก้หรือลบได้ที่แผงหมาก'})));
+      if (w.text && w.src !== 'unarmed') root.append(...cbKids(h('details',{class:'atkc-eff'}, h('summary',{text:'ข้อความเอฟเฟกต์ของอาวุธ'}), h('div',{class:'desc',style:'font-size:12px'}, T(w.text)))));
+      root.append(...cbKids(h('div',{class:'atkc-dyn2'})));
+      root.scrollTop = keepScroll;
+    } finally { this.drawing = false; }
+    this.drawDyn();
+    if (this.redrawAgain){ this.redrawAgain = false; this.drawComposer(); }
+  },
+  /* ส่วนที่คำนวณของหน้าต่างโจมตี: ระยะ คำเตือน เหตุของ Advantage และ Disadvantage สรุปการทอย และปุ่มทอย */
+  drawDyn(){
+    const root = document.getElementById('atkc'); if (!root) return; const d1 = root.querySelector('.atkc-dyn1'), d2 = root.querySelector('.atkc-dyn2'); if (!d1 || !d2) return;
+    const cur = this.current(); if (!cur){ this.closeComposer(); return; }
+    const {s, r, a, t, w, range, reasons, mode, perfect, statVal, cvParts, cvMod, n} = cur; const dyn = ()=>this.drawDyn(); const gm = Table.isGM() || Table.localMode;
+    const tSel = root.querySelector('.atkc-t'); if (tSel && tSel.value !== (s.t || '')) tSel.value = s.t || '';
+    clear(d1); clear(d2);
+    if (s.mode === 'thrown' && !w.props.throwable && w.src !== 'custom' && !w.bomb) d1.append(...cbKids(h('div',{class:'atkc-note warn',text:'อาวุธนี้ไม่มีคุณสมบัติ Throwable ขว้างได้เมื่อมีความสามารถรองรับ (เช่น Trickster) หรือ GM อนุญาต'})));
+    if (w.broken) d1.append(...cbKids(h('div',{class:'atkc-note warn atkc-broken',text:'อาวุธนี้พัง (Durability 0): PDMG เหลือครึ่งปัดลง และคุณสมบัติพิเศษหาย'})));
+    if (w.src === 'npc' && !w.found) d1.append(...cbKids(h('div',{class:'atkc-note warn',text:'ระบบอ่านสูตรความเสียหายจากบรรทัดการโจมตีนี้ไม่ออก ใส่ความเสียหายและประเภทเองได้ในช่องด้านบน'})));
+    if (range) d1.append(...cbKids(h('div',{class:'atkc-range ' + range.cls,text:range.text})));
+    if (range && !range.ok && gm) d1.append(...cbKids(cbCheck('โจมตีทั้งที่ไกลเกิน (GM อนุญาต)', s.far, (v)=>{ s.far = v; dyn(); }, {class:'fld chk atkc-far'})));
+    if (t && !cur.los) d1.append(...cbKids(h('div',{class:'atkc-note warn',text:'มีสิ่งกีดขวางบังแนวยิงระหว่างสองหมาก ให้ GM ตัดสินว่ายิงได้ไหม'})));
+    if (w.props.delay && r.enc && r.enc.active && r.enc.order[r.enc.turnIdx] !== a.id && r.enc.order[r.enc.turnIdx] !== a.turnWith) d1.append(...cbKids(h('div',{class:'atkc-note warn',text:'อาวุธนี้มี Delay ใช้โจมตีได้เฉพาะในเทิร์นของตัวเอง'})));
+    if (a.hp != null && a.hp <= 0) d1.append(...cbKids(h('div',{class:'atkc-note warn',text:`${a.name} เหลือ HP 0 ให้ GM ตัดสินว่ายังลงมือได้ไหม`})));
+    const rs = h('div',{class:'atkc-reasons'});
+    for (const x of reasons) rs.append(...cbKids(cbCheck(x.label, x.on, (v)=>{ s.off[x.key] = !v; dyn(); }, {class:'fld chk rs-' + x.kind,dataset:{key:x.key}})));
+    rs.append(...cbKids(h('div',{class:'row',style:'gap:10px'}, cbCheck('Advantage อื่น', s.advX, (v)=>{ s.advX = v; dyn(); }, {class:'fld chk atkc-advx'}), cbCheck('Disadvantage อื่น', s.disX, (v)=>{ s.disX = v; dyn(); }, {class:'fld chk atkc-disx'}), cbCheck('นับเป็น Perfect Strike', s.perfectX, (v)=>{ s.perfectX = v; dyn(); }, {class:'fld chk atkc-perfx',title:'สกิลหรือสถานการณ์ที่ให้ Perfect Strike โดยไม่ต้องทอยได้หน้าเหมือน'}))));
+    d1.append(...cbKids(rs));
+    const avg = cbExprAvg(s.dmg) + (s.statKind === 'none' ? 0 : statVal * (perfect ? 2 : 1)) + (s.bonus || 0);
+    d2.append(...cbKids(h('div',{class:'atkc-sum'}, h('span',{text:`ทอย ${n}d6${mode === 'adv' ? ' Advantage ผู้โจมตีเลือก 2 ลูก' : mode === 'dis' ? ' Disadvantage ฝ่ายรับเลือก 2 ลูก' : (n > 2 ? ' ผู้โจมตีเลือก 2 ลูก' : '')}`}), cvMod ? h('span',{class:'num',text:` · CV ${signed(cvMod)} (${cvParts.map(p=>p.label + ' ' + signed(p.n)).join(', ')})`}) : null,
+      h('span',{class:'num',text:` · ถ้าโดน ${s.dmg}${s.statKind !== 'none' && statVal ? ` ${signed(statVal)}${perfect ? '×2' : ''}` : ''}${s.bonus ? ' ' + signed(s.bonus) : ''}${/d/i.test(s.dmg) ? ` (เฉลี่ย ${Math.round(avg * 10) / 10})` : ` = ${avg}`} ${s.dtype}`}))));
+    const go = h('button',{class:'primary atkc-go',onclick:()=>this.fire(),text:'🎲 ทอยโจมตี'}); if (cur.block){ go.disabled = true; d2.append(...cbKids(h('div',{class:'atkc-note bad atkc-block',text:cur.block}))); }
+    d2.append(...cbKids(h('div',{class:'row',style:'justify-content:flex-end;gap:8px;margin-top:8px'}, h('button',{class:'small ghost',onclick:()=>this.closeComposer(),text:'ยกเลิก'}), go)));
+    this.markTarget();
+  },
+  /* วงแดงรอบหมากที่ถูกเลือกเป็นเป้า */
+  markTarget(){ for (const el of document.querySelectorAll('.gridmap .gtok.cb-tgt')) el.classList.remove('cb-tgt'); const id = this.comp && this.comp.t; if (!id) return; const el = document.querySelector('#v-table .gridmap .gtok[data-id="' + String(id).replace(/[^A-Za-z0-9_-]/g, '') + '"]'); if (el) el.classList.add('cb-tgt'); },
+  /* ทอยโจมตีตามค่าที่ตั้งในหน้าต่าง แล้วโพสต์เป็นข้อความที่รอฝ่ายรับ */
+  fire(){
+    const cur = this.current(); if (!cur || cur.block){ if (cur && cur.block) toast(cur.block); return; }
+    const {s, r, a, t, w, mode, perfect, impactX, statVal, cvParts, cvMod, n, cells, reasons} = cur;
+    const wname = w.src === 'custom' ? (s.cname || 'การโจมตี') : w.name; const who = (a.hidden && s.hideName) ? 'บางสิ่งที่มองไม่เห็น' : a.name;
+    const flow = {v: 1, type: 'attack', a: {id: a.id, name: who, kind: a.kind}, t: {id: t.id, name: t.name, kind: t.kind}, mode: s.mode, cells, m: cells * CELL_M,
+      w: {name: wname, dmg: s.dmg, dtype: s.dtype, physical: cbIsPhysical(s.dtype), stat: s.statKind === 'none' ? 0 : statVal, statKind: s.statKind, bonus: s.bonus || 0, toughX: s.toughX || 0, toughPerfect: w.toughPerfect || 0, sharpnel: s.props.sharpnel || 0, ripBleed: !!s.props.rip, ap: !!s.props.ap, gb: !!s.props.gb, impact: !!s.props.impact, impactX: !!impactX, headshot: !!s.props.headshot, impale: !!s.props.impale, nonLethal: !!s.nonLethal, conds: (w.conds || []).slice(0, 6), halve: !!w.halve, broken: !!w.broken, skill: (s.preset && s.preset.skill) || null},
+      perfect: !!perfect, reasons: reasons.filter(x=>x.on).map(x=>x.label).concat(s.advX ? ['Advantage อื่น'] : [], s.disX ? ['Disadvantage อื่น'] : []).slice(0, 10), cvParts};
+    const aim = s.aim || null; const label = `โจมตี ${t.name} ด้วย ${wname}` + (aim ? ` · เล็ง${partLabel(aim)}` : '');
+    const id = 'atk-' + uid(); const spent = reasons.filter(x=>x.on && (x.key === 'ahid' || x.key === 'ainvis')).map(x=>x.key === 'ahid' ? 'Hidden' : 'Invisible');
+    if (s.remember && w.src === 'custom' && this.controls(a) && this.isNpc(a)){ // เก็บเป็นบรรทัดการโจมตีแบบเดียวกับสแตตบล็อก ตัวอ่านเดียวกันอ่านกลับได้
+      const line = `${s.mode === 'melee' ? '' : 'Range Attack, '}CV Bonus +0, Damage ${s.dmg}${s.statKind === 'might' ? ' + Might' : s.statKind === 'sight' ? ' + Sight' : ''} ${s.dtype}`;
+      a.attacks = [{name: wname, text: line}, ...(Array.isArray(a.attacks) ? a.attacks : []).filter(x=>x && x.name !== wname)].slice(0, 12); Table.save(); }
+    const run = async ()=>{
+      if (mode === 'dis'){ const dice = Array.from({length: n}, rollD6); Table.post({kind: 'pick', fixedId: id, who, text: label, dice, cvMod, loc: aim, gmOnly: false, flow}); toast('ทอยแล้ว รอฝ่ายรับหรือ GM เลือก 2 ลูกในแชต'); return; }
+      const rr = n > 2 ? await rollChoose(n, mode, `โจมตี ${t.name}: ทอย ${n}d6 เลือก 2 ลูก`, {kind: 'attack', cvMod, loc: aim}) : roll2d6('normal');
+      const av = attackVerdict(rr, {cvMod, loc: aim});
+      Table.post({kind: 'roll', fixedId: id, who, text: label, roll: {dice: rr.dice, kept: rr.kept, keptIdx: rr.keptIdx, sum: rr.sum, crit: null, double: rr.double, mode, chosen: !!rr.chosen}, mod: cvMod, pm: 0, total: av.cv, judge: {cls: av.cls, text: av.text}, atk: {sum: av.sum, cv: av.cv, part: av.part || null, precise: av.precise, cvMod, pick: n > 2 ? 'atk' : null}, gmOnly: false, flow});
+    };
+    Table.guardedRoll(who, async ()=>{ this.closeComposer(); await run(); for (const idc of spent){ const ac = (a.conds || []).find(c=>c.id === idc); if (ac) removeCond(a, r, ac, 'ลงมือโจมตีแล้ว'); } }, label);
+  },
+
+  /* ---------- 5. ฝ่ายรับ ---------- */
+  isAttack(m){ return !!(m && m.kind === 'roll' && m.flow && m.flow.type === 'attack' && m.roll && m.flow.t && m.flow.a); },
+  resolved(m){ return Table.chat.some(x=>x.kind === 'clash' && x.of === m.id); },
+  canRespond(m){ const t = this.tok(m.flow.t.id); return !!t && this.controls(t); },
+  ownerHere(t){ return !!(t && t.ownerId && !t.gmRun && (Table.peers || []).some(p=>p && p.who === t.ownerId)); },
+  /* ฉันเป็นคนแรกที่ควรตอบไหม: เจ้าของหมากตอบเอง · GM ตอบแทนเมื่อเป็น NPC หรือเจ้าของไม่อยู่ในห้อง */
+  primary(m){ const t = this.tok(m.flow.t.id); if (!t) return false; if (Table.localMode) return true; if (ownsTok(t)) return true; return Table.isGM() && !this.ownerHere(t); },
+  pending(){ const now = Date.now(); return Table.chat.filter(m=>this.isAttack(m) && now - (m.ts || 0) < CB_PENDING_MS && !this.resolved(m)).sort((x, y)=>(x.ts || 0) - (y.ts || 0)); },
+  /* เรียกทุกครั้งที่แชตของห้องเปลี่ยน: เล่นเอฟเฟกต์ของข้อความใหม่ และเด้งหน้าต่างป้องกันให้คนที่ต้องตอบ */
+  onChat(){
+    if (!Table.room) return; const now = Date.now(); const gm = Table.isGM(); const first = !this.ready; this.ready = true;
+    const fresh = Table.chat.filter(m=>m && m.id && !this.seen.has(m.id)).sort((x, y)=>(x.ts || 0) - (y.ts || 0));
+    for (const m of fresh){ this.seen.add(m.id); if (first || now - (m.ts || 0) > 20000) continue; if (m.gmOnly && !gm && m.authorId !== Store.me) continue;
+      if (m.kind === 'clash') DiceShow.enqueue(m);
+      else if (m.kind === 'skill' && typeof SkillUse !== 'undefined') SkillUse.onMessage(m);
+      else if (m.fx) setTimeout(()=>Fx.play(m.fx), m.kind === 'roll' ? ROLL_SHOW_MS : 0); }
+    if (this.prompting){ const pm = Table.chat.find(x=>x.id === this.prompting); if (!pm || this.resolved(pm)){ this.prompting = null; modal(null); toast('การโจมตีนี้มีคนตัดสินผลไปแล้ว'); } }
+    this.checkPrompts();
+  },
+  checkPrompts(){
+    if (this.prompting || this.comp) return; const now = Date.now();
+    const m = this.pending().find(x=>!this.snooze.has(x.id) && this.canRespond(x) && this.primary(x)); if (!m || this.timers[m.id]) return;
+    const wait = Math.max(150, ROLL_SHOW_MS + 250 - (now - (m.ts || 0)));
+    const open = ()=>{ delete this.timers[m.id]; if (this.prompting || this.comp || this.resolved(m) || !Table.room) return;
+      if (DiceShow.cur || Table.rolling){ this.timers[m.id] = setTimeout(open, 500); return; } // รอให้ป๊อปอัปเต๋าบนจอจบก่อน
+      const lone = this.tok(m.flow.t.id); if (lone && lone.kind === 'asset'){ this.autoHit(m); return; } this.openDefense(m); };
+    this.timers[m.id] = setTimeout(open, wait);
+  },
+  /* สิ่งของไม่ป้องกัน: ตัดสินเป็นโดนทันที */
+  autoHit(m){ Table.guardedRoll(m.flow.t.name, ()=>{ this.resolve(m, {kind: 'none', success: false, text: 'สิ่งของไม่ป้องกัน'}, {}); }, 'รับการโจมตี'); },
+  defReasons(t, f, st){
+    const parry = [], evade = []; const unb = this.has(t, 'Unbalanced');
+    if (unb){ parry.push({key: 'unbal', kind: 'dis', label: 'Unbalanced: การป้องกันทุกแบบติด Disadvantage'}); evade.push({key: 'unbal', kind: 'dis', label: 'Unbalanced: การป้องกันทุกแบบติด Disadvantage'}); }
+    if (f.mode === 'melee') evade.push({key: 'evm', kind: 'dis', label: 'Evade การโจมตีระยะประชิด: Disadvantage'});
+    if (f.mode !== 'melee' && st.meleeLv < 3) parry.push({key: 'prr', kind: 'dis', label: 'Parry การโจมตีระยะไกล: ต้องได้ Perfect Parry'});
+    if (f.w && f.w.gb) parry.push({key: 'gb', kind: 'gb', label: 'Guard Break: Parry แบบ Advantage ไม่ได้ และไม่ได้ Parry Dice'});
+    return {parry, evade};
+  },
+  openDefense(m){
+    const r = Table.room; if (!r || !this.isAttack(m)) return; if (this.resolved(m)){ toast('การโจมตีนี้ตัดสินผลไปแล้ว'); return; }
+    const f = m.flow; const t = this.tok(f.t.id); if (!t){ toast('หมากเป้าหมายไม่อยู่บนบอร์ดแล้ว'); return; } if (!this.canRespond(m)){ toast('การป้องกันเป็นของเจ้าของหมากหรือ GM'); return; }
+    const atk = m.atk || {}; const sum = m.roll.sum; const cv = atk.cv != null ? atk.cv : sum; const precise = !!atk.precise; const part = atk.part || hitPart(sum) || 'torso';
+    const base = this.defStats(t); const gm = Table.isGM() || Table.localMode; const isPc = !!(t.charId && t.kind === 'pc');
+    const pref = (this.isNpc(t) && ['parry','evade','both','none'].includes(t.defend)) ? t.defend : ''; // วิธีป้องกันที่สแตตบล็อกของ NPC ระบุ
+    const st = {reflex: base.reflex, pd: base.pd, pdUse: base.pd, meleeLv: base.meleeLv, off: {}, advX: false, disX: false, weak: false, resist: 0, force: false, view: 'main', skill: null};
+    const box = h('div',{class:'defbox'});
+    const blocked = ()=> (this.has(t, 'Stunned') ? 'Stunned' : this.has(t, 'Incapacitated') ? 'Incapacitated' : null);
+    const plan = (kind)=>{ const rs = this.defReasons(t, f, st)[kind].map(x=>Object.assign(x, {on: !st.off[kind + x.key]})); const gb = rs.some(x=>x.kind === 'gb' && x.on); const dis = rs.some(x=>x.kind === 'dis' && x.on) || st.disX; const adv = st.advX && !(kind === 'parry' && gb);
+      const mode = adv && dis ? 'normal' : adv ? 'adv' : dis ? 'dis' : 'normal'; const pd = (kind === 'parry' && !gb) ? Math.max(0, Math.min(st.pd, st.pdUse)) : 0;
+      const n = kind === 'parry' ? (mode === 'dis' ? 2 : parryDiceCount(pd, mode === 'adv')) : (mode === 'normal' ? 2 : 3);
+      return {rs, gb, mode, pd, n}; };
+    const used = !!(r.enc && r.enc.active && t.pd && t.pd.round === r.enc.round);
+    const draw = ()=>{
+      clear(box); const redraw = draw;
+      box.append(...cbKids(h('h3',{text:`🛡 ${f.a.name} โจมตี ${t.name}`})));
+      box.append(...cbKids(h('div',{class:'def-atk'}, h('div',{class:'row',style:'gap:8px;justify-content:center'}, renderDice({dice: m.roll.dice || [], keptIdx: m.roll.keptIdx || []}), h('b',{class:'num',text:`เต๋า ${sum}${cv !== sum ? ' → CV ' + cv : ''}`}), tag(partLabel(part) + (precise ? ' (เล็ง)' : ''), 'neg'), (m.roll.double || f.perfect) ? tag('Perfect Strike', 'prop') : null),
+        h('div',{class:'dim',style:'font-size:12.5px;margin-top:4px',text:`${f.w.name} · ${f.mode === 'melee' ? 'ประชิด' : f.mode === 'thrown' ? 'ขว้าง' : 'ยิง'} ระยะ ${f.m} ม. · ถ้าโดน ${f.w.dmg}${f.w.stat ? ' ' + signed(f.w.stat) + ((m.roll.double || f.perfect) ? '×2' : '') : ''}${f.w.bonus ? ' ' + signed(f.w.bonus) : ''} ${f.w.dtype}${f.w.ap ? ' · Armor Penetrate' : ''}${f.w.gb ? ' · Guard Break' : ''}`}))));
+      if (st.view === 'skill'){ this.defSkillView(box, m, t, st, redraw, plan, go); return; }
+      const why = blocked(); const lock = !!why && !st.force;
+      if (why) box.append(...cbKids(h('div',{class:'atkc-note bad',text:`${t.name} ติด ${why} จึงป้องกันไม่ได้`}), gm ? cbCheck('ให้ป้องกันได้ (GM ตัดสิน)', st.force, (v)=>{ st.force = v; redraw(); }, {class:'fld chk def-force'}) : null));
+      if (used) box.append(...cbKids(h('div',{class:'atkc-note warn',text:'รอบนี้ใช้ Perfect Defense ไปแล้ว ทอยได้เลขเท่าผลโจมตีอีกจะไม่นับเป็น Perfect'})));
+      if (base.npc) box.append(...cbKids(h('div',{class:'dim def-npc',style:'font-size:12.5px;text-align:center;margin-top:4px',text:`${t.name}: Reflex ${signed(st.reflex)} · Parry Dice ${st.pd} (คิดจากค่าพลังดัดแปลงและของที่สวม)` + (pref ? ` · สแตตบล็อกระบุ ${pref === 'parry' ? 'Parry' : pref === 'evade' ? 'Evade' : pref === 'both' ? 'Parry หรือ Evade' : 'ไม่ป้องกัน'}` : '') + (t.defendNote ? ` (${String(t.defendNote).slice(0, 120)})` : '')})));
+      const pp = plan('parry'), ev = plan('evade');
+      const nums = HIT_DEFEND[part] || [];
+      const pText = pp.mode === 'dis' ? `ทอย 2d6 ต้องได้ ${sum} พอดี (Perfect Parry)` : `ทอย ${pp.n}d6${pp.n > 2 ? ' เลือก 2 ลูก' : ''} กันได้เมื่อผลรวมเป็น ${nums.join(' หรือ ')}`;
+      const eText = `ทอย ${ev.n}d6${ev.mode === 'dis' ? ' ใช้ 2 ลูกต่ำสุด' : ev.mode === 'adv' ? ' เลือก 2 ลูก' : ''} บวก Reflex ${signed(st.reflex)} ต้องถึง ${cv}`;
+      const lead = (kind)=> !pref || pref === 'both' || pref === kind; // ปุ่มที่ตรงกับสแตตบล็อกเป็นปุ่มเด่น
+      const col = (kind, pl, title, text, extra)=>h('div',{class:'def-col'}, h('button',{class:(lead(kind) ? 'primary ' : '') + 'def-' + kind,disabled: lock,onclick:()=>go(kind),text:title}), h('div',{class:'dim def-how',text:text}), extra || null, pl.rs.map(x=>cbCheck(x.label, x.on, (v)=>{ st.off[kind + x.key] = !v; redraw(); }, {class:'fld chk rs-' + x.kind})));
+      const pdSel = (st.pd > 0 && !pp.gb && pp.mode !== 'dis') ? h('label',{class:'fld def-pdsel'}, h('span',{text:'ใช้ Parry Dice'}), cbSelect(Array.from({length: st.pd + 1}, (_, i)=>[i, `${i} ลูก`]), Math.min(st.pd, st.pdUse), (v)=>{ st.pdUse = +v; redraw(); }, {class:'def-pduse'})) : null;
+      box.append(...cbKids(h('div',{class:'def-cols'}, col('parry', pp, `🛡 Parry ${pp.n}d6`, pText, pdSel), col('evade', ev, `💨 Evade ${ev.n}d6${st.reflex ? ' ' + signed(st.reflex) : ''}`, eText, null))));
+      box.append(...cbKids(h('div',{class:'row',style:'gap:10px;justify-content:center;margin-top:6px'}, cbCheck('Advantage (สกิลหรือสถานการณ์)', st.advX, (v)=>{ st.advX = v; redraw(); }, {class:'fld chk def-advx'}), cbCheck('Disadvantage เพิ่ม', st.disX, (v)=>{ st.disX = v; redraw(); }, {class:'fld chk def-disx'}))));
+      const adj = h('details',{class:'def-adj'}, h('summary',{text:'ตัวปรับความเสียหายของฝ่ายรับ (แพ้ทาง ความต้านทาน)'}), h('div',{class:'row',style:'gap:10px;margin-top:6px'}, cbCheck('แพ้ทาง ความเสียหาย ×2', st.weak, (v)=>{ st.weak = v; }, {class:'fld chk def-weak'}), h('label',{class:'fld'}, h('span',{text:'ลดเพิ่ม (Resistance หรือเกราะที่จดเอง)'}), cbNum(st.resist || '', (v)=>{ st.resist = Math.max(0, v || 0); }, {class:'def-resist',style:'width:58px',placeholder:'0',min:0}))),
+        h('p',{class:'dim',style:'font-size:11.5px;margin:6px 0 0',text:'เกราะของส่วนที่โดนระบบหักให้เอง: โดนชนิดในวงเล็บหักเกราะหลักบวกเกราะรอง ชนิดอื่นหักเกราะหลัก ความเสียหายเวทหักเกราะหลักบวก Sorceries Resistance ของส่วนนั้น'}));
+      if (st.weak || st.resist) adj.open = true; box.append(...cbKids(adj));
+      box.append(...cbKids(h('div',{class:'row',style:'gap:8px;justify-content:center;margin-top:10px'}, h('button',{class:'def-skill',disabled: lock,onclick:()=>{ st.view = 'skill'; redraw(); },text:'✨ ใช้ทักษะ'}), h('button',{class:(pref === 'none' ? 'primary' : 'ghost') + ' def-none',onclick:()=>go('none'),text:'รับการโจมตี (ไม่ป้องกัน)'}), h('button',{class:'small ghost def-later',title:'ปิดหน้าต่างนี้ไว้ก่อน เปิดใหม่ได้จากปุ่มในแชต',onclick:()=>{ this.snooze.add(m.id); this.prompting = null; modal(null); setTimeout(()=>this.checkPrompts(), 120); },text:'ไว้ก่อน'}))));
+    };
+    const go = (kind, forced)=>{
+      if (this.resolved(m)){ this.prompting = null; modal(null); toast('การโจมตีนี้ตัดสินผลไปแล้ว'); return; }
+      const opt = {weak: st.weak, resist: st.resist, skill: st.skill};
+      const label = kind === 'parry' ? 'Parry' : kind === 'evade' ? 'Evade' : 'รับการโจมตี';
+      this.prompting = null; modal(null);
+      Table.guardedRoll(t.name, async ()=>{
+        if (this.resolved(m)){ toast('มีคนตัดสินการโจมตีนี้ไปก่อนแล้ว'); return; }
+        if (kind === 'none'){ this.resolve(m, {kind: 'none', success: false, text: 'ไม่ป้องกัน', skill: st.skill}, opt); return; }
+        if (kind === 'block'){ this.resolve(m, {kind: 'skill', success: true, text: `กันด้วย ${st.skill || 'ทักษะ'}`, skill: st.skill}, opt); return; }
+        const pl = plan(kind); let rr, j, total, mod = 0, lab;
+        if (kind === 'parry'){
+          const pdis = pl.mode === 'dis';
+          rr = pl.n > 2 ? await rollChoose(pl.n, pl.mode, `Parry: ทอย ${pl.n}d6 เลือก 2 ลูก`, {kind: 'parry', dc: sum, cv, loc: precise ? part : null}) : roll2d6('normal');
+          total = rr.sum; j = judgeDefense(total, sum, 'parry', {sum: rr.sum, dis: pdis, cv, loc: precise ? part : null}); lab = pdis ? 'Parry (Disadvantage)' : 'Parry';
+          if (used && rr.sum === sum) j = pdis ? {cls: 'res-fail', text: `Parry ไม่สำเร็จ (รอบนี้ใช้ Perfect Defense ไปแล้ว) โดน${partLabel(part)}`} : {cls: 'res-full', text: `Parry สำเร็จ (${rr.sum} เท่าผลโจมตี แต่รอบนี้ใช้ Perfect Defense ไปแล้ว)`};
+        } else {
+          mod = st.reflex; rr = pl.mode === 'adv' ? await rollChoose(3, 'adv', 'Evade (Advantage): ทอย 3d6 เลือก 2 ลูก', {kind: 'evade', dc: sum, mod, cv, loc: precise ? part : null}) : roll2d6(pl.mode === 'dis' ? 'dis' : 'normal');
+          total = rr.sum + mod; j = judgeDefense(total, sum, 'evade', {sum: rr.sum, cv, loc: precise ? part : null}); lab = pl.mode === 'dis' ? 'Evade (Disadvantage)' : pl.mode === 'adv' ? 'Evade (Advantage)' : 'Evade';
+          if (used && rr.sum === sum) j = total >= cv ? {cls: 'res-full', text: `Evade สำเร็จ (${total} ถึง ${cv})`} : {cls: 'res-fail', text: `Evade ไม่สำเร็จ (${total} ต่ำกว่า ${cv} และรอบนี้ใช้ Perfect Defense ไปแล้ว) โดน${partLabel(part)}`};
+        }
+        const ok = /res-(full|crit)/.test(j.cls || ''); const perfect = j.cls === 'res-crit';
+        this.resolve(m, {kind, success: ok, perfect, roll: cbRollOf(rr), mode: pl.mode, mod, total, text: j.text, cls: j.cls, label: lab, pd: pl.pd, skill: st.skill}, opt);
+      }, label);
+    };
+    /* แสดงกรอบนี้ในหน้าต่าง: ปิดด้วยปุ่ม "ไว้ก่อน" เท่านั้น กันกดพลาดนอกกรอบ · เรียกซ้ำได้หลังหน้าต่างใช้ทักษะปิด */
+    const show = ()=>{ if (this.resolved(m)){ this.prompting = null; return; } this.prompting = m.id; draw(); modal(box); const mEl = $('#modal'); if (!mEl) return; mEl.onclick = ()=>{}; const closeRow = mEl.querySelector('.box > .row:last-child'); if (closeRow && closeRow !== box) closeRow.remove(); };
+    st.show = show; show();
+  },
+  /* ฝ่ายรับเลือกใช้ทักษะ: จ่ายค่าร่าย ประกาศในแชต แล้วบอกว่าทักษะมีผลกับการโจมตีนี้อย่างไร */
+  defSkillView(box, m, t, st, redraw, plan, go){
+    const c = this.charOf(t); let names = []; try { names = c && !(c.shareMode === 'min' && !Store.isMine(c)) ? allSkills(c) : []; } catch(e){ names = []; }
+    const sks = names.map(n=>SKILL_BY_NAME[n]).filter(Boolean); const react = sks.filter(sk=>/Reaction/i.test(sk.type || '')); const rest = sks.filter(sk=>!/Reaction|Passive/i.test(sk.type || ''));
+    box.append(...cbKids(h('p',{class:'desc',style:'margin:8px 0',text: st.skill ? `ใช้ ${st.skill} แล้ว เลือกว่าทักษะนี้มีผลกับการโจมตีอย่างไร` : 'เลือกทักษะที่จะใช้ตอบโต้การโจมตีนี้ ระบบหักค่าร่ายและประกาศในแชตให้ แล้วให้คุณบอกผลของมันต่อการโจมตี'})));
+    if (!st.skill){
+      const pickRow = (sk)=>h('div',{class:'def-sk'}, h('div',null, h('b',{text:skLabel(sk)}), h('span',{class:'dim',style:'font-size:11.5px',text:` ${(sk.type || '').slice(0, 40)}${sk.cost ? ' · ' + sk.cost : ''}`}), h('div',{class:'desc',style:'font-size:12px'}, T(sk.effect || ''))), h('button',{class:'small primary def-usesk',dataset:{sk:sk.nameEn},onclick:()=>{ const done = ()=>{ st.skill = skLabel(sk); st.show(); }; if (typeof SkillUse !== 'undefined') SkillUse.quick(t, sk, {react: m.id}, done, ()=>st.show()); else done(); },text:'ใช้'}));
+      if (react.length) box.append(...cbKids(h('div',{class:'kicker',text:'ทักษะประเภท Reaction'}), react.map(pickRow)));
+      const nre = (this.isNpc(t) && Array.isArray(t.reactions)) ? t.reactions.filter(x=>x && (x.name || x.text)).slice(0, 8) : [];
+      if (nre.length) box.append(...cbKids(h('div',{class:'kicker',text:'Reaction ในสแตตบล็อก (ผู้เล่นเห็นเฉพาะชื่อ)'}), nre.map(x=>h('div',{class:'def-sk'}, h('div',null, h('b',{text:String(x.name || 'Reaction').slice(0, 80)}), h('div',{class:'desc',style:'font-size:12px'}, T(String(x.text || '').slice(0, 1200)))), h('button',{class:'small primary def-usenpc',onclick:()=>{ const nm = String(x.name || 'Reaction').slice(0, 60); st.skill = nm; Table.post({kind: 'sys', who: '', text: `${t.name} ใช้ ${nm} ตอบโต้การโจมตีของ ${m.flow.a.name}`}); redraw(); },text:'ใช้'})))));
+      if (rest.length) box.append(...cbKids(h('details',{class:'def-more'}, h('summary',{text:`ทักษะอื่นของ ${t.name} (${rest.length})`}), rest.map(pickRow))));
+      const free = h('input',{class:'def-skname',placeholder:'หรือพิมพ์ชื่อความสามารถ (NPC หรือความสามารถที่ไม่อยู่ในรายการ)',style:'flex:1;min-width:200px',maxlength:60});
+      box.append(...cbKids(h('div',{class:'row',style:'gap:6px;margin-top:8px'}, free, h('button',{class:'small def-usefree',onclick:()=>{ const nm = free.value.trim().slice(0, 60); if (!nm){ toast('พิมพ์ชื่อความสามารถก่อน'); return; } st.skill = nm; Table.post({kind: 'sys', who: '', text: `${t.name} ใช้ ${nm} ตอบโต้การโจมตีของ ${m.flow.a.name}`}); redraw(); },text:'ใช้ชื่อนี้'}))));
+      box.append(...cbKids(h('div',{class:'row',style:'justify-content:center;margin-top:10px'}, h('button',{class:'small ghost def-back',onclick:()=>{ st.view = 'main'; redraw(); },text:'← กลับไปเลือก Parry หรือ Evade'}))));
+      return;
+    }
+    box.append(...cbKids(h('div',{class:'row',style:'gap:8px;justify-content:center;flex-wrap:wrap'}, h('button',{class:'primary def-block',onclick:()=>go('block'),text:'ทักษะนี้กันการโจมตีได้ทั้งหมด'}), h('button',{class:'def-parry2',onclick:()=>go('parry'),text:`ทอย Parry ต่อ (${plan('parry').n}d6)`}), h('button',{class:'def-evade2',onclick:()=>go('evade'),text:'ทอย Evade ต่อ'}), h('button',{class:'ghost def-none2',onclick:()=>go('none'),text:'ยังโดนตามปกติ'}))));
+    box.append(...cbKids(h('div',{class:'row',style:'gap:10px;justify-content:center;margin-top:8px'}, cbCheck('Advantage จากทักษะนี้', st.advX, (v)=>{ st.advX = v; redraw(); }, {class:'fld chk def-advx'}), cbCheck('Disadvantage เพิ่ม', st.disX, (v)=>{ st.disX = v; redraw(); }, {class:'fld chk def-disx'}))));
+  },
+
+  /* ---------- 6. ตัดสินผลและลงความเสียหาย ---------- */
+  toughInit(t, c, tmax){ const cur = (c && c.current && c.current[toughKeyOf(t)]) || {}; t.tough = t.tough || {}; for (const [k] of DATA.meta.bodyParts) if (t.tough[k] == null){ const v = cur[k] != null ? cur[k] : tmax; if (v != null) t.tough[k] = v; } },
+  /* ลด Toughness ของหมาก n หน่วย คืนแถวบันทึก (PC แยกอวัยวะและทอยตารางบาดแผลเมื่อถึง 0 · NPC มีค่าเดียว) */
+  toughHit(t, c, tmax, pk, n, why){
+    if (!n) return null; const isPc = !!(t.charId && t.kind === 'pc');
+    if (isPc){ this.toughInit(t, c, tmax); if (t.tough[pk] == null) return null;
+      const before = t.tough[pk]; const after = Math.max(tmax != null ? toughFloor(tmax) : -99, before - n); t.tough[pk] = after; const row = {part: pk, n, before, after, why: why || ''};
+      if (after <= 0 && before > 0){ const wr = rollWound(pk); const wrow = wr.row || {name: 'ไม่พบตาราง', text: ''}; const cur = (c && c.current) || {}; const list = Array.isArray(t.wounds) ? t.wounds : woundsOf(cur, bodyOf(t)).map(woundLite);
+        t.wounds = [...list, {part: pk, die: wr.die, name: wrow.name, text: wrow.text, at: Date.now()}]; row.wound = {die: wr.die, name: wrow.name, text: String(wrow.text || '').slice(0, 300)}; }
+      if (tmax != null && after <= -tmax && before > -tmax) row.lost = (pk === 'head' || pk === 'torso') ? 'mortal' : 'lost';
+      return row; }
+    if (t.tgh == null && t.tghMax == null) return null;
+    const before = t.tgh != null ? t.tgh : t.tghMax; const after = Math.max(0, before - n); t.tgh = after; if (t.tghMax == null) t.tghMax = before;
+    return {part: null, n, before, after, why: why || ''};
+  },
+  toughLine(row){ if (!row) return ''; const where = row.part ? partLabel(row.part) : ''; let s = `Toughness${where ? ' ' + where : ''} ${row.before} → ${row.after}${row.why ? ' (' + row.why + ')' : ''}`;
+    if (row.wound) s += ` · บาดแผลฉกรรจ์ ทอย 1d6 ได้ ${row.wound.die}: ${row.wound.name}`; if (row.lost) s += row.lost === 'mortal' ? ' · ติดลบถึงค่าเต็ม ให้ผลเท่า Mortal Wound' : ' · ติดลบถึงค่าเต็ม ส่วนนี้ขาด'; if (!row.part && row.after === 0 && row.before > 0) s += ' · Toughness หมด ให้ GM ตัดสินบาดแผล'; return s; },
+  /* Perfect Strike เข้าส่วนที่สวมเกราะ: เกราะเสีย Durability 1 (ไฟล์แกน บทเศรษฐศาสตร์ ข้อ 3) · หลายชั้นหักชิ้นนอกสุดที่ยังไม่พัง
+   * แก้ได้เฉพาะชีทของเครื่องที่ตัดสินผล ชีทของคนอื่นและ NPC ได้เป็นข้อความเตือนแทน · เรียกหลังคิดความเสียหายของการโจมตีครั้งนั้นเสร็จแล้ว */
+  perfectDur(t, c, part){
+    if (typeof durArmorAt !== 'function') return '';
+    if (!(t.charId && t.kind === 'pc')){ const worn = this.isNpc(t) && Array.isArray(t.equip) && t.equip.some(e=>e && (ARMOR_SLOT_PARTS[e.slot] || []).includes(part) && parseArmor(e.effect)); return worn ? `Perfect Strike เข้า${partLabel(part)}ที่สวมเกราะ: ตามกฎเกราะชิ้นนั้นเสีย Durability 1 (เว็บยังไม่เก็บ Durability ของ NPC ให้ GM จดเอง)` : ''; }
+    if (!c || !c.equip || bodyOf(t) === 'B') return '';
+    const live = durArmorAt(c, part).filter(([sl, e])=>!durBroken(e)); if (!live.length) return '';
+    const e = live[0][1];
+    if (!Store.isMine(c) || !Store.chars.includes(c)) return `Perfect Strike เข้า${partLabel(part)}ที่สวมเกราะ: ${e.name} ควรเสีย Durability 1 ให้เจ้าของกดปุ่ม ⚒ PS ที่กล่อง Toughness ในชีท`;
+    const b4 = durState(e); durSet(e, b4.cur - 1); recalcParry(c); recalcArmor(c); Store.upsert(c); const af = durState(e);
+    return `Perfect Strike เข้า${partLabel(part)}: ${e.name} เสีย Durability 1 (${af.broken ? 'พัง คุณสมบัติพิเศษหาย ประสิทธิภาพเหลือครึ่ง' : `เหลือ ${af.cur}/${af.max}`})` + (live.length > 1 ? ' · สวมหลายชั้น ระบบหักชิ้นนอกสุด แก้ได้ในถุงย่ามของชีท' : '');
+  },
+  /* ลงความเสียหายให้หมาก: หักเกราะ (ถ้ารู้ตำแหน่ง) Temporary HP แล้ว HP · ใช้ทั้งผลโจมตีและความเสียหายจากสกิล */
+  damage(t, o){
+    const r = Table.room; const c = this.charOf(t); const d = this.derived(c); const isPc = !!(t.charId && t.kind === 'pc'); const lines = [];
+    const physical = !!o.physical; const part = o.part || null; let arm = 0, armored = false, armNote = '';
+    if (part && !o.noArmor){
+      const text = isPc ? (c ? ((bodyOf(t) === 'B' ? c.armor2 : c.armor) || {})[part] : '') : ((this.isNpc(t) && typeof npcArmor === 'function') ? npcArmor(t.equip)[part] : '');
+      const all = (this.isNpc(t) && typeof npcAllArmor === 'function') ? Math.max(0, npcAllArmor(t)) : 0; // All Armor และโบนัสขนาดของ NPC นับเป็นเกราะหลักทุกส่วน
+      const cut = cbArmorCut(text, o.dtype, physical, all); armored = cut.any; arm = cut.v;
+      const where = partLabel(part) + (o.viaTorso ? ' (ไม่มีตำแหน่งที่โดน ใช้เกราะลำตัว)' : '');
+      const how = cut.sec ? ` (เกราะหลัก ${cut.main} บวกเกราะรองกัน${cut.key === 'Sorceries Resistance' ? 'เวท' : ' ' + cut.key} ${cut.sec})` : '';
+      if (arm && o.ap){ const half = Math.floor(arm / 2); armNote = `เกราะ${where} ${arm}${how} เหลือ ${half} จาก Armor Penetrate`; arm = half; }
+      else if (arm) armNote = `เกราะ${where} ${arm}${how}`; else if (cut.known) armNote = `${where}ไม่มีเกราะ`;
+      if (!cut.known) armNote = (armNote ? armNote + ' · ' : '') + `ช่องเกราะของ${partLabel(part)}จดไว้นอกรูปแบบ A/B (ชนิด) ระบบจึงไม่ได้หักส่วนที่จดเอง`; }
+    else if (o.noArmor) armNote = 'ความเสียหายนี้ไม่หักเกราะ';
+    if (part && !o.noArmor && isPc && !c) armNote = 'ระบบอ่านชีทของเป้าไม่ได้ จึงไม่ได้หักเกราะให้ ใช้ช่อง ลดเพิ่ม แทนได้';
+    const raw = Math.max(0, cbInt(o.raw)); const resist = Math.max(0, cbInt(o.resist)); const after = Math.max(0, raw - arm - resist); const fin = after * (o.weak ? 2 : 1);
+    if (arm || resist || o.weak) lines.push(`${armNote || 'ไม่มีเกราะกัน'}${resist ? ` ลดเพิ่ม ${resist}` : ''}: ${raw} เหลือ ${after}${o.weak ? ` · แพ้ทาง ×2 = ${fin}` : ''}`);
+    else if (armNote) lines.push(armNote);
+    let hpDmg = fin, bleed = 0, temp = 0;
+    if (o.ripBleed && physical && !armored && fin > 0){ bleed = fin; hpDmg = 0; lines.push(`Rip: ${partLabel(part)}ไม่มีเกราะ เปลี่ยนความเสียหายเป็น Bleeding ${bleed}`); }
+    if (hpDmg > 0 && isPc && c && Store.isMine(c) && c.current && cbInt(c.current.temp) > 0){ temp = Math.min(cbInt(c.current.temp), hpDmg); c.current.temp = cbInt(c.current.temp) - temp; hpDmg -= temp; Store.upsert(c); lines.push(`Temporary HP รับไว้ ${temp}`); }
+    else if (hpDmg > 0 && isPc && c && c.current && cbInt(c.current.temp) > 0) lines.push(`เป้ามี Temporary HP ${cbInt(c.current.temp)} ที่ระบบหักให้ไม่ได้ (ชีทเป็นของผู้เล่นอีกคน) ให้เจ้าของปรับเอง`);
+    const hp0 = cbInt(t.hp); const hp1 = Math.max(0, hp0 - hpDmg); const tracked = t.kind !== 'asset' || t.hpMax > 0;
+    if (hpDmg > 0 && tracked){ tokenVitals(t, 'hp', hp1); lines.push(`HP ${hp0} → ${hp1}${hp1 === 0 ? ' (หมด)' : ''}`); }
+    else if (!bleed && !temp) lines.push(fin > 0 ? 'ไม่เสีย HP' : 'ความเสียหายเหลือ 0 ไม่เสีย HP');
+    const zeroed = arm > 0 && raw > 0 && (raw - arm) <= 0; // เกราะมาก่อน: นับทั้งความเสียหายกายภาพและความเสียหายเวท (คำเคาะ 15 พ.ย. 2026)
+    return {raw, arm, armored, after, fin, hpDmg, bleed, temp, hp0, hp1: (hpDmg > 0 && tracked) ? hp1 : hp0, zeroed, lines, tmax: d ? d.toughness : null, c, isPc};
+  },
+  resolve(m, def, o){
+    o = o || {}; const r = Table.room; if (!r || !this.isAttack(m)) return false;
+    if (this.resolved(m)){ toast('การโจมตีนี้ตัดสินผลไปแล้ว'); return false; }
+    const f = m.flow; const t = this.tok(f.t.id); const a = this.tok(f.a.id); if (!t){ toast('หมากเป้าหมายไม่อยู่บนบอร์ดแล้ว'); return false; }
+    const atk = m.atk || {}; const sum = m.roll.sum; const precise = !!atk.precise; const part = atk.part || hitPart(sum) || 'torso'; const w = f.w || {};
+    const hit = !def.success; const lines = []; const res = {lines, tough: [], conds: [], hp0: cbInt(t.hp), hp1: cbInt(t.hp), dmg: 0, bleed: 0}; const after = []; let perfect = false, headline = '';
+    const floats = [];
+    if (hit){
+      perfect = !!m.roll.double || !!f.perfect || !!(w.headshot && part === 'head' && !precise) || this.has(t, 'Incapacitated');
+      const base = cbRollExpr(w.dmg); const rolled = base.total; if (w.halve) base.total = Math.floor(base.total / 2); // อาวุธพังที่ความเสียหายเป็นเต๋า: ครึ่งหนึ่งของผลทอย ปัดลง
+      const statN = cbInt(w.stat); let raw = base.total + statN * (perfect ? 2 : 1) + cbInt(w.bonus);
+      const bits = [`${w.name} ${base.rolls.length ? base.text : base.total}${w.halve ? ` พังเหลือครึ่ง ${base.total}` : ''}`];
+      if (statN) bits.push(`${w.statKind === 'sight' ? 'Sight' : 'Might'} ${statN}${perfect ? ' ×2 จาก Perfect Strike' : ''}`); if (cbInt(w.bonus)) bits.push(`โบนัส ${signed(cbInt(w.bonus))}`);
+      if (w.impactX){ const x = cbRollExpr('1d3'); raw += x.total; bits.push(`Impact 1d3 ได้ ${x.total}`); }
+      raw = Math.max(0, Math.min(999, raw)); lines.push(`ความเสียหาย: ${bits.join(' + ')} = ${raw} ${w.dtype || ''}`.trim());
+      const dm = this.damage(t, {raw, dtype: w.dtype, physical: !!w.physical, part, ap: !!w.ap, ripBleed: !!w.ripBleed && !w.nonLethal, weak: !!o.weak, resist: o.resist});
+      lines.push(...dm.lines); res.dmg = dm.hpDmg; res.bleed = dm.bleed; res.hp0 = dm.hp0; res.hp1 = dm.hp1;
+      // Toughness: ลด 1 เว้นแต่เกราะหักความเสียหายกายภาพจนเหลือ 0 · Toughness Damage ที่อาวุธระบุเพิ่มยังเข้าตามปกติ
+      if (!w.nonLethal){
+        const extra = cbInt(w.toughX) + (perfect ? cbInt(w.toughPerfect) : 0); const n1 = (dm.zeroed ? 0 : 1) + extra;
+        if (dm.zeroed && !extra) lines.push(`เกราะรับความเสียหายไว้หมด Toughness ของ${partLabel(part)}ไม่ลด`);
+        const row = this.toughHit(t, dm.c, dm.tmax, part, n1, extra ? `รวม Toughness Damage เพิ่ม ${extra}` : ''); if (row){ res.tough.push(row); lines.push(this.toughLine(row)); }
+        else if (n1 && t.kind !== 'asset') lines.push(dm.isPc ? `ระบบอ่านค่า Toughness ของเป้าไม่ได้ ให้เจ้าของหรือ GM ลด Toughness ของ${partLabel(part)} ${n1} เอง` : `NPC ตัวนี้ยังไม่ได้ตั้งค่า Toughness (ตั้งได้ในหน้าต่างหมากที่เลือก) จึงไม่ได้ลด`);
+        for (let i = 0; i < Math.min(6, cbInt(w.sharpnel)); i++){ const sr = roll2d6('normal'); const pk = hitPart(sr.sum) || 'torso'; const rw = this.toughHit(t, dm.c, dm.tmax, pk, 1, `Sharpnel ทอยได้ ${sr.sum}`); if (rw){ res.tough.push(rw); lines.push(this.toughLine(rw)); } }
+        if (this.has(t, 'Sundered') && res.tough.length){ const sr = roll2d6('normal'); const pk = hitPart(sr.sum) || 'torso'; const rw = this.toughHit(t, dm.c, dm.tmax, pk, 1, `Sundered ทอยได้ ${sr.sum}`); if (rw){ res.tough.push(rw); lines.push(this.toughLine(rw)); } }
+        if (dm.bleed) after.push(()=>applyCond(t, r, 'Bleeding', {lv: dm.bleed, by: a || undefined}));
+        if (w.impale) after.push(()=>{ if (!this.has(t, 'Rooted')) applyCond(t, r, 'Rooted', {by: a || undefined}); });
+      } else lines.push('Non-Lethal: เสียเฉพาะ HP ไม่ลด Toughness และไม่ติดสภาวะทางกาย');
+      if (perfect && !w.nonLethal){ const dl = this.perfectDur(t, dm.c, part); if (dl) lines.push(dl); }
+      const stun = (t.conds || []).find(c=>c.id === 'Stunned'); if (stun && dm.hp1 < dm.hp0) after.push(()=>removeCond(t, r, stun, 'ถูกโจมตีจนเสีย HP'));
+      if (w.impact && !w.nonLethal) lines.push('Impact: ผู้โจมตีเลื่อนเป้าได้ 1 เมตร (ย้ายหมากเองถ้าต้องการ)');
+      t.vitalsAt = Date.now();
+      headline = (perfect ? 'Perfect Strike · ' : '') + 'โดน' + partLabel(part);
+      floats.push({x: t.x, y: t.y, text: dm.bleed ? `Bleeding ${dm.bleed}` : (dm.hpDmg > 0 ? `−${dm.hpDmg}` : '0'), cls: dm.hpDmg > 0 || dm.bleed ? 'dmg' : 'miss'});
+    } else {
+      headline = def.kind === 'skill' ? `กันด้วย ${def.skill || 'ทักษะ'}` : def.perfect ? (def.kind === 'parry' ? 'Perfect Parry' : 'Perfect Evade') : (def.kind === 'parry' ? 'Parry สำเร็จ' : 'หลบพ้น');
+      lines.push(def.text || headline);
+      if (def.perfect){ lines.push(`${t.name} ได้ 1 Swift Action ทันที`); if (r.enc && r.enc.active) t.pd = {round: r.enc.round}; }
+      if (def.kind === 'parry' && a && ['Large','Huge'].includes(a.size)) lines.push(`Parry การโจมตีจากศัตรูขนาด ${a.size}: GM ตัดสินว่ารุนแรงพอให้อาวุธที่ใช้ Parry เสีย Durability 1 ไหม`);
+      floats.push({x: t.x, y: t.y, text: def.perfect ? 'Perfect!' : (def.kind === 'parry' ? 'Parry' : def.kind === 'evade' ? 'Evade' : 'Block'), cls: 'miss'});
+    }
+    const sugg = hit && !w.nonLethal ? (w.conds || []).filter(x=>x && x.id && !(x.id === 'Bleeding' && res.bleed) && !(x.id === 'Rooted' && w.impale)).slice(0, 5) : [];
+    Table.save();
+    const from = a ? {x: a.x, y: a.y} : null;
+    Table.post({kind: 'clash', fixedId: 'clash-' + m.id, of: m.id, who: f.a.name, text: `${f.a.name} โจมตี ${t.name}: ${headline}`, gmOnly: !!m.gmOnly, a: f.a, t: f.t, w: {name: w.name, dtype: w.dtype}, mode: f.mode,
+      atkRoll: cbRollOf(m.roll), cv: atk.cv != null ? atk.cv : sum, part, perfect, hit, headline, def: {kind: def.kind, roll: def.roll || null, mod: def.mod || 0, total: def.total != null ? def.total : null, text: def.text || '', cls: def.cls || '', perfect: !!def.perfect, label: def.label || '', skill: def.skill || null, mode: def.mode || 'normal'}, res, sugg,
+      fx: hit ? {k: f.mode === 'melee' ? 'slash' : 'proj', from, to: {x: t.x, y: t.y}, hue: fxHueOfDamage(w.dtype), floats} : {k: 'shield', from, to: {x: t.x, y: t.y}, hue: 'qi', floats}});
+    for (const fn of after){ try { fn(); } catch(e){ console.warn('combat after', e); } }
+    return true;
+  },
+
+  /* ---------- 7. การ์ดในแชต ---------- */
+  chatEl(m, time){
+    if (m.kind === 'clash') return this.clashCard(m, time);
+    if (m.kind === 'pick' && m.flow) return this.pickCard(m, time);
+    if (m.kind === 'skill' && typeof SkillUse !== 'undefined') return SkillUse.card(m, time);
+    return null;
+  },
+  /* แถวสถานะใต้ข้อความทอยโจมตีที่มาจากหน้าต่างโจมตี */
+  flowRow(m){
+    if (!this.isAttack(m)) return null; const f = m.flow; const done = this.resolved(m); const old = Date.now() - (m.ts || 0) > CB_PENDING_MS;
+    const row = h('div',{class:'row flowrow',style:'gap:6px;margin-top:3px;align-items:center'}, h('span',{class:'dim',style:'font-size:12px',text:`เป้า: ${f.t.name} · ${f.w.name} · ${f.mode === 'melee' ? 'ประชิด' : f.mode === 'thrown' ? 'ขว้าง' : 'ยิง'} ${f.m} ม.`}));
+    if (done) row.append(...cbKids(h('span',{class:'dim',style:'font-size:12px',text:'ตัดสินแล้ว'})));
+    else if (old) row.append(...cbKids(h('span',{class:'dim',style:'font-size:12px',text:'ค้างนานเกินไป ไม่ได้ตัดสิน'})));
+    else if (this.canRespond(m)) row.append(...cbKids(h('button',{class:'small primary flow-def',dataset:{of:m.id},onclick:()=>{ this.snooze.delete(m.id); const t = this.tok(f.t.id); if (t && t.kind === 'asset') this.autoHit(m); else this.openDefense(m); },text: this.primary(m) ? '🛡 เลือกวิธีป้องกัน' : '🛡 ป้องกันแทน'})));
+    else row.append(...cbKids(h('span',{class:'dim',style:'font-size:12px',text:`รอ ${f.t.name} ป้องกัน`})));
+    return row;
+  },
+  pickCard(m, time){
+    const f = m.flow; const done = Table.pickDone(m); const dice = m.dice || []; const t = this.tok(f.t.id); const can = !done && (Table.localMode || Table.isGM() || (t && ownsTok(t)));
+    return h('div',{class:'e pickmsg' + (done ? ' done' : '')}, h('div',{class:'row',style:'gap:6px'}, chatWho(m), h('b',{text:m.text || 'Attack Roll'}), tag('Disadvantage', 'neg'), h('span',{class:'dim',style:'font-size:11px;margin-left:auto',text:time})),
+      h('div',{class:'row',style:'gap:8px;margin-top:2px;align-items:center'}, h('span',{class:'inline-roll'}, dice.map(v=>h('span',{class:'die',text:v}))), m.cvMod ? h('span',{class:'dim num',text:'ตัวปรับ CV ' + signed(m.cvMod)}) : null,
+        done ? h('span',{class:'dim',text:'เลือกแล้ว ดูผลในข้อความถัดไป'}) : (can ? h('button',{class:'small primary pickbtn flow-pick',onclick:()=>Table.resolvePick(m),text:`เลือก 2 ลูกให้การโจมตีใส่ ${f.t.name}`}) : h('span',{class:'dim',text:`รอ ${f.t.name} หรือ GM เลือก 2 ลูก`}))));
+  },
+  clashCard(m, time){
+    const def = m.def || {}; const res = m.res || {}; const a = m.atkRoll || {};
+    const el = h('div',{class:'e clashmsg ' + (m.hit ? 'hit' : 'blocked')}, h('div',{class:'row',style:'gap:6px'}, h('b',{text:`⚔ ${(m.a && m.a.name) || ''} → ${(m.t && m.t.name) || ''}`}), h('span',{class:'dim',text:(m.w && m.w.name) || ''}), m.gmOnly ? h('span',{class:'gm',text:'ลับ'}) : null, h('span',{class:'dim',style:'font-size:11px;margin-left:auto',text:time})),
+      h('div',{class:'row',style:'gap:8px;margin-top:2px;align-items:center'}, renderDice({dice: a.dice || [], keptIdx: a.keptIdx || []}), h('span',{class:'num dim',text:`${a.sum}${m.cv !== a.sum ? ' → CV ' + m.cv : ''} ${partLabel(m.part)}`}), h('span',{class:'dim',text:'ปะทะ'}),
+        def.roll ? [renderDice({dice: def.roll.dice || [], keptIdx: def.roll.keptIdx || []}), h('span',{class:'num dim',text:`${def.label || ''} ${def.total}`})] : h('span',{class:'dim',text: def.kind === 'skill' ? (def.skill || 'ทักษะ') : 'ไม่ป้องกัน'}),
+        h('b',{class: m.hit ? 'res-fail' : (def.perfect ? 'res-crit' : 'res-full'),text:m.headline || ''})));
+    const body = h('div',{class:'clash-lines'}); const rows = [];
+    if (def.roll && def.text) rows.push(h('div',{class:'dim',text:String(def.text).slice(0, 300)})); for (const ln of (Array.isArray(res.lines) ? res.lines : []).slice(0, 14)) rows.push(h('div',{text:String(ln).slice(0, 400)}));
+    for (const row of (Array.isArray(res.tough) ? res.tough : []).slice(0, 8)) if (row && row.wound && row.wound.text) rows.push(h('div',{class:'desc',style:'font-size:11.5px'}, T(`${row.part ? partLabel(row.part) : ''}: ${String(row.wound.text).slice(0, 300)}`)));
+    body.append(...cbKids(rows.slice(0, 15)));
+    el.append(...cbKids(body));
+    const t = m.t ? this.tok(m.t.id) : null; const src = m.a ? this.tok(m.a.id) : null;
+    if (t && Array.isArray(m.sugg) && m.sugg.length && this.controls(t)){
+      const row = h('div',{class:'row sugg',style:'gap:6px;margin-top:4px;align-items:center'}, h('span',{class:'dim',style:'font-size:12px',text:'เอฟเฟกต์ของอาวุธเอ่ยถึงสภาวะ ใส่ให้เมื่อเข้าเงื่อนไข:'}));
+      for (const sg of m.sugg.slice(0, 5)){ const key = m.id + '|' + sg.id; const b = h('button',{class:'small ghost sugg-btn',dataset:{cond:sg.id},disabled: this.done.has(key),onclick:()=>{ if (this.done.has(key)) return; this.done.add(key); b.disabled = true; if (!applyCond(t, Table.room, sg.id, {lv: sg.lv || 1, by: src || undefined})){ this.done.delete(key); b.disabled = false; } },text:`${condIcon(sg.id)} ${sg.id}${sg.lv ? ' ' + sg.lv : ''}`}); row.append(...cbKids(b)); }
+      el.append(...cbKids(row));
+    }
+    return el;
+  },
+
+  /* ---------- 8. ส่วนที่ฝังในหน้าต่างหมากที่เลือก ---------- */
+  /* ปุ่มโจมตีในหน้าต่างหมากที่เลือก (เรียกจาก tokBody ของ table.js) · ค่าต่อสู้ของ NPC ตั้งที่แผงหมากเดิม: ค่าพลังดัดแปลง Range อาวุธและชุดเกราะ สแตตบล็อก */
+  tokPanel(t, r, gm){
+    const out = []; if (!t || t.inside) return out; const mine = this.myTokens(r);
+    const row = h('div',{class:'row cb-row',style:'gap:6px;margin-top:8px'});
+    if (t.kind !== 'asset' && this.controls(t)) row.append(...cbKids(h('button',{class:'small primary cb-attack',title:'เปิดหน้าต่างโจมตี เลือกเป้าหมาย อาวุธ และแบบการโจมตี',onclick:()=>this.openAttack(t.id, null),text:'⚔ โจมตี'})));
+    const others = mine.filter(x=>x.id !== t.id);
+    if (others.length && (t.kind !== 'asset' || t.hpMax > 0) && (!this.controls(t) || gm)) row.append(...cbKids(h('button',{class:'small cb-target',title:'ใช้หมากของคุณโจมตีหมากนี้',onclick:()=>{ const sel = others.find(x=>x.kind === 'pc' && ownsTok(x)) || others[0]; this.openAttack(sel.id, t.id); },text:'🎯 โจมตีหมากนี้'})));
+    if (row.children.length) out.push(row);
+    return out;
+  },
+  /* เรียกหลังโต๊ะวาดเสร็จทุกครั้ง: ปรับหน้าต่างโจมตีตามตำแหน่งหมากล่าสุด และเริ่มนับข้อความในห้องที่ไม่มีการฟังฐานข้อมูล */
+  afterRender(){
+    if (!Table.room){ this.closeComposer(); return; }
+    if (!this.ready && Table.localMode) this.onChat();
+    if (this.comp){ if (!this.tok(this.comp.a)){ this.closeComposer(); } else { if (this.comp.t && !this.tok(this.comp.t)) this.comp.t = null; const ae = document.activeElement; const typing = !!(ae && ae.closest && ae.closest('#atkc') && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)); if (!typing) this.drawComposer(); else this.drawDyn(); } }
+    if (typeof SkillUse !== 'undefined') SkillUse.afterRender();
+  },
+};
+
+/* ===== v1.28 (Non สั่ง 13 พ.ย. 2026 ต่อบนฐาน v1.27 เมื่อ 16 พ.ย. 2026): ลาก Skill และ Sorcery ลงใช้ในโต๊ะเล่น =====
+ * แถบสกิลอยู่ใต้แผนที่ ลากป้ายสกิลไปปล่อยบนหมากหรือช่อง (หรือคลิกแล้วเลือกเป้า) → หน้าต่างยืนยัน → หักค่าร่าย ประกาศในแชต และเล่นเอฟเฟกต์ให้ทุกคนในห้องเห็น
+ * ระบบอ่านกลไกที่เขียนเป็นแบบแผนในข้อความของสกิล (Saving Throw กับ DC · Clash / Challenge · ความเสียหาย · ฟื้นฟู · สภาวะ · Melee / Range Attack) แล้วทำเป็นปุ่มในการ์ดของแชต
+ * กลไกที่ข้อความเขียนเป็นเงื่อนไขเฉพาะจะยังเป็นข้อความให้ GM ตัดสิน · ข้อความที่มาจากแชตถือว่าไม่น่าไว้ใจ ทุกค่าถูกตรวจชนิดและความยาวก่อนใช้
+ * NPC ที่มีสแตตบล็อก (v1.27) ได้ป้ายจากการโจมตี Reaction และพฤติกรรมของมันเอง ข้อความของสแตตบล็อกเป็นของ GM จึงไม่ลงแชตเว้นแต่ GM ติ๊กให้แสดง
+ * ความเสียหายของทักษะที่ไม่มีตำแหน่งที่โดนหักด้วยเกราะลำตัว ความเสียหายจาก Stack ไม่หักเกราะ (Non เคาะ 15 พ.ย. 2026) */
+
+/* ---------- ตัวอ่านข้อความของสกิล ---------- */
+function suSides(){ if (!suSides.list) suSides.list = DATA.meta.personality.flatMap(ax=>[ax.left, ax.right]); return suSides.list; }
+function suStatKnown(name){ return STATS.includes(name) || suSides().includes(name) || ['Sight','Might','Reflex'].includes(name); }
+function suStatMod(name, c, d, t){
+  name = String(name || '').trim();
+  if (c && d){
+    if (STATS.includes(name)) return d.mod[name];
+    if (name === 'Sight') return d.sight; if (name === 'Might') return d.might; if (name === 'Reflex') return d.reflex;
+    if (suSides().includes(name)){ try { return persMod(c, name); } catch(e){ return null; } }
+    return null;
+  }
+  // NPC ที่ไม่มีชีท: ค่าพลังดัดแปลงบนหมาก (ไม่ได้ตั้ง = 0) และค่าพลังรองจากสูตรเดียวกับผู้เล่น · ค่าบุคลิกภาพไม่มีให้อ่าน
+  const nd = (t && typeof Combat !== 'undefined') ? Combat.npcDer(t) : null; if (!nd) return null;
+  if (STATS.includes(name)) return cbInt((t.mods || {})[name]);
+  if (name === 'Sight') return nd.sight; if (name === 'Might') return nd.might; if (name === 'Reflex') return nd.reflex;
+  return null;
+}
+/* DC ที่เขียนเป็นสูตร เช่น "8 + Order Mod." · "6 + Logic Mod. ของคุณ" · "10" · "2d6 + Chaos" คิดจากชีทของผู้ใช้ทักษะ อ่านไม่ออกคืน null */
+function suDcValue(txt, c, d, t){
+  const s = String(txt || '').replace(/ของคุณ|ของผู้ร่าย[^+]*/g, '').trim(); let m = /^(\d{1,2})$/.exec(s); if (m) return {value: +m[1], text: m[1]};
+  m = /^(?:(\d+d\d+|\d{1,2})\s*\+\s*)?([A-Za-z]+)(?:\s*Mod\.?)?$/.exec(s); if (!m) return null;
+  const mod = suStatMod(m[2], c, d, t); if (mod == null) return null; let base = 0, btxt = '';
+  if (m[1]){ if (/d/.test(m[1])){ const r = cbRollExpr(m[1]); base = r.total; btxt = r.text; } else { base = +m[1]; btxt = m[1]; } }
+  return {value: base + mod, text: `${btxt ? btxt + ' ' : ''}${mod < 0 ? '-' : '+'}${Math.abs(mod)} ${m[2]}`};
+}
+function suParseCost(cost){
+  const raw = String(cost || '').trim(); const parts = []; const rx = /(\d+d\d+(?:\s*\+\s*\d+)?|\d+)\s*(MP|Sanity|HP)/g; let m;
+  while ((m = rx.exec(raw)) && parts.length < 4) parts.push({expr: m[1].replace(/\s+/g, ''), res: m[2] === 'MP' ? 'mp' : m[2] === 'HP' ? 'hp' : 'san'});
+  return {raw, parts, alt: parts.length > 1 && /หรือ|\/|แต่/.test(raw)};
+}
+const SU_RES = {mp: 'MP', san: 'Sanity', hp: 'HP'};
+function suParse(sk){
+  if (!sk) return {saves: [], clashes: [], checks: [], dmg: [], heal: [], conds: [], tough: null, attack: null, rangeM: null, area: null, passive: false, reaction: false, half: false};
+  const eff = String(sk.effect || '').replace(/\\/g, ''); const type = String(sk.type || ''); let x;
+  const ck = sk.npc ? null : sk.nameEn; if (!suParse.cache) suParse.cache = new Map();
+  if (ck){ const hit = suParse.cache.get(ck); if (hit && hit.eff === eff && hit.type === type) return hit.m; }
+  const m = {saves: [], clashes: [], checks: [], dmg: [], heal: [], conds: [], tough: null, attack: null, rangeM: null, area: null, passive: /Passive/i.test(type), reaction: /Reaction/i.test(type), half: /สำเร็จ[^.]{0,40}ครึ่ง/.test(eff)};
+  const rxS = /([A-Za-z][A-Za-z&' ]*?) Saving Throw \(DC ?=? ?([^)]*)\)/g; while ((x = rxS.exec(eff)) && m.saves.length < 3) m.saves.push({stat: x[1].trim(), dc: x[2].trim()});
+  const rxC = /([A-Za-z][A-Za-z&']*) (Clash|Challenge) ([A-Za-z][A-Za-z&']*)/g; while ((x = rxC.exec(eff)) && m.clashes.length < 2) m.clashes.push({a: x[1], kind: x[2], b: x[3]});
+  const rxK = /([A-Za-z][A-Za-z&' ()]*?) Check \(DC ?=? ?([^)]*)\)/g; while ((x = rxK.exec(eff)) && m.checks.length < 3) m.checks.push({stat: x[1].trim(), dc: x[2].trim()});
+  const rxD = /(\d+d\d+|\d+)\s*(?:\+\s*([A-Za-z]+)(?: Mod\.?)?\s*)?([A-Z][A-Za-z]+) (?:Damage|DMG)|(\d+d\d+|\d+)\s*PDMG/g;
+  while ((x = rxD.exec(eff)) && m.dmg.length < 4){ if (x[4]){ m.dmg.push({expr: x[4], mod: null, type: 'Physical'}); continue; } if (/^Tough/.test(x[3])){ if (!m.tough) m.tough = x[1]; continue; } if (x[3] === 'All') continue; m.dmg.push({expr: x[1], mod: x[2] || null, type: x[3] === 'Sanity' ? 'Sanity' : cbNormType(x[3])}); }
+  const rxH = /ฟื้นฟู\s*(?:(HP|MP|Sanity)\s*)?(\d+d\d+(?:\s*\+\s*\d+)?|\d+)\s*(HP|MP|Sanity)?/g; while ((x = rxH.exec(eff)) && m.heal.length < 2){ const res = x[1] || x[3]; if (!res) continue; m.heal.push({expr: x[2].replace(/\s+/g, ''), res: res === 'MP' ? 'mp' : res === 'HP' ? 'hp' : 'san'}); }
+  const am = /(?:^|ทำการ\s*|ทำ\s*|ด้วยการ\s*)(Melee|Rang(?:e|ed)) Attack/.exec(eff); if (am) m.attack = am[1] === 'Melee' ? 'melee' : 'ranged';
+  m.conds = cbFindConds(eff).slice(0, 5);
+  const rg = /ระยะ(?:ไม่เกิน)?\s*(\d+)\s*เมตร/.exec(eff); if (rg) m.rangeM = +rg[1];
+  const ar = /รัศมี\s*(\d+)\s*เมตร/.exec(eff); const sq = /(\d+)\s*x\s*(\d+)\s*เมตร/.exec(eff);
+  if (ar) m.area = {r: +ar[1]}; else if (sq) m.area = {sq: +sq[1]}; else if (/รูปกรวย|\bCone\b/.test(eff)) m.area = {cone: true};
+  if (ck) suParse.cache.set(ck, {eff, type, m}); return m;
+}
+/* พื้นที่ของสกิลคิดเป็นจำนวนช่องจากจุดกลางออกไปแต่ละด้าน (หนึ่งช่อง 2 เมตร) */
+function suAreaCells(area){ if (!area) return 0; if (area.r) return Math.max(1, Math.min(8, Math.floor(area.r / CELL_M))); if (area.sq) return Math.max(0, Math.min(8, Math.floor(area.sq / CELL_M / 2))); if (area.cone) return 1; return 0; }
+function suFxKind(mech, self, cells){
+  if (mech.heal.length) return 'heal'; if (mech.attack === 'melee') return 'slash'; if (cells > 0) return 'zone';
+  if (mech.reaction && !mech.dmg.length) return 'shield'; if (mech.passive || self) return 'aura';
+  return 'proj';
+}
+const SU_FX = [['proj','ลูกพลังพุ่งใส่เป้า'],['slash','รอยฟัน'],['burst','ระเบิด'],['zone','พื้นที่'],['aura','ออร่ารอบตัว'],['heal','ฟื้นฟู'],['shield','โล่']];
+const SU_HUES = [['fire','ไฟ'],['plasma','พลาสมา'],['electric','สายฟ้า'],['wind','ลม'],['earth','ดินและโลหะ'],['water','น้ำ'],['frost','น้ำแข็ง'],['nature','พฤกษา'],['chaos','เคออส'],['blood','เลือด'],['necrotic','ความตาย'],['poison','พิษ'],['ritual','ทอง'],['steel','เหล็ก'],['qi','ปราณ']];
+function suClean(s, n){ return String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n); }
+
+const SkillUse = {
+  tokId: null, q: '', collapsed: null, pick: false, st: null, modes: {},
+  reset(){ this.pick = false; this.st = null; this.modes = {}; this.hint(null); },
+  isCollapsed(){ if (this.collapsed == null){ try { this.collapsed = localStorage.getItem('kirana.skillbar') === '1'; } catch(e){ this.collapsed = false; } } return this.collapsed; },
+  setCollapsed(v){ this.collapsed = !!v; try { localStorage.setItem('kirana.skillbar', v ? '1' : '0'); } catch(e){} },
+  /* ความสามารถในสแตตบล็อกของ NPC ทำเป็นป้ายแบบเดียวกับทักษะ: การโจมตี (ลากใส่เป้า = เปิดหน้าต่างโจมตีด้วยท่านั้น) · Reaction · พฤติกรรมและความสามารถพิเศษ */
+  npcSkills(t){
+    if (typeof Combat === 'undefined' || !Combat.isNpc(t)) return []; const out = [];
+    const add = (list, kind, type, max)=>{ (Array.isArray(list) ? list : []).slice(0, max).forEach((x, i)=>{ if (!x || typeof x !== 'object') return; const full = suClean(x.name, 80) || (kind === 'a' ? 'การโจมตี' : kind === 'r' ? 'Reaction' : 'ความสามารถ'); const sp = (typeof itemNameSplit === 'function') ? itemNameSplit(full) : [full, ''];
+      out.push({npc: true, npcKind: kind, key: `npc:${kind}:${i}`, full, nameTh: sp[0] || full, nameEn: sp[1] || sp[0] || full, type, category: 'NPC', cost: '', effect: String(x.text || '').slice(0, 2000)}); }); };
+    add(t.attacks, 'a', 'การโจมตี', 12); add(t.reactions, 'r', 'Reaction', 8); add(t.behaviors, 'b', 'พฤติกรรม', 16);
+    return out;
+  },
+  skillByKey(t, key){ if (key === '*' || key == null) return null; if (String(key).indexOf('npc:') === 0) return this.npcSkills(t).find(x=>x.key === key) || null; return Object.prototype.hasOwnProperty.call(SKILL_BY_NAME, key) ? SKILL_BY_NAME[key] : null; },
+  nameOf(sk){ return !sk ? '' : (sk.npc ? sk.full : skLabel(sk)); },
+  skillsOf(t){
+    const npc = this.npcSkills(t); if (npc.length) return npc;
+    const c = Combat.charOf(t); if (!c || (c.shareMode === 'min' && !Store.isMine(c))) return [];
+    let names = []; try { names = allSkills(c); } catch(e){ names = []; }
+    const list = names.map(n=>SKILL_BY_NAME[n]).filter(Boolean); return [...list.filter(sk=>!/Passive/i.test(sk.type || '')), ...list.filter(sk=>/Passive/i.test(sk.type || ''))];
+  },
+  /* ---------- แถบสกิลใต้แผนที่ ---------- */
+  bar(r, gm){
+    const list = Combat.myTokens(r); if (!list.length) return null;
+    const sel = list.find(x=>x.id === Table.sel); let t = sel || list.find(x=>x.id === this.tokId) || list.find(x=>x.kind === 'pc' && ownsTok(x)) || list[0]; this.tokId = t.id;
+    const sks = this.skillsOf(t); const col = this.isCollapsed();
+    const box = h('div',{class:'card skillbar' + (col ? ' collapsed' : '')});
+    const who = list.length > 1 ? cbSelect(list.map(x=>[x.id, x.name]), t.id, (v)=>{ this.tokId = v; Table.sel = v; renderTable(); }, {class:'skb-who',title:'หมากที่จะใช้ทักษะ'}) : h('b',{class:'skb-who',text:t.name});
+    const search = sks.length > 10 ? h('input',{class:'skb-q',placeholder:'ค้นหาทักษะ',style:'width:150px'}) : null;
+    if (search){ search.value = this.q; search.oninput = ()=>{ this.q = search.value; drawChips(); }; }
+    box.append(...cbKids(h('h3',{class:'row',style:'justify-content:space-between;gap:8px'}, h('span',{text:'⚡ สกิลและเวท'}), h('span',{class:'row',style:'gap:6px'}, who, col ? null : search, h('button',{class:'small ghost skb-toggle',title: col ? 'กางแถบสกิล' : 'พับแถบสกิล',onclick:()=>{ this.setCollapsed(!col); renderTable(); },text: col ? '▸ กาง' : '▾ พับ'})))));
+    if (col) return box;
+    box.append(...cbKids(h('p',{class:'dim skb-hint',text:'ลากป้ายไปปล่อยบนหมากหรือช่องบนแผนที่ หรือคลิกป้ายแล้วเลือกเป้า ทุกคนในห้องเห็นเอฟเฟกต์'})));
+    const chips = h('div',{class:'skchips'}); box.append(...cbKids(chips));
+    const drawChips = ()=>{ clear(chips); const k = this.q.trim().toLowerCase();
+      const shown = sks.filter(sk=>!k || [sk.nameTh, sk.nameEn, sk.type, sk.subcategory, sk.npc ? sk.effect : ''].filter(Boolean).some(x=>String(x).toLowerCase().includes(k)));
+      for (const sk of shown) chips.append(...cbKids(this.chip(t, sk)));
+      chips.append(...cbKids(this.chip(t, null)));
+      if (!sks.length) chips.append(...cbKids(h('span',{class:'dim',style:'font-size:12px',text: t.charId ? 'ตัวละครนี้ยังไม่มีทักษะ หรือเจ้าของแชร์เฉพาะค่าหลัก' : 'หมากนี้ยังไม่มีการโจมตี Reaction หรือพฤติกรรมในสแตตบล็อก เพิ่มได้ที่แผงหมาก หรือใช้ป้าย "ความสามารถอื่น" แล้วพิมพ์ชื่อกับผลเอง'})));
+      else if (!shown.length) chips.append(...cbKids(h('span',{class:'dim',style:'font-size:12px',text:`ไม่พบทักษะที่ตรงกับ "${this.q.trim()}"`}))); };
+    drawChips();
+    return box;
+  },
+  chip(t, sk){
+    const mech = suParse(sk); const hue = sk ? fxHueOfSkill(sk) : 'ritual'; const key = !sk ? '*' : (sk.npc ? sk.key : sk.nameEn);
+    const ico = !sk ? '＋' : sk.npc ? (sk.npcKind === 'a' ? '⚔' : sk.npcKind === 'r' ? '↺' : '◈') : mech.passive ? '◈' : mech.reaction ? '↺' : sk.category === 'Sorcery' ? '✦' : '⚔'; const name = sk ? skTh(sk) : 'ความสามารถอื่น';
+    const b = h('button',{class:'skchip' + (mech.passive ? ' passive' : '') + (sk ? '' : ' custom') + (sk && sk.npc ? ' npc' : ''),dataset:{sk:key},title: sk ? `${this.nameOf(sk)}\n${sk.type || ''}${sk.cost ? ' · ' + sk.cost : ''}\n${String(sk.effect || '').slice(0, 240)}` : 'พิมพ์ชื่อและผลของความสามารถเอง ใช้กับ NPC หรือความสามารถที่ไม่อยู่ในรายการ'},
+      h('i',{class:'skdot',text:ico}), h('span',{class:'sknm',text:name}), (sk && sk.cost) ? h('span',{class:'skcost',text: sk.cost.length > 14 ? sk.cost.slice(0, 13) + '…' : sk.cost}) : null);
+    b.style.setProperty('--fx', FX_HUE[hue] || FX_HUE.ritual);
+    b.addEventListener('pointerdown', (e)=>this.startDrag(e, t.id, key, name));
+    b.addEventListener('click', (e)=>{ if (e.detail === 0) this.use(t.id, key, null); }); // คีย์บอร์ด: Enter หรือ Space บนป้าย
+    return b;
+  },
+  /* ลากด้วย pointer: ฟังที่ window การวาดโต๊ะใหม่กลางทางจึงไม่ทำให้การลากหลุด · ไม่ขยับ = คลิก */
+  startDrag(ev, tokId, key, label){
+    if (ev.button != null && ev.button !== 0) return; ev.preventDefault();
+    const sx = ev.clientX, sy = ev.clientY; let ghost = null, moved = false, last = null, px = sx, py = sy, timer = null;
+    const gridEl = ()=>document.querySelector('#v-table .gridmap');
+    const mark = ()=>{ const g = gridEl(); const cell = g ? cellAtPoint(g, px, py) : null; if (cell !== last){ if (last) last.classList.remove('drop'); if (cell) cell.classList.add('drop'); last = cell; } };
+    const move = (e)=>{ px = e.clientX; py = e.clientY; if (!moved && Math.hypot(px - sx, py - sy) < 6) return;
+      if (!moved){ moved = true; ghost = h('div',{class:'skghost',text:'⚡ ' + label}); document.body.append(...cbKids(ghost)); document.body.classList.add('sk-dragging');
+        // ลากไปใกล้ขอบบนหรือล่างของจอ หน้าเลื่อนตามเอง จะได้ลากถึงหมากที่อยู่นอกจอ
+        timer = setInterval(()=>{ const edge = 64; if (py < edge) window.scrollBy(0, -16); else if (py > window.innerHeight - edge) window.scrollBy(0, 16); else return; mark(); }, 30); }
+      const z = uiZoom(); ghost.style.left = (px / z + 12) + 'px'; ghost.style.top = (py / z + 12) + 'px'; mark(); };
+    const up = (e)=>{ window.removeEventListener('pointermove', move, true); window.removeEventListener('pointerup', up, true); window.removeEventListener('pointercancel', up, true);
+      if (timer) clearInterval(timer); document.body.classList.remove('sk-dragging'); if (ghost) ghost.remove(); if (last) last.classList.remove('drop');
+      if (e.type === 'pointercancel') return; if (!moved){ this.use(tokId, key, null); return; }
+      const g = gridEl(); const cell = g ? cellAtPoint(g, e.clientX, e.clientY) : null; if (!cell){ toast('ลากไปปล่อยบนหมากหรือช่องบนแผนที่'); return; }
+      this.use(tokId, key, {x: +cell.dataset.x, y: +cell.dataset.y}); };
+    window.addEventListener('pointermove', move, true); window.addEventListener('pointerup', up, true); window.addEventListener('pointercancel', up, true);
+  },
+  /* ---------- หน้าต่างยืนยันการใช้ ---------- */
+  use(tokId, key, cell, extra){
+    const r = Table.room; const t = Combat.tok(tokId); if (!r || !t || !Combat.controls(t)){ toast('ใช้ทักษะของหมากนี้ไม่ได้'); return; }
+    const sk = this.skillByKey(t, key); if (key !== '*' && !sk){ toast('ไม่พบทักษะนี้ในข้อมูลของเว็บ'); return; }
+    if (sk && sk.npc && sk.npcKind === 'a' && !cbParseNpcAttack(sk.full, sk.effect).save){ // การโจมตีในสแตตบล็อกที่ทอย Attack Roll: เปิดหน้าต่างโจมตีด้วยท่านี้ เป้าคือหมากในช่องที่ปล่อย
+      const at = cell ? Combat.visible(r).find(x=>x.x === cell.x && x.y === cell.y && x.id !== t.id && (x.kind !== 'asset' || x.hpMax > 0)) : null; Combat.openAttack(t.id, at ? at.id : null, {pick: sk.full}); return; }
+    const mech = suParse(sk); const cost = suParseCost(sk ? sk.cost : '');
+    const st = {tokId, key, sk, mech, cost, cell: null, targets: [], alt: 0, noPay: false, reveal: false, amt: cost.parts.map(p=>p.expr), extra: extra || null, custom: {name: '', text: '', fx: 'proj', hue: 'ritual', dmg: '', dtype: 'Fire', save: '', dc: ''}};
+    this.st = st; this.pick = false; this.aim(st, cell); this.drawPanel();
+  },
+  /* ตั้งเป้าจากช่องที่ปล่อย: สกิลที่มีพื้นที่เก็บทุกหมากในพื้นที่ (ไม่รวมผู้ใช้) สกิลอื่นเก็บหมากที่อยู่ในช่องนั้น */
+  aim(st, cell){
+    const r = Table.room; const t = Combat.tok(st.tokId); st.cell = cell || null; st.targets = []; if (!cell || !r || !t) return;
+    const vis = Combat.visible(r); const at = vis.find(x=>x.x === cell.x && x.y === cell.y); const n = suAreaCells(st.mech.area);
+    if (n > 0) st.targets = vis.filter(x=>x.kind !== 'asset' && x.id !== t.id && cellDist(x, cell) <= n).map(x=>x.id).slice(0, 12);
+    else if (at) st.targets = [at.id];
+  },
+  label(st){ return st.sk ? this.nameOf(st.sk) : (suClean(st.custom.name, 60) || 'ความสามารถ'); },
+  hint(text){
+    let el = document.getElementById('pickhint'); if (!text){ if (el) el.remove(); document.body.classList.remove('cb-picking'); if (Combat.comp) document.body.classList.add('cb-picking'); return; }
+    if (!el){ el = h('div',{id:'pickhint',class:'pickhint',role:'status'}); document.body.append(...cbKids(el)); } clear(el);
+    el.append(...cbKids(h('span',{text:text}), h('button',{class:'small ghost',onclick:()=>{ this.pick = false; this.hint(null); if (this.st) this.drawPanel(); },text:'ยกเลิก'}))); document.body.classList.add('cb-picking');
+  },
+  onTokenClick(t){ if (!this.pick || !this.st) return false; this.pick = false; this.hint(null); this.aim(this.st, {x: t.x, y: t.y}); this.drawPanel(); return true; },
+  onCellClick(x, y){ if (!this.pick || !this.st) return false; this.pick = false; this.hint(null); this.aim(this.st, {x, y}); this.drawPanel(); return true; },
+  cancel(){ const st = this.st; this.st = null; this.pick = false; this.hint(null); modal(null); if (st && st.extra && st.extra.cancel) st.extra.cancel(); },
+  drawPanel(){
+    const st = this.st; const r = Table.room; if (!st || !r) return; const t = Combat.tok(st.tokId); if (!t){ this.cancel(); return; }
+    const c = Combat.charOf(t); const d = Combat.derived(c); const sk = st.sk; const mech = st.mech; const redraw = ()=>this.drawPanel(); const gm = Table.isGM() || Table.localMode;
+    const box = h('div',{class:'subox'});
+    box.append(...cbKids(h('h3',{text:'⚡ ' + (sk ? this.nameOf(sk) : 'ความสามารถอื่น')})));
+    if (sk) box.append(...cbKids(h('div',{class:'gives'}, sk.type ? tag(sk.type.slice(0, 50)) : null, sk.cost ? tag(sk.cost.slice(0, 50), 'stat') : null, (sk.components && !sk.npc) ? compTag(sk.components, sorceryLv(c)) : null, sk.subcategory ? tag(sk.subcategory.replace(/\s*\(.*$/, ''), 'prop') : null, sk.npc ? tag('สแตตบล็อกของ ' + t.name, 'prop') : null)));
+    else {
+      const cu = st.custom; const inp = (k, ph, w, max)=>{ const el = h('input',{class:'su-c' + k,placeholder:ph,style:`width:${w}`,maxlength:max}); el.value = cu[k]; el.onchange = ()=>{ cu[k] = el.value.trim(); redraw(); }; return el; };
+      const ta = h('textarea',{class:'su-ctext',placeholder:'ผลของความสามารถ (ทุกคนในห้องเห็นข้อความนี้ในแชต)',style:'min-height:60px',maxlength:600}); ta.value = cu.text; ta.onchange = ()=>{ cu.text = ta.value.trim(); };
+      box.append(...cbKids(h('div',{class:'row',style:'gap:6px;margin:6px 0'}, inp('name', 'ชื่อความสามารถ', '220px', 60), cbSelect(SU_FX, cu.fx, (v)=>{ cu.fx = v; }, {class:'su-cfx',title:'เอฟเฟกต์ภาพ'}), cbSelect(SU_HUES, cu.hue, (v)=>{ cu.hue = v; }, {class:'su-chue',title:'สีของเอฟเฟกต์'})), ta,
+        h('div',{class:'row',style:'gap:6px;margin-top:6px'}, h('span',{class:'dim',text:'ความเสียหาย'}), inp('dmg', 'เช่น 1d6+1', '90px', 12), cbSelect(CB_DTYPES.map(x=>[x, x]), cu.dtype, (v)=>{ cu.dtype = v; }, {class:'su-cdtype'}), h('span',{class:'dim',text:'Saving Throw'}), cbSelect([['', 'ไม่มี'], ...[...STATS, ...suSides()].map(x=>[x, x])], cu.save, (v)=>{ cu.save = v; redraw(); }, {class:'su-csave'}), cu.save ? inp('dc', 'DC', '60px', 2) : null)));
+    }
+    // เป้าหมาย
+    const vis = Combat.visible(r); const tg = st.targets.map(id=>vis.find(x=>x.id === id)).filter(Boolean); st.targets = tg.map(x=>x.id);
+    const tRow = h('div',{class:'row su-targets',style:'gap:6px;margin-top:8px;align-items:center'}, h('span',{class:'dim',text:'เป้าหมาย'}));
+    for (const x of tg) tRow.append(...cbKids(h('span',{class:'tag prop su-tg',dataset:{id:x.id}}, `${x.name} (${cellDist(t, x) * CELL_M} ม.)`, h('button',{class:'cadj',title:'เอาเป้านี้ออก',onclick:()=>{ st.targets = st.targets.filter(id=>id !== x.id); redraw(); },text:'×'}))));
+    if (!tg.length) tRow.append(...cbKids(h('span',{class:'dim',style:'font-size:12.5px',text: st.cell ? `ช่อง (${st.cell.x},${st.cell.y}) ไม่มีหมาก` : 'ยังไม่ได้เลือก (ใช้กับตัวเองหรือไม่มีเป้าก็กดใช้ได้เลย)'})));
+    const rest = vis.filter(x=>!st.targets.includes(x.id) && x.kind !== 'asset');
+    if (rest.length) tRow.append(...cbKids(cbSelect([['', '+ เพิ่มเป้า'], ...rest.map(x=>[x.id, `${x.name}${x.id === t.id ? ' (ตัวเอง)' : ''}`])], '', (v)=>{ if (v){ st.targets = [...st.targets, v].slice(0, 12); if (!st.cell){ const x = vis.find(k=>k.id === v); if (x) st.cell = {x: x.x, y: x.y}; } redraw(); } }, {class:'su-addtg'})));
+    tRow.append(...cbKids(h('button',{class:'small ghost su-pick',title:'ปิดหน้าต่างนี้ชั่วคราว แล้วคลิกหมากหรือช่องบนแผนที่',onclick:()=>{ this.pick = true; modal(null); this.hint(`🎯 คลิกหมากหรือช่องเป้าหมายของ ${this.label(st)}`); },text:'🎯 เลือกบนแผนที่'})));
+    box.append(...cbKids(tRow));
+    const area = suAreaCells(mech.area); if (area > 0) box.append(...cbKids(h('div',{class:'dim',style:'font-size:12px;margin-top:2px',text:`ทักษะนี้มีพื้นที่ ระบบเก็บหมากที่อยู่ห่างจุดปล่อยไม่เกิน ${area} ช่องมาให้แล้ว เอาออกหรือเพิ่มได้`})));
+    if (mech.rangeM){ const far = tg.filter(x=>cellDist(t, x) * CELL_M > mech.rangeM); if (far.length) box.append(...cbKids(h('div',{class:'atkc-note bad su-far',text:`ไกลเกินระยะ ${mech.rangeM} ม. ที่ข้อความของทักษะระบุ: ${far.map(x=>`${x.name} ${cellDist(t, x) * CELL_M} ม.`).join(', ')} ให้ GM ตัดสินว่าใช้ได้ไหม`}))); }
+    // ค่าร่าย
+    const cost = st.cost; const cRow = h('div',{class:'su-cost',style:'margin-top:8px'});
+    if (cost.parts.length){
+      const have = (res)=> res === 'mp' ? (c && c.current ? (c.current.mp != null ? c.current.mp : (d ? d.mp : null)) : null) : res === 'hp' ? t.hp : (t.sanMax ? t.san : null);
+      cost.parts.forEach((p, i)=>{ const on = cost.alt ? st.alt === i : true; const hv = have(p.res);
+        const pickEl = cost.alt ? (()=>{ const rb = h('input',{type:'radio',name:'su-alt'}); rb.checked = on; rb.onchange = ()=>{ st.alt = i; redraw(); }; return rb; })() : null;
+        const amt = h('input',{class:'su-amt',style:'width:72px',title:'จำนวนที่จะหัก ตัวเลขหรือรูปแบบเต๋า แก้ได้เมื่อมีของลดค่าร่าย'}); amt.value = st.amt[i]; amt.disabled = !on || st.noPay; amt.onchange = ()=>{ st.amt[i] = amt.value.trim(); redraw(); };
+        cRow.append(...cbKids(h('label',{class:'fld su-costrow' + (on ? '' : ' off')}, pickEl, h('span',{text:'ค่าร่าย'}), amt, h('b',{text:SU_RES[p.res]}), hv != null ? h('span',{class:'dim',text:`(มี ${hv})`}) : h('span',{class:'dim',text: p.res === 'mp' ? '(MP อยู่ในชีทของเจ้าของ ระบบหักให้ไม่ได้)' : ''})))); });
+      cRow.append(...cbKids(cbCheck('ไม่หักค่าร่ายครั้งนี้', st.noPay, (v)=>{ st.noPay = v; redraw(); }, {class:'fld chk su-nopay'})));
+    } else if (cost.raw && !/^none$/i.test(cost.raw)) cRow.append(...cbKids(h('div',{class:'dim',style:'font-size:12.5px',text:`ค่าร่าย: ${cost.raw} (ระบบอ่านเป็นตัวเลขไม่ออก หักเองบนชีท)`})));
+    box.append(...cbKids(cRow));
+    // กลไกที่อ่านได้
+    const pv = []; const dcOf = (sv)=>{ const v = suDcValue(sv.dc, c, d, t); return v ? `DC ${v.value}` : `DC ${sv.dc} (ให้ GM บอกค่า)`; };
+    for (const sv of mech.saves.slice(0, 1)) pv.push(`เป้าหมายทอย ${sv.stat} Saving Throw (${dcOf(sv)})`);
+    for (const cl of mech.clashes.slice(0, 1)) pv.push(`${cl.a} ${cl.kind} ${cl.b}: ผู้ใช้ทอย ${cl.a} เป้าหมายทอย ${cl.b}`);
+    for (const dm of mech.dmg.slice(0, 2)) pv.push(`ความเสียหาย ${dm.expr}${dm.mod ? ' + ' + dm.mod : ''} ${dm.type}${mech.half ? ' (ครึ่งเดียวเมื่อ Saving Throw สำเร็จ)' : ''}`);
+    for (const hl of mech.heal.slice(0, 1)) pv.push(`ฟื้นฟู ${hl.expr} ${SU_RES[hl.res]}`);
+    if (mech.conds.length) pv.push('สภาวะที่ข้อความเอ่ยถึง: ' + mech.conds.map(x=>x.id + (x.lv ? ' ' + x.lv : '')).join(', '));
+    if (mech.attack) pv.push(`เป็นการโจมตี${mech.attack === 'melee' ? 'ประชิด' : 'ระยะไกล'}: กดใช้แล้วหน้าต่างโจมตีจะเปิดให้ทอย`);
+    if (mech.passive) pv.push('ทักษะติดตัว ทำงานตลอดเวลา การกดใช้คือการประกาศและแสดงเอฟเฟกต์');
+    if (pv.length) box.append(...cbKids(h('div',{class:'su-mech'}, h('div',{class:'kicker',text:'ปุ่มที่จะขึ้นในการ์ดของแชต'}), pv.map(x=>h('div',{text:'• ' + x})))));
+    if (sk) box.append(...cbKids(h('details',{class:'su-eff',open: true}, h('summary',{text: sk.npc ? 'ข้อความในสแตตบล็อก' : 'ข้อความของทักษะ'}), sk.flavor ? h('div',{class:'flavor',style:'font-size:12.5px'}, T(sk.flavor)) : null, h('div',{class:'desc',style:'font-size:13px'}, T(sk.effect || '')), ...(sk.npc ? [] : skillRollLines(sk, 'desc', 'font-size:13px')))));
+    if (sk && sk.npc) box.append(...cbKids(cbCheck('แสดงข้อความนี้ให้ผู้เล่นเห็นในแชต (ปกติแชตขึ้นแค่ชื่อกับปุ่มทอย)', st.reveal, (v)=>{ st.reveal = v; }, {class:'fld chk su-reveal'})));
+    box.append(...cbKids(h('div',{class:'row',style:'justify-content:flex-end;gap:8px;margin-top:12px'}, h('button',{class:'ghost su-cancel',onclick:()=>this.cancel(),text:'ยกเลิก'}), h('button',{class:'primary su-go',onclick:()=>this.cast(),text:'✨ ใช้ทักษะ'}))));
+    modal(box);
+    const mEl = $('#modal'); if (mEl){ mEl.onclick = ()=>{}; const close = mEl.querySelector('.box > .row:last-child'); if (close && close !== box) close.remove(); }
+  },
+  /* หักค่าร่าย: MP อยู่ในชีท (หักได้เฉพาะชีทของตัวเอง) · Sanity กับ HP อยู่บนหมาก */
+  pay(t, c, d, st){
+    const out = {ok: true, paid: [], note: ''}; if (st.noPay || !st.cost.parts.length) return out;
+    const idx = st.cost.alt ? [st.alt] : st.cost.parts.map((_, i)=>i); const plan = [];
+    for (const i of idx){ const p = st.cost.parts[i]; const ex = st.amt[i]; if (!cbExprOk(ex)){ out.ok = false; out.msg = 'ค่าร่ายต้องเป็นตัวเลขหรือรูปแบบเต๋า เช่น 3 หรือ 1d3'; return out; } const rr = cbRollExpr(ex); plan.push({res: p.res, n: Math.max(0, rr.total), text: rr.rolls.length ? rr.text : String(rr.total)}); }
+    for (const p of plan){
+      if (p.res === 'mp'){ if (!c || !Store.isMine(c) || !c.current){ out.note = 'MP อยู่ในชีทของเจ้าของ ระบบหักให้ไม่ได้ ให้เจ้าของหักเอง'; p.skip = true; continue; } const have = c.current.mp != null ? c.current.mp : (d ? d.mp : 0); if (have < p.n){ out.ok = false; out.msg = `MP ไม่พอ (มี ${have} ต้องใช้ ${p.n})`; return out; } }
+      else if (p.res === 'san'){ if (!t.sanMax){ p.skip = true; continue; } if (cbInt(t.san) < p.n){ out.ok = false; out.msg = `Sanity ไม่พอ (มี ${cbInt(t.san)} ต้องใช้ ${p.n})`; return out; } }
+      else if (cbInt(t.hp) < p.n){ out.ok = false; out.msg = `HP ไม่พอ (มี ${cbInt(t.hp)} ต้องใช้ ${p.n})`; return out; }
+    }
+    let room = false;
+    for (const p of plan){ if (p.skip) continue;
+      if (p.res === 'mp'){ const have = c.current.mp != null ? c.current.mp : (d ? d.mp : 0); c.current.mp = have - p.n; Store.upsert(c); }
+      else if (p.res === 'san'){ tokenVitals(t, 'san', cbInt(t.san) - p.n); room = true; }
+      else { tokenVitals(t, 'hp', cbInt(t.hp) - p.n); room = true; }
+      out.paid.push({res: p.res, n: p.n, text: p.text}); }
+    if (room) Table.save();
+    return out;
+  },
+  cast(){
+    const st = this.st; const r = Table.room; if (!st || !r) return; const t = Combat.tok(st.tokId); if (!t){ this.cancel(); return; }
+    const c = Combat.charOf(t); const d = Combat.derived(c); const sk = st.sk; const cu = st.custom;
+    if (!sk && !suClean(cu.name, 60)){ toast('ใส่ชื่อความสามารถก่อน'); return; }
+    if (!sk && cu.dmg && !cbExprOk(cu.dmg)){ toast('ความเสียหายต้องเป็นตัวเลขหรือรูปแบบเต๋า เช่น 2 หรือ 1d6+1'); return; }
+    const paid = this.pay(t, c, d, st); if (!paid.ok){ toast(paid.msg); return; }
+    const src = sk ? st.mech : {saves: cu.save ? [{stat: cu.save, dc: String(cbInt(cu.dc) || '')}] : [], clashes: [], dmg: cu.dmg ? [{expr: cu.dmg, mod: null, type: cu.dtype}] : [], heal: [], conds: cbFindConds(cu.text).slice(0, 5), half: false, attack: null, area: null, passive: false, reaction: false};
+    const vis = Combat.visible(r); const tg = st.targets.map(id=>vis.find(x=>x.id === id)).filter(Boolean).slice(0, 12);
+    const mech = {
+      saves: src.saves.slice(0, 1).map(sv=>{ const v = suDcValue(sv.dc, c, d, t); return {stat: sv.stat, dc: v ? v.value : null, dcText: v ? v.text : suClean(sv.dc, 60)}; }),
+      clashes: src.clashes.slice(0, 1).map(cl=>({a: cl.a, kind: cl.kind, b: cl.b})),
+      dmg: src.dmg.slice(0, 2).map(dm=>{ const mv = dm.mod ? suStatMod(dm.mod, c, d, t) : 0; return {expr: dm.expr, mod: dm.mod || null, modVal: mv == null ? 0 : mv, type: dm.type}; }),
+      heal: src.heal.slice(0, 1).map(x=>({expr: x.expr, res: x.res})), conds: src.conds.slice(0, 5), half: !!src.half, attack: src.attack || null};
+    const label = this.label(st); const self = !tg.length || (tg.length === 1 && tg[0].id === t.id); const cells = suAreaCells(src.area);
+    const hue = sk ? fxHueOfSkill(sk) : cu.hue; const kind = sk ? suFxKind(src, self, cells) : cu.fx; const to = st.cell || (tg[0] ? {x: tg[0].x, y: tg[0].y} : {x: t.x, y: t.y});
+    const react = st.extra && st.extra.react;
+    const fx = {k: react ? 'shield' : kind, from: {x: t.x, y: t.y}, to: react ? {x: t.x, y: t.y} : to, hue, cells, floats: [{x: t.x, y: t.y, text: suClean(sk ? skTh(sk) : cu.name, 22), cls: 'info'}]};
+    const who = t.hidden ? 'บางสิ่งที่มองไม่เห็น' : t.name;
+    Table.post({kind: 'skill', who, text: `${who} ใช้ ${label}${tg.length ? ' ใส่ ' + tg.map(x=>x.name).join(', ') : ''}`, sk: (sk && !sk.npc) ? sk.nameEn : null, label, hue, caster: {id: t.id, name: who}, targets: tg.map(x=>({id: x.id, name: x.name})), cell: st.cell || null,
+      cost: paid.paid, costNote: paid.note || (st.noPay && st.cost.parts.length ? 'ไม่หักค่าร่ายครั้งนี้' : ''), mech, note: sk ? ((sk.npc && st.reveal) ? suClean(sk.effect, 600) : '') : suClean(cu.text, 600), react: react || null, fx, gmOnly: false});
+    const extra = st.extra; this.st = null; this.pick = false; this.hint(null); modal(null);
+    if (extra && extra.done){ extra.done(); return; }
+    if (mech.attack){ const dm = mech.dmg[0]; const target = tg.find(x=>x.id !== t.id);
+      const weapon = dm ? Object.assign(cbParseWeapon(label, ''), {found: true, src: 'skill', dmg: dm.modVal ? (/d/i.test(dm.expr) ? `${dm.expr}${signed(dm.modVal)}` : String(cbInt(dm.expr) + dm.modVal)) : dm.expr, dtypes: [dm.type === 'Sanity' ? 'Physical' : dm.type], physical: cbIsPhysical(dm.type), statKind: 'none', conds: mech.conds, text: sk ? (sk.effect || '') : cu.text}) : null;
+      setTimeout(()=>Combat.openAttack(t.id, target ? target.id : null, {weapon, mode: mech.attack, skill: label}), 60); }
+  },
+  /* ฝ่ายรับใช้ทักษะตอบโต้การโจมตี (เรียกจากหน้าต่างป้องกัน) */
+  quick(t, sk, opts, done, cancel){ this.use(t.id, sk.nameEn, null, {react: (opts && opts.react) || true, done, cancel}); },
+  onMessage(m){ if (m && m.fx) Fx.play(m.fx); },
+
+  /* ---------- การ์ดในแชตและปุ่มต่อเนื่อง ---------- */
+  follow(m){ return Table.chat.filter(x=>x && x.of === m.id); },
+  mechOf(m){
+    const raw = (m && m.mech && typeof m.mech === 'object') ? m.mech : {}; const arr = (v)=>Array.isArray(v) ? v : []; const conds = cbCondNames();
+    return {
+      saves: arr(raw.saves).slice(0, 1).filter(s=>s && suStatKnown(String(s.stat))).map(s=>({stat: String(s.stat), dc: (typeof s.dc === 'number' && isFinite(s.dc)) ? Math.max(0, Math.min(40, Math.round(s.dc))) : null, dcText: suClean(s.dcText, 60)})),
+      clashes: arr(raw.clashes).slice(0, 1).filter(c=>c && suStatKnown(String(c.a)) && suStatKnown(String(c.b)) && (c.kind === 'Clash' || c.kind === 'Challenge')).map(c=>({a: String(c.a), b: String(c.b), kind: c.kind})),
+      dmg: arr(raw.dmg).slice(0, 2).filter(x=>x && cbExprOk(x.expr)).map(x=>({expr: String(x.expr).trim(), mod: x.mod ? suClean(x.mod, 16) : null, modVal: Math.max(-20, Math.min(20, cbInt(x.modVal))), type: x.type === 'Sanity' ? 'Sanity' : (CB_DTYPES.includes(cbNormType(x.type)) ? cbNormType(x.type) : 'Physical')})),
+      heal: arr(raw.heal).slice(0, 1).filter(x=>x && cbExprOk(x.expr) && SU_RES[x.res]).map(x=>({expr: String(x.expr).trim(), res: x.res})),
+      conds: arr(raw.conds).slice(0, 5).filter(x=>x && conds.includes(x.id)).map(x=>({id: x.id, lv: x.lv ? Math.max(1, Math.min(20, cbInt(x.lv, 1))) : null})),
+      half: !!raw.half, attack: raw.attack === 'melee' || raw.attack === 'ranged' ? raw.attack : null};
+  },
+  card(m, time){
+    const mech = this.mechOf(m); const fol = this.follow(m); const sk = (m.sk && Object.prototype.hasOwnProperty.call(SKILL_BY_NAME, m.sk)) ? SKILL_BY_NAME[m.sk] : null;
+    const targets = (Array.isArray(m.targets) ? m.targets : []).slice(0, 12).filter(x=>x && typeof x.id === 'string'); const caster = m.caster && typeof m.caster.id === 'string' ? Combat.tok(m.caster.id) : null;
+    const el = h('div',{class:'e skillmsg'}); el.style.setProperty('--fx', FX_HUE[m.hue] || FX_HUE.ritual);
+    el.append(...cbKids(h('div',{class:'row',style:'gap:6px'}, chatWho(m), h('span',{class:'dim',text:'ใช้'}), h('b',{class:'sk-name',text: sk ? skLabel(sk) : suClean(m.label, 80)}), targets.length ? h('span',{class:'dim',text:'→ ' + targets.map(x=>suClean(x.name, 40)).join(', ')}) : null, m.react ? tag('ตอบโต้', 'prop') : null, h('span',{class:'dim',style:'font-size:11px;margin-left:auto',text:time}))));
+    const paid = (Array.isArray(m.cost) ? m.cost : []).slice(0, 4).filter(p=>p && SU_RES[p.res]).map(p=>`${cbInt(p.n)} ${SU_RES[p.res]}${/\[/.test(String(p.text || '')) ? ' (' + suClean(p.text, 40) + ')' : ''}`);
+    if (paid.length || m.costNote) el.append(...cbKids(h('div',{class:'dim',style:'font-size:12px',text:(paid.length ? 'หักค่าร่าย ' + paid.join(' และ ') : '') + (m.costNote ? (paid.length ? ' · ' : '') + suClean(m.costNote, 120) : '')})));
+    if (sk) el.append(...cbKids(h('details',{class:'cp-d'}, h('summary',{text:'ข้อความของทักษะ'}), h('div',{class:'desc',style:'font-size:12px'}, T(sk.effect || '')), ...skillRollLines(sk, 'desc', 'font-size:12px'))));
+    else if (m.note) el.append(...cbKids(h('div',{class:'desc',style:'font-size:12.5px',text:suClean(m.note, 600)})));
+    const label = sk ? skTh(sk) : suClean(m.label, 60);
+    // Clash / Challenge: ฝั่งผู้ใช้ทอยหนึ่งครั้ง ใช้เทียบกับทุกเป้า
+    const cl = mech.clashes[0]; let aRoll = null;
+    if (cl){ aRoll = fol.find(x=>x.step === 'clashA') || null; const row = h('div',{class:'row sk-follow',style:'gap:6px;margin-top:4px;align-items:center'}, h('span',{class:'dim',style:'font-size:12px',text:`${cl.a} ${cl.kind} ${cl.b}`}));
+      if (aRoll) row.append(...cbKids(tag(`ผู้ใช้ทอยได้ ${cbInt(aRoll.total)}`, 'stat')));
+      else if (caster && Combat.controls(caster)) row.append(...cbKids(this.modeSel(m.id + '|A'), h('button',{class:'small primary sk-clasha',onclick:()=>this.rollStat(m, caster, cl.a, null, 'clashA', null, `${cl.a} ${cl.kind} · ${label}`),text:`🎲 ทอย ${cl.a} (ผู้ใช้)`})));
+      else row.append(...cbKids(h('span',{class:'dim',style:'font-size:12px',text:'รอผู้ใช้ทักษะทอย'})));
+      el.append(...cbKids(row)); }
+    for (const tg of targets){
+      const t = Combat.tok(tg.id); const can = !!t && Combat.controls(t); const row = h('div',{class:'row sk-follow',style:'gap:6px;margin-top:4px;align-items:center',dataset:{tg:tg.id}}, h('b',{style:'font-size:12.5px',text:suClean(tg.name, 40)}));
+      const sv = mech.saves[0]; let saved = null;
+      if (sv){ const done = fol.find(x=>x.step === 'save' && x.tg === tg.id); if (done){ saved = /res-(full|crit)/.test((done.judge && done.judge.cls) || '') && !/Failure|ล้มเหลว/.test((done.judge && done.judge.text) || ''); row.append(...cbKids(tag(`${sv.stat} ST ${cbInt(done.total)}: ${sv.dc == null ? 'รอ GM ตัดสิน' : (saved ? 'ผ่าน' : 'ไม่ผ่าน')}`, sv.dc == null ? '' : (saved ? 'ok' : 'neg')))); if (sv.dc == null) saved = null; }
+        else if (can) row.append(...cbKids(this.modeSel(m.id + '|' + tg.id), h('button',{class:'small primary sk-save',onclick:()=>this.rollStat(m, t, sv.stat, sv.dc, 'save', tg.id, `${sv.stat} Saving Throw · ต้าน ${label}`),text:`🎲 ${sv.stat} Saving Throw${sv.dc != null ? ' (DC ' + sv.dc + ')' : ''}`})));
+        else row.append(...cbKids(h('span',{class:'dim',style:'font-size:12px',text:`รอทอย ${sv.stat} Saving Throw${sv.dc != null ? ' (DC ' + sv.dc + ')' : ''}`}))); }
+      if (cl){ const bRoll = fol.find(x=>x.step === 'clashB' && x.tg === tg.id);
+        if (bRoll && aRoll){ const av = cbInt(aRoll.total), bv = cbInt(bRoll.total); const aWin = av > bv || (av === bv && cl.kind === 'Clash'); row.append(...cbKids(tag(`${cl.b} ${bv} ปะทะ ${av}: ${aWin ? 'ผู้ใช้ชนะ' : 'เป้าหมายชนะ'}${av === bv ? ' (เท่ากัน)' : ''}`, aWin ? 'neg' : 'ok'))); }
+        else if (bRoll) row.append(...cbKids(tag(`${cl.b} ${cbInt(bRoll.total)}`, 'stat')));
+        else if (can) row.append(...cbKids(this.modeSel(m.id + '|' + tg.id + '|B'), h('button',{class:'small primary sk-clashb',onclick:()=>this.rollStat(m, t, cl.b, null, 'clashB', tg.id, `${cl.b} ต้าน ${cl.kind} · ${label}`),text:`🎲 ทอย ${cl.b}`})));
+        else row.append(...cbKids(h('span',{class:'dim',style:'font-size:12px',text:`รอทอย ${cl.b}`}))); }
+      mech.dmg.forEach((dm, i)=>{ const done = fol.find(x=>x.step === 'dmg' && x.tg === tg.id && x.idx === i); const txt = `${dm.expr}${dm.modVal ? signed(dm.modVal) : ''} ${dm.type}`;
+        if (done) row.append(...cbKids(tag(`รับแล้ว ${cbInt(done.n)} ${dm.type}`, 'neg'))); else if (can && !mech.attack) row.append(...cbKids(h('button',{class:'small sk-dmg' + (saved === true && !mech.half ? ' ghost' : ''),onclick:()=>this.dmgModal(m, t, dm, i, saved === true && mech.half, label),text:`💥 ${txt}`}))); });
+      mech.heal.forEach((hl, i)=>{ const done = fol.find(x=>x.step === 'heal' && x.tg === tg.id && x.idx === i); if (done) row.append(...cbKids(tag(`ฟื้นฟูแล้ว ${cbInt(done.n)} ${SU_RES[hl.res]}`, 'ok'))); else if (can && hl.res !== 'mp') row.append(...cbKids(h('button',{class:'small sk-heal',onclick:()=>this.heal(m, t, hl, i, label),text:`✚ ฟื้นฟู ${hl.expr} ${SU_RES[hl.res]}`}))); });
+      if (can) for (const cd of mech.conds){ const key = m.id + '|' + tg.id + '|' + cd.id; const b = h('button',{class:'small ghost sk-cond',dataset:{cond:cd.id},disabled: Combat.done.has(key),onclick:()=>{ if (Combat.done.has(key)) return; Combat.done.add(key); b.disabled = true; if (!applyCond(t, Table.room, cd.id, {lv: cd.lv || 1, by: (caster && caster.id !== t.id) ? caster : undefined})){ Combat.done.delete(key); b.disabled = false; } },text:`${condIcon(cd.id)} ${cd.id}${cd.lv ? ' ' + cd.lv : ''}`}); row.append(...cbKids(b)); }
+      if (row.children.length > 1) el.append(...cbKids(row));
+    }
+    if (mech.attack) el.append(...cbKids(h('div',{class:'dim',style:'font-size:12px;margin-top:3px',text:'ทักษะนี้เป็นการโจมตี ผลดูจากการทอยโจมตีที่ตามมา'})));
+    return el;
+  },
+  modeSel(key){ const el = cbSelect([['normal', 'ปกติ'], ['adv', 'Advantage'], ['dis', 'Disadvantage']], this.modes[key] || 'normal', (v)=>{ this.modes[key] = v; }, {class:'sk-mode',title:'โหมดการทอยครั้งนี้'}); el.dataset.key = key; return el; },
+  /* ถามตัวบวกเมื่อไม่มีชีทให้อ่าน (NPC หรือชีทที่เจ้าของแชร์เฉพาะค่าหลัก) */
+  askMod(title){
+    return new Promise(resolve=>{ const inp = h('input',{type:'number',class:'su-askmod',style:'width:90px',placeholder:'0'}); inp.value = '0';
+      const ok = h('button',{class:'primary su-askok',onclick:()=>{ modal(null); resolve(cbInt(inp.value)); },text:'ทอย'});
+      modal(h('div',{class:'pickbox'}, h('h3',{text:title}), h('p',{class:'desc',text:'ระบบอ่านค่านี้ของหมากไม่ได้ (ไม่มีชีท หรือเป็นค่าบุคลิกภาพของ NPC) ใส่ตัวบวกของการทอยครั้งนี้ (ไม่มีให้ใส่ 0)'}), h('div',{class:'row',style:'justify-content:center;gap:8px'}, h('span',{text:'2d6 +'}), inp, ok)));
+      const mEl = $('#modal'); if (mEl){ mEl.onclick = ()=>{}; const close = mEl.querySelector('.box > .row:last-child'); if (close) close.querySelector('button').onclick = ()=>{ modal(null); resolve(null); }; } });
+  },
+  rollStat(m, t, stat, dc, step, tgId, text){
+    const key = step === 'clashA' ? m.id + '|A' : step === 'clashB' ? m.id + '|' + tgId + '|B' : m.id + '|' + tgId; const mode = this.modes[key] || 'normal';
+    if (this.follow(m).some(x=>x.step === step && (tgId == null || x.tg === tgId))){ toast('ทอยรายการนี้ไปแล้ว'); return; }
+    Table.guardedRoll(t.name, async ()=>{
+      const c = Combat.charOf(t); const d = Combat.derived(c); let mod = suStatMod(stat, c, d, t);
+      if (mod == null){ mod = await this.askMod(`${t.name}: ${text}`); if (mod == null) return; }
+      if (this.follow(m).some(x=>x.step === step && (tgId == null || x.tg === tgId))){ toast('มีคนทอยรายการนี้ไปก่อนแล้ว'); return; }
+      const rr = roll2d6(mode); const total = rr.sum + mod; const j = judge(total, rr, dc);
+      Table.post({kind: 'roll', fixedId: `${step}-${m.id}${tgId ? '-' + tgId : ''}`, who: t.hidden ? 'บางสิ่งที่มองไม่เห็น' : t.name, text, roll: {dice: rr.dice, kept: rr.kept, keptIdx: rr.keptIdx, sum: rr.sum, crit: rr.crit, double: rr.double, mode}, mod, pm: 0, total, judge: j, dc: dc != null ? dc : null, gmOnly: false, of: m.id, tg: tgId || null, step});
+    }, text);
+  },
+  /* ความเสียหายของทักษะที่ไม่ได้ทอยโจมตี: ไม่มีตำแหน่งที่โดนจึงหักด้วยเกราะลำตัว (Non เคาะ 15 พ.ย. 2026) เลือกส่วนอื่นหรือไม่หักเกราะได้
+   * กฎลด Toughness 1 ในไฟล์แกนเขียนไว้กับการโจมตีที่ป้องกันด้วย Parry หรือ Evade ไม่สำเร็จ ที่นี่จึงเป็นตัวเลือกให้ GM ติ๊กเอง */
+  dmgModal(m, t, dm, idx, half, label){
+    const rr = cbRollExpr(dm.expr); const total = Math.max(0, rr.total + dm.modVal); const sanity = dm.type === 'Sanity'; const physical = cbIsPhysical(dm.type);
+    const st = {n: total, half: !!half, part: sanity ? 'none' : 'torso', weak: false, tough: false};
+    const parts = [['torso', 'ลำตัว (ทักษะที่ไม่มีตำแหน่งที่โดน)'], ...DATA.meta.bodyParts.filter(([k])=>k !== 'torso').map(([k, l])=>[k, l]), ['none', 'ไม่หักเกราะ (ความเสียหายจาก Stack หรือผลที่ข้ามเกราะ)']];
+    const box = h('div',{class:'pickbox dmgbox'});
+    const draw = ()=>{ clear(box); const fin = st.half ? Math.floor(st.n / 2) : st.n;
+      box.append(...cbKids(h('h3',{text:`💥 ${t.name} รับความเสียหายจาก ${label}`}), h('p',{class:'desc',text:`${rr.rolls.length ? `${dm.expr} [${rr.rolls.join(',')}]` : rr.total}${dm.modVal ? ` ${signed(dm.modVal)} ${dm.mod || ''}` : ''}${(rr.rolls.length || dm.modVal) ? ` = ${total}` : ''} ${dm.type}`}),
+        h('div',{class:'row',style:'justify-content:center;gap:10px'}, h('label',{class:'fld'}, h('span',{text:'จำนวน'}), cbNum(st.n, (v)=>{ st.n = Math.max(0, v || 0); draw(); }, {class:'dm-n',style:'width:70px',min:0})), cbCheck('ครึ่งเดียว (ปัดลง)', st.half, (v)=>{ st.half = v; draw(); }, {class:'fld chk dm-half'}), sanity ? null : cbCheck('แพ้ทาง ×2', st.weak, (v)=>{ st.weak = v; draw(); }, {class:'fld chk dm-weak'})),
+        sanity ? null : h('div',{class:'row',style:'justify-content:center;gap:8px;margin-top:8px'}, h('span',{class:'dim',text:'หักเกราะที่'}), cbSelect(parts, st.part, (v)=>{ st.part = v; draw(); }, {class:'dm-part',title: physical ? 'โดนชนิดในวงเล็บของค่าเกราะหักเกราะหลักบวกเกราะรอง ชนิดอื่นหักเกราะหลัก' : 'ความเสียหายเวทหักเกราะหลักบวก Sorceries Resistance ของส่วนที่เลือก'})),
+        (sanity || st.part === 'none') ? null : h('div',{class:'row',style:'justify-content:center;margin-top:6px'}, cbCheck('ลด Toughness ของส่วนนี้ 1 ด้วย (GM ตัดสินว่านับเป็นการโจมตีที่โดน)', st.tough, (v)=>{ st.tough = v; }, {class:'fld chk dm-tough',title:'เกราะที่หักความเสียหายจนเหลือ 0 ทำให้ส่วนนั้นไม่เสีย Toughness'})),
+        h('div',{class:'row',style:'justify-content:center;gap:8px;margin-top:12px'}, h('button',{class:'primary dm-ok',onclick:()=>{ modal(null); this.applyDmg(m, t, dm, idx, fin, st, label); },text: sanity ? `ลด Sanity ${fin}` : `ลงความเสียหาย ${fin}`})))); };
+    draw(); modal(box);
+  },
+  applyDmg(m, t, dm, idx, n, st, label){
+    const r = Table.room; if (!r || !Combat.tok(t.id)) return; if (this.follow(m).some(x=>x.step === 'dmg' && x.tg === t.id && x.idx === idx)){ toast('ความเสียหายรายการนี้ลงไปแล้ว'); return; }
+    let text, got = n;
+    if (dm.type === 'Sanity'){ const s0 = cbInt(t.san); const s1 = Math.max(0, s0 - n); if (t.sanMax) tokenVitals(t, 'san', s1); text = `${t.name} เสีย Sanity ${n} จาก ${label}${t.sanMax ? `: Sanity ${s0} → ${s1}` : ''}`; }
+    else { const part = (st.part && st.part !== 'none') ? st.part : null;
+      const res = Combat.damage(t, {raw: n, dtype: dm.type, physical: cbIsPhysical(dm.type), part, noArmor: !part, viaTorso: part === 'torso', weak: st.weak}); got = res.fin; const more = [];
+      if (part && st.tough){ if (res.zeroed) more.push(`เกราะรับความเสียหายไว้หมด Toughness ของ${partLabel(part)}ไม่ลด`); else { const row = Combat.toughHit(t, res.c, res.tmax, part, 1, ''); if (row) more.push(Combat.toughLine(row)); } }
+      text = `${t.name} รับ ${res.fin} ${dm.type} จาก ${label}: ${[...res.lines, ...more].join(' · ')}`;
+      const stun = (t.conds || []).find(c=>c.id === 'Stunned'); if (stun && res.hp1 < res.hp0) setTimeout(()=>removeCond(t, r, stun, 'เสีย HP'), 0); }
+    t.vitalsAt = Date.now(); Table.save();
+    Table.post({kind: 'sys', fixedId: `dmg-${m.id}-${t.id}-${idx}`, who: '', text, of: m.id, tg: t.id, step: 'dmg', idx, n: got, fx: {k: 'burst', to: {x: t.x, y: t.y}, hue: fxHueOfDamage(dm.type), floats: [{x: t.x, y: t.y, text: `−${got}`, cls: 'dmg'}]}});
+  },
+  heal(m, t, hl, idx, label){
+    const r = Table.room; if (!r) return; if (this.follow(m).some(x=>x.step === 'heal' && x.tg === t.id && x.idx === idx)){ toast('ฟื้นฟูรายการนี้ไปแล้ว'); return; }
+    const rr = cbRollExpr(hl.expr); const n = Math.max(0, rr.total); const key = hl.res === 'san' ? 'san' : 'hp'; const max = key === 'san' ? (t.sanMax || 0) : (t.hpMax || 0); const v0 = cbInt(t[key]); const v1 = max ? Math.min(max, v0 + n) : v0 + n;
+    tokenVitals(t, key, v1); Table.save();
+    Table.post({kind: 'sys', fixedId: `heal-${m.id}-${t.id}-${idx}`, who: '', text: `${t.name} ฟื้นฟู ${SU_RES[hl.res]} ${rr.rolls.length ? rr.text : n} จาก ${label}: ${v0} → ${v1}`, of: m.id, tg: t.id, step: 'heal', idx, n: v1 - v0, fx: {k: 'heal', to: {x: t.x, y: t.y}, hue: 'heal', floats: [{x: t.x, y: t.y, text: `+${v1 - v0}`, cls: 'heal'}]}});
+  },
+  afterRender(){ if (this.pick && !this.st){ this.pick = false; this.hint(null); } },
+};
 
 /* ===== คลังแผนที่: GM เตรียมด่านและสถานที่ไว้ก่อนเปิดโต๊ะ =====
  * เอกสาร maps/<id> = {id, ownerId, ownerName, name, desc, kind, seed, w, h, cells, light, npcs:[{id,name,hp,init,x,y,nv,hidden,note}], published, createdAt, updatedAt, fromId?, fromName?}
