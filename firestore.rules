@@ -83,12 +83,14 @@ service cloud.firestore {
       allow read, update, delete: if signedIn() && (isDev() || resource.data.ownerId == request.auth.uid);
       allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
     }
-    // คลังความรู้ (v1.26 ร่าง รอ Non สั่งเผยแพร่): ข้อความตำนานที่ผู้พัฒนาแก้จากหลังบ้าน
+    // คลังความรู้ (v1.26 เผยแพร่แล้ว 16 พ.ย. 2026): ข้อความตำนานที่ผู้พัฒนาแก้จากหลังบ้าน
     // codex/lore อ่านได้ทุกคน เขียนได้เฉพาะผู้พัฒนาใน config/site.devUids และรับเฉพาะฟิลด์ที่เว็บเขียน
+    // v1.27 (เผยแพร่ 16 พ.ย. 2026): codex/items และ codex/skills ไอเทมและทักษะที่แก้จากหน้าคลัง รับเฉพาะฟิลด์ที่เว็บเขียน
     match /codex/{doc} {
       allow read: if true;
-      allow create, update: if isDev() && doc == 'lore'
-        && request.resource.data.keys().hasOnly(['v', 'at', 'by', 'byName', 'articles', 'eras', 'intro', 'log']);
+      allow create, update: if isDev() && (
+        (doc == 'lore' && request.resource.data.keys().hasOnly(['v', 'at', 'by', 'byName', 'articles', 'eras', 'intro', 'log']))
+        || ((doc == 'items' || doc == 'skills') && request.resource.data.keys().hasOnly(['v', 'at', 'by', 'byName', 'entries', 'log'])));
       allow delete: if isDev();
     }
   }
